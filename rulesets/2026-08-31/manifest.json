@@ -1,0 +1,16 @@
+{
+  "version": "2026-08-31",
+  "sha256": "2530cd107c414511c5d0462ec10f886910395abfca820db82e83d70bf01221a8",
+  "source_url": "https://github.com/itplr-kosit/validator-configuration-xrechnung/releases/download/v2026-08-31/xrechnung-3.0.2-validator-configuration-2026-08-31.zip",
+  "asset_name": "xrechnung-3.0.2-validator-configuration-2026-08-31.zip",
+  "fetched_at": "2026-09-04T11:58:24+00:00",
+  "paths": {
+    "xslt_en16931_cii": "resources/cii/16b/xsl/EN16931-CII-validation.xsl",
+    "xslt_en16931_ubl": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+    "xslt_xrechnung_cii": "resources/xrechnung/3.0.2/xsl/XRechnung-CII-validation.xsl",
+    "xslt_xrechnung_ubl": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+    "xsd_cii": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd",
+    "xsd_ubl": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd",
+    "scenarios": "scenarios.xml"
+  }
+}
