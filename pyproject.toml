@@ -1,0 +1,58 @@
+[project]
+name = "xrv"
+version = "0.1.0"
+description = "XRechnung / ZUGFeRD validation and explanation service"
+requires-python = ">=3.12,<3.13"
+
+# Pinned to minor. Week-1 spike exists to prove this exact set installs and runs
+# inside the container, on both amd64 and arm64.
+dependencies = [
+    "saxonche>=13.0.0,<14",   # SaxonC-HE. Native library. The constraint that shapes deployment.
+    "lxml>=5.3,<7",           # XSD validation + tree work
+    "pikepdf>=9,<10",         # PDF/A-3 embedded file extraction (week 3)
+    "fastapi>=0.115,<1",      # week 4 — here now so the measured image size is honest
+    "uvicorn[standard]>=0.32,<1",
+    "pydantic>=2.9,<3",
+    "pydantic-settings>=2.6,<3",
+]
+
+[project.optional-dependencies]
+# xsdata's CLI deps are only needed to *generate* bindings, never to run the service.
+# Keeping them out of the runtime image is worth ~15 MB.
+codegen = [
+    "xsdata[cli]>=26.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# The domain package is the contract. It gets strict mode; nothing else does yet.
+[[tool.mypy.overrides]]
+module = "xrv.core.*"
+strict = true
+
+# Generated code is never hand-edited, so never type-checked.
+[[tool.mypy.overrides]]
+module = "xrv.bindings.*"
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

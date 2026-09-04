@@ -1,0 +1,40 @@
+# Planning and working notes stay local. Excluded from the first commit rather
+# than removed later, because git history is permanent — a file committed now is
+# public the moment the repo is, whether or not it still exists at HEAD.
+project-1-xrechnung.md
+SPIKE.md
+notes/
+
+# Local editor / tooling state
+.claude/
+
+# Ruleset artifacts are fetched, hashed and recorded — never committed.
+# manifest.json IS committed: it is the provenance record behind ruleset_sha256.
+# Note the pattern: `rulesets/*/` would stop git descending into the directory,
+# so the negation below could never match. `rulesets/*/**` ignores the contents
+# while leaving the directory traversable.
+rulesets/*/**
+!rulesets/*/manifest.json
+
+# Test corpus is fetched from the KoSIT testsuite release.
+tests/corpus/_downloaded/
+
+# Spike output
+.spike-out/
+spike-results.json
+
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+node_modules/
+frontend/dist/
+
+.env
+.env.*
+!.env.example

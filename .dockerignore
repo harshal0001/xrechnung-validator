@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.git/
+.github/
+frontend/
+node_modules/
+tests/corpus/_downloaded/
+.spike-out/
+spike-results.json
+*.md
+!SPIKE.md
