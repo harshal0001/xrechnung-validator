@@ -95,8 +95,9 @@ without failing the document.
 | SVRL parsing, Saxon validation engine | done |
 | XSD structural validation | done |
 | Ingest: sniffing, routing, hardened parsing | done |
-| ZUGFeRD PDF unwrapping, profile detection | not started |
+| ZUGFeRD PDF unwrapping, profile detection | done |
 | Mutation test suite | in progress — 15 rules proven, both syntaxes and both layers |
+| Typed bindings wired into parsing | not started |
 | API, frontend, explanations | not started |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
