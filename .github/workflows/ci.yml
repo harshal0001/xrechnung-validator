@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A second push to a PR makes the first run irrelevant. Cancel it rather than
+# queueing behind it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned, not "latest". CI resolving to whatever KoSIT published this morning
+  # would mean a green build says nothing about the commit that produced it.
+  # Bumping this is a deliberate commit, reviewed like any other.
+  RULESET_VERSION: "2026-08-31"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: lint, types, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.11"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras
+
+      # Not cached. The archive is 500 KB, and actions/cache only writes on a
+      # primary-key miss — so a cache holding a bad ruleset is permanent, and a
+      # fetch step gated on cache-hit never gets the chance to repair it. That
+      # is not a hypothetical: it is how this workflow failed twice. The script
+      # is idempotent and checks completeness itself, so let it decide.
+      - name: Fetch KoSIT ruleset
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
+
+      - name: Lint
+        run: uv run ruff check src tests scripts
+
+      - name: Format
+        run: uv run ruff format --check src tests scripts
+
+      - name: Type check
+        run: uv run mypy src/xrv
+
+      # XRV_REQUIRE_RULESET turns the "no ruleset fetched" skip into a failure.
+      # That skip is right on a clean checkout and wrong here: a silent skip
+      # would hide the ruleset drift the guard exists to catch.
+      - name: Tests
+        env:
+          XRV_REQUIRE_RULESET: "1"
+        run: uv run pytest --strict-markers
+
+  image:
+    name: docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Dockerfile bakes the ruleset in and verifies it, so the image cannot
+      # build without one. Uncached, for the reason given in the check job.
+      - name: Fetch KoSIT ruleset
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
+
+      # Only needed for the arm64 build on main. Cheap enough to always set up.
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      # arm64 is what keeps Lambda Graviton on the table, but it builds under
+      # emulation and is slow. Every PR proves amd64; pushes to main also prove
+      # arm64, which is where a dependency losing its arm64 wheel would show up.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ github.event_name == 'push' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
