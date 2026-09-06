@@ -62,9 +62,7 @@ class Ruleset:
     def _manifest(self) -> Mapping[str, object]:
         path = self.root / MANIFEST_NAME
         if not path.is_file():
-            raise RulesetNotFoundError(
-                f"{path} is missing — run: python scripts/fetch_ruleset.py"
-            )
+            raise RulesetNotFoundError(f"{path} is missing — run: python scripts/fetch_ruleset.py")
         data = json.loads(path.read_text())
         if not isinstance(data, dict):
             raise RulesetNotFoundError(f"{path} is not a JSON object")
@@ -104,8 +102,9 @@ class Ruleset:
             raise RulesetNotFoundError(f"unknown ruleset path '{key}' (have: {known})") from None
         resolved = self.root / rel
         if not resolved.is_file():
-            raise RulesetNotFoundError(f"ruleset {self.version} declares '{key}' at {rel}, "
-                                       f"but {resolved} does not exist")
+            raise RulesetNotFoundError(
+                f"ruleset {self.version} declares '{key}' at {rel}, but {resolved} does not exist"
+            )
         return resolved
 
     def stylesheets(self, syntax: Syntax) -> tuple[Path, ...]:

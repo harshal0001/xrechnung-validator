@@ -1,13 +1,17 @@
 """Shared fixtures.
 
 Tests that need a real KoSIT ruleset skip when one has not been fetched, so a
-clean checkout can still run the suite. CI fetches one, so nothing is skipped
-where it matters.
+clean checkout can still run the suite.
+
+That skip is right locally and wrong in CI, where a silently skipped test hides
+exactly the drift the guard exists to catch. Setting XRV_REQUIRE_RULESET=1 turns
+the skip into a failure.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -15,7 +19,11 @@ import pytest
 from xrv.rules import Ruleset, RulesetRegistry
 
 ROOT = Path(__file__).resolve().parent.parent
-REAL_RULESETS = ROOT / "rulesets"
+
+# Same override the service honours, so a test run can be pointed at a different
+# ruleset directory the same way the container is. Absolute default, because the
+# suite must not depend on the working directory it was invoked from.
+REAL_RULESETS = Path(os.environ.get("XRV_RULESET_DIR", ROOT / "rulesets"))
 
 
 @pytest.fixture
@@ -23,7 +31,10 @@ def real_ruleset() -> Ruleset:
     """The newest ruleset actually fetched into ./rulesets."""
     registry = RulesetRegistry(base=REAL_RULESETS)
     if not registry.versions():
-        pytest.skip("no ruleset fetched — run: python scripts/fetch_ruleset.py")
+        missing = f"no ruleset under {REAL_RULESETS} — run: python scripts/fetch_ruleset.py"
+        if os.environ.get("XRV_REQUIRE_RULESET") == "1":
+            pytest.fail(missing)
+        pytest.skip(missing)
     return registry.latest()
 
 
