@@ -95,7 +95,7 @@ without failing the document.
 | SVRL parsing, Saxon validation engine | done |
 | XSD structural validation | not started |
 | ZUGFeRD PDF unwrapping, profile detection | not started |
-| Mutation test suite | not started |
+| Mutation test suite | in progress — 15 rules proven, both syntaxes |
 | API, frontend, explanations | not started |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
@@ -104,9 +104,14 @@ without failing the document.
 
 Filled in from real runs, not estimates. Empty until measured.
 
+Two numbers are needed, not one. Zero false positives is easy to reach by
+reporting nothing; proving rules fire is easy to reach by reporting everything.
+Only the pair means anything.
+
 | Metric | Value |
 |---|---|
-| Business rules covered | — *(needs the mutation corpus; passing valid documents does not measure this)* |
+| Business rules proven to fire | **15** across 21 mutations (14 German CIUS, 7 EN 16931 core), UBL and CII |
+| Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII) |
 | Validation latency p50 / p95 | 61 ms/document mean, warm, both rule sets — not yet split by percentile |
 | Cold start to first response | — |
