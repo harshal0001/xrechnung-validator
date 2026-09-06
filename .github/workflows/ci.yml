@@ -44,10 +44,13 @@ jobs:
       # fetch step gated on cache-hit never gets the chance to repair it. That
       # is not a hypothetical: it is how this workflow failed twice. The script
       # is idempotent and checks completeness itself, so let it decide.
-      - name: Fetch KoSIT ruleset
+      # --testsuite brings the reference messages too. The integration tests need
+      # them, and XRV_REQUIRE_RULESET below turns a missing corpus into a failure
+      # rather than a skip.
+      - name: Fetch KoSIT ruleset and test suite
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: uv run python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
+        run: uv run python scripts/fetch_ruleset.py --version "$RULESET_VERSION" --testsuite
 
       - name: Lint
         run: uv run ruff check src tests scripts
