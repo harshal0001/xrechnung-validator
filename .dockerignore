@@ -11,5 +11,5 @@ node_modules/
 tests/corpus/_downloaded/
 .spike-out/
 spike-results.json
+# Nothing in the image needs docs, and this keeps local notes out of the context.
 *.md
-!SPIKE.md

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Week-1 spike runner.
+# Toolchain verification runner.
 #
 # Answers, in one command, the three questions that decide the platform:
 #   1. does saxonche run a real KoSIT stylesheet — on amd64 AND arm64?

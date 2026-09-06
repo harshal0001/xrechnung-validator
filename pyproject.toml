@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "XRechnung / ZUGFeRD validation and explanation service"
 requires-python = ">=3.12,<3.13"
 
-# Pinned to minor. Week-1 spike exists to prove this exact set installs and runs
+# Pinned to minor. scripts/run_spike.sh proves this exact set installs and runs
 # inside the container, on both amd64 and arm64.
 dependencies = [
     "saxonche>=13.0.0,<14",   # SaxonC-HE. Native library. The constraint that shapes deployment.
     "lxml>=5.3,<7",           # XSD validation + tree work
-    "pikepdf>=9,<10",         # PDF/A-3 embedded file extraction (week 3)
-    "fastapi>=0.115,<1",      # week 4 — here now so the measured image size is honest
+    "pikepdf>=9,<10",         # PDF/A-3 embedded file extraction
+    "fastapi>=0.115,<1",      # not wired up yet; pinned here so image size is honest
     "uvicorn[standard]>=0.32,<1",
     "pydantic>=2.9,<3",
     "pydantic-settings>=2.6,<3",

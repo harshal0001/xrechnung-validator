@@ -150,8 +150,8 @@ def main() -> int:
                 continue
             entry["transform_ms"] = round((time.perf_counter() - t) * 1000, 1)
 
-            # Cheap structural checks. Full SVRL parsing is week 2 work; here we
-            # only need evidence that Saxon really ran the Schematron.
+            # Cheap structural checks. Full SVRL parsing belongs in validate/;
+            # here we only need evidence that Saxon really ran the Schematron.
             svrl = svrl or ""
             entry["svrl_bytes"] = len(svrl)
             entry["is_svrl"] = SVRL_NS in svrl
@@ -200,14 +200,14 @@ def main() -> int:
     log("")
 
     # ---- Q4: the decisions this spike exists to make ----------------------
-    # Plan section 6.5 says lazy-load everything. On Lambda the INIT phase is
+    # The intuitive move is to lazy-load everything. On Lambda the INIT phase is
     # unbilled full-vCPU up to ~10s, so an eager compile that fits is free.
     if compile_total < 8000:
         log(f"  DECISION eager init is safe ({compile_total / 1000:.1f}s < 8s budget).")
         log("           Compile at module scope: free on Lambda INIT, warm on Cloud Run.")
     else:
         log(f"  DECISION compile is slow ({compile_total / 1000:.1f}s >= 8s).")
-        log("           Lazy-load per plan section 6.5; keep /healthz off the Saxon path.")
+        log("           Lazy-load the heavy imports; keep /healthz off the Saxon path.")
 
     floor = out["rss_peak_mb"]
     if floor < 400:

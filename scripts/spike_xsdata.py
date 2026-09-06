@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """SPIKE 2 — does xsdata generate usable CII bindings, and what do they cost?
 
-Plan section 1.2 says CII first, deliberately: it is the larger and messier schema
-set, so it is the risk. Find out in week 1, not week 3.
+CII is the larger and messier schema set, so it was assumed to be the risk. This
+answers that up front, before anything is built on top of the bindings.
 
 Three questions:
 
@@ -11,7 +11,7 @@ Three questions:
      typed objects (not an XML tree)?
   3. What does importing them cost in time and memory? This feeds directly into
      the cold-start budget, because a large generated module imported at module
-     scope is exactly the thing plan section 6.5 warns about.
+     scope is the classic cold-start trap.
 
 Generation runs in a subprocess against the XSDs that came with the ruleset —
 there is no separate schema download.
@@ -104,7 +104,7 @@ def generate(xsd: Path, package: str, workdir: Path) -> dict:
             # import only what you need — but UBL 2.1 explodes into 2705 modules and
             # takes 26s to import even with bytecode precompiled, because the cost is
             # the filesystem walk, not compilation. "single-package" emits 2 files
-            # and imports in 1.5s. See SPIKE.md.
+            # and imports in 1.5s.
             "--structure-style", "single-package",
             "--docstring-style", "Google",
             "--slots",                        # lower per-object memory
@@ -245,7 +245,7 @@ def main() -> int:
         shutil.rmtree(OUT_DIR)
     OUT_DIR.mkdir(parents=True)
 
-    # CII first, deliberately — plan section 1.2. It is the risk.
+    # CII first: it was assumed to be the riskier of the two.
     targets = [
         ("CII", "xsd_cii", "cii", "CrossIndustryInvoice", "_uncefact.xml"),
         ("UBL", "xsd_ubl", "ubl", "Invoice", "_ubl.xml"),
@@ -322,7 +322,7 @@ def main() -> int:
     if out["import_total_ms"] > 5000:
         log(f"  DECISION import is heavy ({out['import_total_ms'] / 1000:.1f}s).")
         log("           Import bindings inside the request path, not at module scope,")
-        log("           and check --structure-style: see SPIKE.md on the 26s cluster trap.")
+        log("           and check --structure-style: clusters costs ~26s on UBL.")
     else:
         log(
             f"  DECISION import is affordable ({out['import_total_ms'] / 1000:.1f}s) — "
