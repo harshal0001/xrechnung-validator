@@ -22,18 +22,10 @@ from typing import Self, cast
 from lxml import etree
 
 from xrv.core import Finding, Severity, Syntax
+from xrv.ingest import parse
 from xrv.rules import Ruleset
 
 _WHITESPACE = re.compile(r"\s+")
-
-
-class MalformedDocumentError(ValueError):
-    """The bytes are not well-formed XML, so nothing can be said about them.
-
-    Distinct from "structurally invalid": a document that parses and breaches
-    the schema gets a report. One that does not parse gets an error, because
-    there is no document to report on.
-    """
 
 
 class StructureValidator:
@@ -56,15 +48,19 @@ class StructureValidator:
     def roots(self) -> tuple[str, ...]:
         return tuple(sorted({root for _, root in self._schemas}))
 
-    def findings(self, source: Path | str, syntax: Syntax) -> tuple[Finding, ...]:
-        """Validate one document. Empty result means structurally sound."""
-        path = Path(source)
-        try:
-            tree = etree.parse(str(path))
-        except OSError as exc:
-            raise MalformedDocumentError(f"cannot read {path}: {exc}") from exc
-        except etree.XMLSyntaxError as exc:
-            raise MalformedDocumentError(f"{path.name} is not well-formed XML: {exc}") from exc
+    def findings(self, source: Path | str | bytes, syntax: Syntax) -> tuple[Finding, ...]:
+        """Validate one document. Empty result means structurally sound.
+
+        Takes bytes as well as a path, because in production the document
+        arrives as an upload and writing it to disk to validate it would add a
+        failure mode for nothing.
+
+        Parsing goes through the hardened parser in `ingest`: this is untrusted
+        input, and a schema validator that resolves external entities on the way
+        in is a file-disclosure bug regardless of what the schema says.
+        """
+        payload = source if isinstance(source, bytes) else Path(source).read_bytes()
+        tree = parse(payload)
 
         root_name = etree.QName(tree.getroot()).localname
         schema = self._schemas.get((syntax, root_name))
