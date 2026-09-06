@@ -24,9 +24,7 @@ class TestResolution:
     def test_get_by_version(self, fake_registry: RulesetRegistry) -> None:
         assert fake_registry.get("2026-01-31").sha256 == "a" * 64
 
-    def test_unknown_version_lists_what_is_available(
-        self, fake_registry: RulesetRegistry
-    ) -> None:
+    def test_unknown_version_lists_what_is_available(self, fake_registry: RulesetRegistry) -> None:
         with pytest.raises(RulesetNotFoundError, match="2026-01-31, 2026-08-31"):
             fake_registry.get("2025-01-01")
 
@@ -38,9 +36,7 @@ class TestResolution:
         registry = RulesetRegistry(base=tmp_path / "nope")
         assert registry.versions() == ()
 
-    def test_directory_without_a_manifest_is_ignored(
-        self, fake_registry: RulesetRegistry
-    ) -> None:
+    def test_directory_without_a_manifest_is_ignored(self, fake_registry: RulesetRegistry) -> None:
         """A half-extracted download must not be offered as a ruleset."""
         (fake_registry.base / "2027-01-01").mkdir()
         assert fake_registry.versions() == ("2026-01-31", "2026-08-31")
@@ -102,9 +98,7 @@ class TestDefaultRegistry:
         monkeypatch.setenv("XRV_RULESET_DIR", str(fake_registry.base))
         assert default_registry().latest().version == "2026-08-31"
 
-    def test_falls_back_to_the_fetch_script_location(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_falls_back_to_the_fetch_script_location(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("XRV_RULESET_DIR", raising=False)
         assert default_registry().base == Path("rulesets")
 

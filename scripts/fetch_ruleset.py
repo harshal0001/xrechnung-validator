@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 import urllib.request
@@ -48,7 +49,16 @@ EXPECTED_LAYOUT = {
 
 
 def _get_json(url: str) -> dict:
-    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json"})
+    headers = {"Accept": "application/vnd.github+json"}
+
+    # Unauthenticated GitHub API calls are limited to 60/hour per IP, and CI
+    # runners share an IP with everyone else on the same host. A token lifts that
+    # to 5000/hour. Optional: a developer running this locally needs no token.
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r)
 

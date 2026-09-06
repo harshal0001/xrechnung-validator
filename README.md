@@ -1,5 +1,7 @@
 # XRechnung / ZUGFeRD validator
 
+[![CI](https://github.com/harshal0001/xrechnung-validator/actions/workflows/ci.yml/badge.svg)](https://github.com/harshal0001/xrechnung-validator/actions/workflows/ci.yml)
+
 Validates German e-invoices against EN 16931 and the KoSIT XRechnung rule set, and
 explains each failure in plain German.
 
@@ -89,11 +91,13 @@ without failing the document.
 |---|---|
 | Dependency spikes (Saxon, xsdata) | done — verified in-container on amd64 and arm64 |
 | Rule set fetching, hashing, versioning | done |
-| Core models, SVRL parsing, validation | in progress |
+| Core domain model, rule set registry | done |
+| SVRL parsing, Saxon validation engine | in progress |
 | ZUGFeRD PDF unwrapping, profile detection | not started |
 | Mutation test suite | not started |
 | API, frontend, explanations | not started |
 | Deployment | not started |
+| CI (lint, types, tests, multi-arch image build) | done |
 
 ### Measured results
 
@@ -110,11 +114,24 @@ Filled in from real runs, not estimates. Empty until measured.
 ## Local development
 
 ```bash
-uv venv && uv pip install -e ".[codegen]" --group dev
+uv sync --all-extras          # resolves from uv.lock, so CI and local match
 
 # Fetch the current KoSIT rule set and reference invoices
-python scripts/fetch_ruleset.py --testsuite
+uv run python scripts/fetch_ruleset.py --testsuite
 ```
+
+Run the checks CI runs:
+
+```bash
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy src/xrv
+uv run pytest
+```
+
+Tests that need a fetched rule set skip when there is not one, so the suite passes
+on a clean checkout. CI sets `XRV_REQUIRE_RULESET=1` to turn that skip into a
+failure, because a silent skip there would hide rule set drift.
 
 Verify the toolchain end to end — Saxon compiling and executing real KoSIT
 stylesheets, and xsdata generating and parsing with the official schemas:
@@ -124,11 +141,9 @@ bash scripts/run_spike.sh            # host + amd64 container
 bash scripts/run_spike.sh --arm64    # also arm64 (emulated; slow)
 ```
 
-Regenerating bindings after a schema update:
-
-```bash
-bash scripts/generate_bindings.sh
-```
+Binding generation is not yet wired into a script of its own — `scripts/spike_xsdata.py`
+generates from the XSDs shipped in the rule set and is the reference for how it is done.
+Two things it settled, both worth keeping:
 
 > `xsdata` shells out to `ruff` to format generated code, so `ruff` must be on
 > `PATH`. Generate with `--structure-style single-package`: the `clusters` layout

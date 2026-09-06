@@ -212,8 +212,7 @@ def main() -> int:
     floor = out["rss_peak_mb"]
     if floor < 400:
         log(
-            f"  DECISION {floor:.0f} MB peak — 512 MB tiers are viable. "
-            f"Render stays a real backup."
+            f"  DECISION {floor:.0f} MB peak — 512 MB tiers are viable. Render stays a real backup."
         )
     elif floor < 900:
         log(f"  DECISION {floor:.0f} MB peak — needs 1 GiB. 512 MB tiers are out.")

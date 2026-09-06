@@ -97,17 +97,23 @@ def generate(xsd: Path, package: str, workdir: Path) -> dict:
     t = time.perf_counter()
     proc = subprocess.run(
         [
-            sys.executable, "-m", "xsdata", "generate",
+            sys.executable,
+            "-m",
+            "xsdata",
+            "generate",
             str(xsd),
-            "--package", package,
+            "--package",
+            package,
             # MEASURED, not guessed. "clusters" looks right — one module per root,
             # import only what you need — but UBL 2.1 explodes into 2705 modules and
             # takes 26s to import even with bytecode precompiled, because the cost is
             # the filesystem walk, not compilation. "single-package" emits 2 files
             # and imports in 1.5s.
-            "--structure-style", "single-package",
-            "--docstring-style", "Google",
-            "--slots",                        # lower per-object memory
+            "--structure-style",
+            "single-package",
+            "--docstring-style",
+            "Google",
+            "--slots",  # lower per-object memory
         ],
         cwd=workdir,
         capture_output=True,
@@ -193,9 +199,7 @@ else:
 
 print("__RESULT__" + json.dumps(result))
 """
-    proc = subprocess.run(
-        [sys.executable, "-c", code], capture_output=True, text=True, timeout=600
-    )
+    proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=600)
     for line in proc.stdout.splitlines():
         if line.startswith("__RESULT__"):
             return json.loads(line.removeprefix("__RESULT__"))
@@ -225,6 +229,7 @@ def main() -> int:
     try:
         import xsdata  # noqa: F401
         from xsdata import __version__ as xsdata_version
+
         out["xsdata_version"] = xsdata_version
     except Exception as e:
         out["ok"] = False
