@@ -35,9 +35,13 @@ _XSLT_KEYS: Mapping[Syntax, tuple[str, ...]] = {
     Syntax.UBL: ("xslt_en16931_ubl", "xslt_xrechnung_ubl"),
 }
 
-_XSD_KEYS: Mapping[Syntax, str] = {
-    Syntax.CII: "xsd_cii",
-    Syntax.UBL: "xsd_ubl",
+# UBL puts invoices and credit notes in different root elements with different
+# schemas; CII carries both in one, distinguished by a type code. So the schema
+# is chosen by root element, not by syntax alone. The first entry per syntax is
+# the default when the root is not known yet.
+_XSD_KEYS: Mapping[Syntax, Mapping[str, str]] = {
+    Syntax.CII: {"CrossIndustryInvoice": "xsd_cii"},
+    Syntax.UBL: {"Invoice": "xsd_ubl", "CreditNote": "xsd_ubl_creditnote"},
 }
 
 
@@ -111,9 +115,27 @@ class Ruleset:
         """The Schematron-compiled stylesheets to run for a syntax, in order."""
         return tuple(self.path(k) for k in _XSLT_KEYS[syntax])
 
-    def xsd(self, syntax: Syntax) -> Path:
-        """The structural schema for a syntax."""
-        return self.path(_XSD_KEYS[syntax])
+    def xsd(self, syntax: Syntax, root: str | None = None) -> Path:
+        """The structural schema for a syntax, chosen by root element name.
+
+        Passing no root gives the invoice schema, which is the right default for
+        a caller that has not looked at the document yet.
+        """
+        choices = _XSD_KEYS[syntax]
+        if root is None:
+            return self.path(next(iter(choices.values())))
+        try:
+            key = choices[root]
+        except KeyError:
+            known = ", ".join(choices)
+            raise RulesetNotFoundError(
+                f"{syntax} has no schema for root element '{root}' (have: {known})"
+            ) from None
+        return self.path(key)
+
+    def document_roots(self, syntax: Syntax) -> tuple[str, ...]:
+        """Root element names this syntax validates."""
+        return tuple(_XSD_KEYS[syntax])
 
     def __str__(self) -> str:
         return f"{self.version} ({self.sha256[:12]}…)"

@@ -22,6 +22,7 @@ from saxonche import PySaxonProcessor, PyXsltExecutable
 
 from xrv.core import Finding, Syntax
 from xrv.rules import Ruleset
+from xrv.validate.structure import StructureValidator
 from xrv.validate.svrl import parse_svrl
 
 
@@ -38,11 +39,13 @@ class ValidationEngine:
 
     def __init__(self, ruleset: Ruleset, syntaxes: Iterable[Syntax] | None = None) -> None:
         self.ruleset = ruleset
+        wanted = tuple(syntaxes) if syntaxes is not None else tuple(Syntax)
         self._processor = PySaxonProcessor(license=False)
         self._compiled: dict[Syntax, tuple[PyXsltExecutable, ...]] = {}
+        self.structure = StructureValidator(ruleset, syntaxes=wanted)
 
         compiler = self._processor.new_xslt30_processor()
-        for syntax in syntaxes if syntaxes is not None else tuple(Syntax):
+        for syntax in wanted:
             self._compiled[syntax] = tuple(
                 compiler.compile_stylesheet(stylesheet_file=str(sheet))
                 for sheet in ruleset.stylesheets(syntax)
@@ -53,11 +56,42 @@ class ValidationEngine:
         return str(self._processor.version)
 
     def findings(self, source: Path | str, syntax: Syntax) -> tuple[Finding, ...]:
+        """Validate a document: structure first, then business rules.
+
+        Structural failure stops the run. Business rules are written against a
+        shape the schema guarantees, so evaluating them over a document the
+        schema rejected reports on a structure that is not there — noise layered
+        on top of the one finding that matters.
+
+        Note that the two layers overlap: some EN 16931 rules restate a
+        constraint the schema already enforces, so a document missing its invoice
+        number fails structurally and never reaches the rule that says so. The
+        FATAL finding is the honest answer in that case.
+        """
+        document = self._require_document(source)
+        structural = self.structure.findings(document, syntax)
+        if structural:
+            return structural
+        return self.rule_findings(document, syntax)
+
+    @staticmethod
+    def _require_document(source: Path | str) -> Path:
+        """A missing file is not a malformed one, and should not be reported as one."""
+        path = Path(source)
+        if not path.is_file():
+            raise ValidationError(f"no such document: {path}")
+        return path
+
+    def rule_findings(self, source: Path | str, syntax: Syntax) -> tuple[Finding, ...]:
         """Run every stylesheet for `syntax` and collect what fired.
 
         Both the EN 16931 core rules and the German CIUS run, in that order. A
         document can satisfy the European rules and still breach the national
         restriction, so neither alone is an answer.
+
+        Exposed separately from `findings` so the rule layer can be exercised on
+        its own — a mutation that also breaks the schema would otherwise never
+        reach the rule it was written to prove.
         """
         try:
             executables = self._compiled[syntax]
@@ -66,9 +100,7 @@ class ValidationEngine:
                 f"engine was not built for {syntax}; it has {sorted(self._compiled)}"
             ) from None
 
-        source_path = Path(source)
-        if not source_path.is_file():
-            raise ValidationError(f"no such document: {source_path}")
+        source_path = self._require_document(source)
 
         collected: list[Finding] = []
         for executable in executables:
@@ -82,12 +114,13 @@ class ValidationEngine:
         return tuple(collected)
 
     def close(self) -> None:
-        """Drop the compiled stylesheets and shut the processor down.
+        """Drop the compiled schemas and stylesheets, and shut the processor down.
 
         PySaxonProcessor exposes no explicit release in saxonche 13 — its
         __exit__ is the teardown — so closing means driving that.
         """
         self._compiled.clear()
+        self.structure.close()
         self._processor.__exit__(None, None, None)
 
     def __enter__(self) -> Self:
