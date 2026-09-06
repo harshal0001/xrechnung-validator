@@ -18,7 +18,7 @@ import pytest
 
 from xrv.core import Finding, Severity, Syntax
 from xrv.rules import Ruleset
-from xrv.validate import ValidationEngine, ValidationError
+from xrv.validate import MalformedDocumentError, ValidationEngine, ValidationError
 
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
 
@@ -108,26 +108,36 @@ class TestFailureModes:
             ValidationEngine(real_ruleset, syntaxes=[Syntax.UBL]) as partial,
             pytest.raises(ValidationError, match="not built for"),
         ):
-            partial.findings(Path("whatever.xml"), Syntax.CII)
+            partial.rule_findings(Path("whatever.xml"), Syntax.CII)
 
-    def test_a_document_that_is_not_an_invoice_is_not_reported_clean(
+    def test_a_document_that_is_not_an_invoice_is_named_as_such(
         self, engine: ValidationEngine, tmp_path: Path
     ) -> None:
-        """Well-formed XML that is not an invoice must not come back valid.
+        """The structural layer answers this directly, rather than by accident.
 
-        Schematron alone cannot say "this is not an invoice" — that is the XSD
-        layer's job, and it is not wired up yet. What it can do is refuse to call
-        the document clean, which is the property worth pinning down now.
+        Before the schema ran first, this document tripped an unrelated business
+        rule about empty elements — technically not clean, but a misleading
+        answer to give someone.
         """
         junk = tmp_path / "junk.xml"
         junk.write_text("<nonsense/>")
-        findings = engine.findings(junk, Syntax.UBL)
-        assert [f for f in findings if f.blocking]
+        (finding,) = engine.findings(junk, Syntax.UBL)
+        assert finding.rule_id == "XSD-UNKNOWN-ROOT"
+        assert finding.blocking
 
     def test_malformed_xml_does_not_pass_silently(
         self, engine: ValidationEngine, tmp_path: Path
     ) -> None:
         broken = tmp_path / "broken.xml"
         broken.write_text("<Invoice>")
-        with pytest.raises(ValidationError):
+        with pytest.raises(MalformedDocumentError):
             engine.findings(broken, Syntax.UBL)
+
+    def test_the_rule_layer_alone_still_rejects_malformed_xml(
+        self, engine: ValidationEngine, tmp_path: Path
+    ) -> None:
+        """rule_findings bypasses the schema, so it needs its own guard."""
+        broken = tmp_path / "broken.xml"
+        broken.write_text("<Invoice>")
+        with pytest.raises(ValidationError):
+            engine.rule_findings(broken, Syntax.UBL)

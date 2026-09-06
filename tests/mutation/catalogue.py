@@ -45,6 +45,11 @@ class Mutation:
     xpath: str
     #: Rules that this breakage unavoidably trips as well as `rule_id`.
     collateral: frozenset[str] = field(default_factory=frozenset)
+    #: True when the XSD also rejects this document. Some EN 16931 rules restate
+    #: a constraint the schema already enforces, so the integrated pipeline stops
+    #: at the structural failure and the business rule never runs. Recording which
+    #: ones overlap is the point — the rule is still proven, at its own layer.
+    caught_by_schema: bool = False
 
     @property
     def expected(self) -> frozenset[str]:
@@ -144,12 +149,14 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         rule_id="BR-02",
         syntax=Syntax.UBL,
+        caught_by_schema=True,
         breaks="Invoice number (BT-1) removed",
         xpath="/*/cbc:ID",
     ),
     Mutation(
         rule_id="BR-03",
         syntax=Syntax.UBL,
+        caught_by_schema=True,
         breaks="Issue date (BT-2) removed",
         xpath="/*/cbc:IssueDate",
     ),
@@ -174,6 +181,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         rule_id="BR-16",
         syntax=Syntax.UBL,
+        caught_by_schema=True,
         breaks="Every invoice line removed",
         # A document with no lines cannot have a consistent line total or VAT
         # breakdown either, so those rules fire too. Declared rather than hidden.
@@ -214,6 +222,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         rule_id="BR-02",
         syntax=Syntax.CII,
+        caught_by_schema=True,
         breaks="Invoice number (BT-1) removed",
         xpath="/*/rsm:ExchangedDocument/ram:ID",
     ),
