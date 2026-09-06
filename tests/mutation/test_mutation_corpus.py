@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 from mutation.catalogue import MUTATIONS, Mutation, MutationError
-from xrv.core import Syntax
+from xrv.core import Severity, Syntax
 from xrv.validate import ValidationEngine
 
 pytestmark = pytest.mark.usefixtures("corpus")
@@ -26,6 +26,9 @@ pytestmark = pytest.mark.usefixtures("corpus")
 #: fields that every business case carries, so a wider base would add runtime
 #: without adding coverage.
 BASE = {Syntax.UBL: "01.01a-INVOICE_ubl.xml", Syntax.CII: "01.01a-INVOICE_uncefact.xml"}
+
+SCHEMA_CAUGHT = tuple(m for m in MUTATIONS if m.caught_by_schema)
+RULES_ONLY = tuple(m for m in MUTATIONS if not m.caught_by_schema)
 
 
 @pytest.fixture(scope="module")
@@ -81,7 +84,7 @@ class TestRulesFire:
     def test_the_broken_rule_is_reported(
         self, engine: ValidationEngine, mutate, mutation: Mutation
     ) -> None:
-        findings = engine.findings(mutate(mutation), mutation.syntax)
+        findings = engine.rule_findings(mutate(mutation), mutation.syntax)
         fired = {f.rule_id for f in findings if f.blocking}
         assert mutation.rule_id in fired, (
             f"{mutation.breaks} — expected {mutation.rule_id}, got {sorted(fired) or 'nothing'}"
@@ -92,7 +95,7 @@ class TestRulesFire:
         self, engine: ValidationEngine, mutate, mutation: Mutation
     ) -> None:
         """The half that stops "catches everything" from looking like accuracy."""
-        findings = engine.findings(mutate(mutation), mutation.syntax)
+        findings = engine.rule_findings(mutate(mutation), mutation.syntax)
         fired = {f.rule_id for f in findings if f.blocking}
         assert not fired - mutation.expected, (
             f"{mutation.breaks} — unexpected rules also fired: {sorted(fired - mutation.expected)}"
@@ -105,11 +108,55 @@ class TestRulesFire:
         """explain/ is grounded in rule_text, so a blank one is ungroundable."""
         finding = next(
             f
-            for f in engine.findings(mutate(mutation), mutation.syntax)
+            for f in engine.rule_findings(mutate(mutation), mutation.syntax)
             if f.rule_id == mutation.rule_id
         )
         assert finding.rule_text.strip()
         assert finding.xpath.strip()
+
+
+class TestTheTwoLayersOverlapAsRecorded:
+    """Some EN 16931 rules restate a constraint the schema already enforces.
+
+    Which ones is a property of the rule set, not a choice, so it is asserted in
+    both directions: a mutation marked as schema-caught must actually fail the
+    schema, and one not marked must actually pass it. Either drifting means the
+    catalogue no longer describes the rule set it is testing.
+    """
+
+    @pytest.mark.parametrize(
+        "mutation", [m for m in MUTATIONS if m.caught_by_schema], ids=ids(SCHEMA_CAUGHT)
+    )
+    def test_schema_catches_it_first(
+        self, engine: ValidationEngine, mutate, mutation: Mutation
+    ) -> None:
+        document = mutate(mutation)
+        structural = engine.structure.findings(document, mutation.syntax)
+        assert structural, f"{mutation.breaks} was expected to fail the schema, and did not"
+        assert all(f.severity is Severity.FATAL for f in structural)
+
+    @pytest.mark.parametrize(
+        "mutation", [m for m in MUTATIONS if m.caught_by_schema], ids=ids(SCHEMA_CAUGHT)
+    )
+    def test_the_pipeline_stops_at_the_structural_failure(
+        self, engine: ValidationEngine, mutate, mutation: Mutation
+    ) -> None:
+        """Business rules are not run over a document the schema rejected."""
+        reported = engine.findings(mutate(mutation), mutation.syntax)
+        assert reported
+        assert all(f.rule_id.startswith("XSD-") for f in reported)
+
+    @pytest.mark.parametrize(
+        "mutation", [m for m in MUTATIONS if not m.caught_by_schema], ids=ids(RULES_ONLY)
+    )
+    def test_structurally_valid_mutations_reach_the_rules(
+        self, engine: ValidationEngine, mutate, mutation: Mutation
+    ) -> None:
+        document = mutate(mutation)
+        assert not engine.structure.findings(document, mutation.syntax)
+        assert engine.findings(document, mutation.syntax) == engine.rule_findings(
+            document, mutation.syntax
+        )
 
 
 class TestBothSyntaxesAreCovered:

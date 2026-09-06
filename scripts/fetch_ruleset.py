@@ -44,6 +44,10 @@ EXPECTED_LAYOUT = {
     "xslt_xrechnung_ubl": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
     "xsd_cii": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd",
     "xsd_ubl": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd",
+    # A credit note is a different UBL root element with its own schema. The
+    # Schematron handles both; validating one against the Invoice schema would
+    # reject a perfectly valid document.
+    "xsd_ubl_creditnote": "resources/ubl/2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd",
     "scenarios": "scenarios.xml",
 }
 
