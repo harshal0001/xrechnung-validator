@@ -94,3 +94,47 @@ def engine(real_ruleset: Ruleset) -> Iterator[ValidationEngine]:
     """One engine for the whole session — compiling the stylesheets costs ~1.7s."""
     with ValidationEngine(real_ruleset) as built:
         yield built
+
+
+@pytest.fixture(scope="session")
+def make_zugferd_pdf():
+    """Build a ZUGFeRD-shaped PDF around a given payload.
+
+    The KoSIT test suite ships no PDFs — it is XML only — so fixtures have to be
+    constructed. That tests our extraction honestly and says nothing about how
+    real producers behave in the wild, which is a limit worth naming rather than
+    papering over.
+    """
+    import io
+
+    import pikepdf
+
+    def build(
+        payload: bytes | None = None,
+        *,
+        filename: str = "factur-x.xml",
+        extras: dict[str, bytes] | None = None,
+        password: str | None = None,
+    ) -> bytes:
+        pdf = pikepdf.Pdf.new()
+        pdf.add_blank_page(page_size=(595, 842))
+        if payload is not None:
+            pdf.attachments[filename] = pikepdf.AttachedFileSpec(
+                pdf, payload, filename=filename, mime_type="text/xml"
+            )
+        for name, data in (extras or {}).items():
+            pdf.attachments[name] = pikepdf.AttachedFileSpec(pdf, data, filename=name)
+        buffer = io.BytesIO()
+        if password:
+            pdf.save(buffer, encryption=pikepdf.Encryption(owner=password, user=password))
+        else:
+            pdf.save(buffer)
+        return buffer.getvalue()
+
+    return build
+
+
+@pytest.fixture(scope="session")
+def cii_invoice(corpus: Path) -> bytes:
+    """A real CII reference invoice, to embed in constructed PDFs."""
+    return (corpus / "01.01a-INVOICE_uncefact.xml").read_bytes()

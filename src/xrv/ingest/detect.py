@@ -14,6 +14,7 @@ from lxml import etree
 
 from xrv.core import Source, Syntax
 from xrv.ingest.xml import parse
+from xrv.ingest.zugferd import Profile, detect_profile, extract_xml, read_guideline_id
 
 #: Root namespaces EN 16931 permits, mapped to the syntax that validates them.
 #: UBL splits invoices and credit notes across two namespaces; CII carries both
@@ -46,13 +47,30 @@ class Document:
     source: Source
     syntax: Syntax
     root: str
-    #: The XML as received, byte for byte. Kept rather than re-serialised so a
-    #: hash of it means something later.
+    #: The XML to validate, byte for byte as it was found. For a ZUGFeRD PDF that
+    #: is the embedded attachment, not the PDF. Kept unmodified so a hash of it
+    #: means something later.
     content: bytes
+    #: ZUGFeRD profile, when the document came out of a PDF. None for plain XML,
+    #: which carries no profile of its own.
+    profile: Profile | None = None
+    #: The embedded file the XML was taken from, for a PDF.
+    attachment: str | None = None
 
     @property
     def is_credit_note(self) -> bool:
         return self.root == "CreditNote"
+
+    @property
+    def mandate_ready(self) -> bool:
+        """Whether this document carries enough to be validated as an invoice.
+
+        Plain XML always does — it was sent as an invoice and stands or falls on
+        the rules. A PDF depends on its profile: MINIMUM and BASIC WL have no
+        line items, so running the full rule set over one reports dozens of
+        failures for data the profile never claimed to carry.
+        """
+        return self.profile is None or self.profile.mandate_ready
 
 
 def detect_media(payload: bytes) -> Media:
@@ -78,10 +96,7 @@ def identify(payload: bytes) -> Document:
     media = detect_media(payload)
 
     if media is Media.PDF:
-        raise UnsupportedDocumentError(
-            "This looks like a PDF. Extracting the invoice XML from a ZUGFeRD "
-            "PDF is not available yet; upload the XML directly for now."
-        )
+        return _identify_pdf(payload)
     if media is Media.UNKNOWN:
         raise UnsupportedDocumentError(
             "This is neither XML nor a PDF. Upload an XRechnung XML file "
@@ -104,4 +119,31 @@ def identify(payload: bytes) -> Document:
         syntax=syntax,
         root=qname.localname,
         content=payload,
+    )
+
+
+def _identify_pdf(payload: bytes) -> Document:
+    """Unwrap a ZUGFeRD PDF and describe what was inside it.
+
+    The embedded XML is routed exactly like an uploaded one — same namespace
+    check, same refusal if it is not an invoice. A PDF is a container, not a
+    reason to trust its contents.
+    """
+    invoice_xml, attachment = extract_xml(payload)
+
+    qname = etree.QName(parse(invoice_xml).getroot())
+    syntax = ROOT_NAMESPACES.get(qname.namespace or "")
+    if syntax is None:
+        raise UnsupportedDocumentError(
+            f"the file embedded in this PDF ('{attachment}') is not an e-invoice: "
+            f"its root is '{qname.localname}' in namespace '{qname.namespace or 'none'}'"
+        )
+
+    return Document(
+        source=Source.ZUGFERD_PDF,
+        syntax=syntax,
+        root=qname.localname,
+        content=invoice_xml,
+        profile=detect_profile(read_guideline_id(invoice_xml)),
+        attachment=attachment,
     )
