@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Fetch, hash and record a KoSIT validator configuration.
 
-This is plan section 1.4: the ruleset is *data*, never a vendored constant. Every
-fetch writes a manifest recording which release produced it and what its bytes
-hashed to, so `ruleset_version` / `ruleset_sha256` on a ValidationReport trace
-back to something real.
+The ruleset is *data*, never a vendored constant. Every fetch writes a manifest
+recording which release produced it and what its bytes hashed to, so
+`ruleset_version` / `ruleset_sha256` on a ValidationReport trace back to
+something real.
 
     python scripts/fetch_ruleset.py                 # latest release
     python scripts/fetch_ruleset.py --version 2026-08-31
