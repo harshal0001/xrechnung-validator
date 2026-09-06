@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "xrv"
 version = "0.1.0"
@@ -53,6 +57,11 @@ strict = true
 module = "xrv.bindings.*"
 ignore_errors = true
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/xrv"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# src layout, so the suite runs against the tree without an editable install.
+pythonpath = ["src"]
 addopts = "-q"
