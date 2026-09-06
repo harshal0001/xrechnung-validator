@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
 from xrv.rules import Ruleset, RulesetRegistry
+from xrv.validate import ValidationEngine
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -26,15 +28,12 @@ ROOT = Path(__file__).resolve().parent.parent
 REAL_RULESETS = Path(os.environ.get("XRV_RULESET_DIR", ROOT / "rulesets"))
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def real_ruleset() -> Ruleset:
     """The newest ruleset actually fetched into ./rulesets."""
     registry = RulesetRegistry(base=REAL_RULESETS)
     if not registry.versions():
-        missing = f"no ruleset under {REAL_RULESETS} — run: python scripts/fetch_ruleset.py"
-        if os.environ.get("XRV_REQUIRE_RULESET") == "1":
-            pytest.fail(missing)
-        pytest.skip(missing)
+        _require(f"no ruleset under {REAL_RULESETS}", "python scripts/fetch_ruleset.py")
     return registry.latest()
 
 
@@ -63,3 +62,35 @@ def fake_registry(tmp_path: Path) -> RulesetRegistry:
             json.dumps({"version": version, "sha256": sha, "paths": paths})
         )
     return RulesetRegistry(base=tmp_path)
+
+
+CORPUS_DIR = Path(os.environ.get("XRV_CORPUS_DIR", ROOT / "tests" / "corpus" / "_downloaded"))
+
+
+def _require(what: str, hint: str) -> None:
+    if os.environ.get("XRV_REQUIRE_RULESET") == "1":
+        pytest.fail(f"{what} — run: {hint}")
+    pytest.skip(f"{what} — run: {hint}")
+
+
+@pytest.fixture(scope="session")
+def corpus() -> Path:
+    """KoSIT reference messages: business cases that are valid by construction.
+
+    Passing them proves the service emits no false positives. It proves nothing
+    about rule coverage — that needs the mutation corpus, which does not exist yet.
+    """
+    releases = sorted(p for p in CORPUS_DIR.iterdir() if p.is_dir()) if CORPUS_DIR.is_dir() else []
+    if not releases:
+        _require(
+            f"no test suite under {CORPUS_DIR}",
+            "python scripts/fetch_ruleset.py --testsuite",
+        )
+    return releases[-1] / "instances" / "standard"
+
+
+@pytest.fixture(scope="session")
+def engine(real_ruleset: Ruleset) -> Iterator[ValidationEngine]:
+    """One engine for the whole session — compiling the stylesheets costs ~1.7s."""
+    with ValidationEngine(real_ruleset) as built:
+        yield built

@@ -92,7 +92,8 @@ without failing the document.
 | Dependency spikes (Saxon, xsdata) | done — verified in-container on amd64 and arm64 |
 | Rule set fetching, hashing, versioning | done |
 | Core domain model, rule set registry | done |
-| SVRL parsing, Saxon validation engine | in progress |
+| SVRL parsing, Saxon validation engine | done |
+| XSD structural validation | not started |
 | ZUGFeRD PDF unwrapping, profile detection | not started |
 | Mutation test suite | not started |
 | API, frontend, explanations | not started |
@@ -105,9 +106,9 @@ Filled in from real runs, not estimates. Empty until measured.
 
 | Metric | Value |
 |---|---|
-| Business rules covered | — |
-| False positives on the valid reference corpus | — |
-| Validation latency p50 / p95 | — |
+| Business rules covered | — *(needs the mutation corpus; passing valid documents does not measure this)* |
+| False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII) |
+| Validation latency p50 / p95 | 61 ms/document mean, warm, both rule sets — not yet split by percentile |
 | Cold start to first response | — |
 | Explanation accuracy on the eval set | — |
 
