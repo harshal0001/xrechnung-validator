@@ -39,17 +39,12 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --all-extras
 
-      # ~40 MB from a GitHub release, keyed on the pinned version, so a normal
-      # run does not touch the network.
-      - name: Cache KoSIT ruleset
-        id: ruleset-cache
-        uses: actions/cache@v4
-        with:
-          path: rulesets
-          key: ruleset-${{ env.RULESET_VERSION }}
-
+      # Not cached. The archive is 500 KB, and actions/cache only writes on a
+      # primary-key miss — so a cache holding a bad ruleset is permanent, and a
+      # fetch step gated on cache-hit never gets the chance to repair it. That
+      # is not a hypothetical: it is how this workflow failed twice. The script
+      # is idempotent and checks completeness itself, so let it decide.
       - name: Fetch KoSIT ruleset
-        if: steps.ruleset-cache.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: uv run python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
@@ -79,16 +74,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache KoSIT ruleset
-        id: ruleset-cache
-        uses: actions/cache@v4
-        with:
-          path: rulesets
-          key: ruleset-${{ env.RULESET_VERSION }}
-
-      # The Dockerfile bakes the ruleset in, so the image cannot build without it.
+      # The Dockerfile bakes the ruleset in and verifies it, so the image cannot
+      # build without one. Uncached, for the reason given in the check job.
       - name: Fetch KoSIT ruleset
-        if: steps.ruleset-cache.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
