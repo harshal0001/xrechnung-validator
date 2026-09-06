@@ -100,13 +100,37 @@ def safe_extract(zf: zipfile.ZipFile, target: Path) -> None:
     zf.extractall(target)
 
 
+def missing_paths(root: Path) -> list[str]:
+    """Logical keys from the manifest whose files are not on disk.
+
+    Read from the manifest rather than EXPECTED_LAYOUT so an already-extracted
+    ruleset is judged against the layout it was actually fetched with.
+    """
+    manifest_file = root / "manifest.json"
+    if not manifest_file.is_file():
+        return sorted(EXPECTED_LAYOUT)
+    try:
+        paths = json.loads(manifest_file.read_text())["paths"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return sorted(EXPECTED_LAYOUT)
+    return sorted(k for k, rel in paths.items() if not (root / rel).is_file())
+
+
 def fetch_ruleset(version: str | None, force: bool) -> Path:
     tag, asset_name, url = resolve_release(CONFIG_REPO, version)
     out = RULESET_DIR / tag
 
+    # "Already present" means the files are present, not that the directory is.
+    # manifest.json is committed to the repository, so after a fresh clone the
+    # directory exists and holds nothing else — testing existence alone would
+    # skip the download and leave the ruleset empty.
     if out.exists() and not force:
-        print(f"  ruleset {tag} already present at {out.relative_to(ROOT)} (--force to refetch)")
-        return out
+        incomplete = missing_paths(out)
+        if not incomplete:
+            here = out.relative_to(ROOT)
+            print(f"  ruleset {tag} already present at {here} (--force to refetch)")
+            return out
+        print(f"  {out.relative_to(ROOT)} is incomplete ({len(incomplete)} missing) — refetching")
     if out.exists():
         shutil.rmtree(out)
 
@@ -122,7 +146,7 @@ def fetch_ruleset(version: str | None, force: bool) -> Path:
         safe_extract(zf, out)
     tmp_zip.unlink()
 
-    missing = [k for k, rel in EXPECTED_LAYOUT.items() if not (out / rel).exists()]
+    missing = [k for k, rel in EXPECTED_LAYOUT.items() if not (out / rel).is_file()]
     if missing:
         raise SystemExit(
             f"archive layout changed — missing: {', '.join(missing)}\n"
@@ -167,12 +191,47 @@ def fetch_testsuite(force: bool) -> Path:
     return out
 
 
+def verify(base: Path) -> int:
+    """Check every ruleset under `base` is complete. No network access.
+
+    The image bakes the ruleset in, and COPY is happy to copy a directory that
+    holds nothing but a manifest. Running this at build time turns that into a
+    failed build instead of an image that only fails when someone uploads an
+    invoice.
+    """
+    roots = sorted(p for p in base.iterdir() if p.is_dir()) if base.is_dir() else []
+    if not roots:
+        print(f"no ruleset under {base}", file=sys.stderr)
+        return 1
+
+    failed = False
+    for root in roots:
+        incomplete = missing_paths(root)
+        if incomplete:
+            print(f"  {root.name}  INCOMPLETE — missing {', '.join(incomplete)}", file=sys.stderr)
+            failed = True
+        else:
+            print(f"  {root.name}  ok")
+    return 1 if failed else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--version", help="ruleset version, e.g. 2026-08-31 (default: latest release)")
     ap.add_argument("--testsuite", action="store_true", help="also fetch KoSIT reference messages")
     ap.add_argument("--force", action="store_true", help="refetch even if already present")
+    ap.add_argument(
+        "--verify",
+        metavar="DIR",
+        nargs="?",
+        const=str(RULESET_DIR),
+        help="check rulesets on disk are complete and exit; no download",
+    )
     args = ap.parse_args()
+
+    if args.verify:
+        print("verifying rulesets")
+        return verify(Path(args.verify))
 
     print("KoSIT validator configuration")
     ruleset = fetch_ruleset(args.version, args.force)

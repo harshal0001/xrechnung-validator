@@ -55,6 +55,12 @@ RUN uv pip install --system \
 COPY scripts/ ./scripts/
 COPY rulesets/ ./rulesets/
 
+# COPY is happy to copy a directory containing nothing but a manifest, which is
+# exactly what a fresh clone has — manifest.json is committed, the resources are
+# not. Without this the build goes green and the image only fails when someone
+# uploads an invoice.
+RUN python scripts/fetch_ruleset.py --verify /app/rulesets
+
 ENV XRV_RULESET_DIR=/app/rulesets
 
 # Replaced with the uvicorn CMD once the API lands. For now the image's job is to
