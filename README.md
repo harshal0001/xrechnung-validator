@@ -96,7 +96,7 @@ without failing the document.
 | XSD structural validation | done |
 | Ingest: sniffing, routing, hardened parsing | done |
 | ZUGFeRD PDF unwrapping, profile detection | done |
-| Mutation test suite | in progress — 15 rules proven, both syntaxes and both layers |
+| Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
 | Typed bindings wired into parsing | not started |
 | API, frontend, explanations | not started |
 | Deployment | not started |
@@ -112,7 +112,7 @@ Only the pair means anything.
 
 | Metric | Value |
 |---|---|
-| Business rules proven to fire | **15** across 21 mutations (14 German CIUS, 7 EN 16931 core), UBL and CII |
+| Business rules proven to fire | **25** across 38 mutations — 9 German CIUS, 6 EN 16931 core, 6 calculation, 4 code list — UBL and CII |
 | Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
 | Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
