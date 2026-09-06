@@ -15,8 +15,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from lxml import etree
 
-from mutation.catalogue import MUTATIONS, Mutation, MutationError
+from mutation.catalogue import MUTATIONS, Change, Mutation, MutationError
 from xrv.core import Severity, Syntax
 from xrv.validate import ValidationEngine
 
@@ -60,6 +61,43 @@ class TestTheHarnessItself:
     def test_mutation_actually_changes_the_document(self, mutation: Mutation, corpus: Path) -> None:
         original = (corpus / BASE[mutation.syntax]).read_bytes()
         assert mutation.apply(corpus / BASE[mutation.syntax]) != original
+
+    def test_a_value_edit_that_changes_nothing_is_an_error(self, corpus: Path) -> None:
+        """The no-op guard for value edits.
+
+        Setting a field to what it already holds produces a byte-identical
+        document, so the test built on it would be asserting things about a
+        valid invoice while appearing to test a broken one.
+        """
+        invoice = corpus / BASE[Syntax.UBL]
+        current = (
+            etree.parse(str(invoice))
+            .getroot()
+            .findtext(
+                "{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}BuyerReference"
+            )
+        )
+        no_op = Mutation(
+            rule_id="BR-00",
+            syntax=Syntax.UBL,
+            breaks="nothing at all",
+            xpath="/*/cbc:BuyerReference",
+            change=Change.SET_TEXT,
+            value=current,
+        )
+        with pytest.raises(MutationError, match="changes nothing"):
+            no_op.apply(invoice)
+
+    def test_a_value_edit_needs_a_value(self, corpus: Path) -> None:
+        incomplete = Mutation(
+            rule_id="BR-00",
+            syntax=Syntax.UBL,
+            breaks="nothing",
+            xpath="/*/cbc:BuyerReference",
+            change=Change.SET_TEXT,
+        )
+        with pytest.raises(MutationError, match="needs a value"):
+            incomplete.apply(corpus / BASE[Syntax.UBL])
 
     def test_a_selector_that_matches_nothing_is_an_error(self, corpus: Path) -> None:
         """Not a silent no-op: that would turn a test into an assertion about a
@@ -157,6 +195,28 @@ class TestTheTwoLayersOverlapAsRecorded:
         assert engine.findings(document, mutation.syntax) == engine.rule_findings(
             document, mutation.syntax
         )
+
+
+class TestCoverage:
+    """What the corpus actually reaches, asserted so it cannot quietly shrink."""
+
+    def test_calculation_rules_are_reached(self) -> None:
+        """Deletion alone cannot reach these: removing a total breaks the rule
+        that requires it, not the rule that checks it adds up."""
+        arithmetic = {m.rule_id for m in MUTATIONS if m.rule_id.startswith("BR-CO-")}
+        assert len(arithmetic) >= 5
+
+    def test_code_list_rules_are_reached(self) -> None:
+        assert {m.rule_id for m in MUTATIONS if m.rule_id.startswith("BR-CL-")}
+
+    def test_both_kinds_of_breakage_are_represented(self) -> None:
+        kinds = {m.change for m in MUTATIONS}
+        assert kinds == {Change.DELETE, Change.SET_TEXT}
+
+    def test_value_edits_stay_structurally_valid(self) -> None:
+        """A value edit that broke the schema would never reach its rule, and the
+        mutation would be testing the XSD layer by accident."""
+        assert not [m for m in MUTATIONS if m.change is Change.SET_TEXT and m.caught_by_schema]
 
 
 class TestBothSyntaxesAreCovered:
