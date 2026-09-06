@@ -17,8 +17,9 @@ from pathlib import Path
 import pytest
 
 from xrv.core import Finding, Severity, Syntax
+from xrv.ingest import MalformedXmlError
 from xrv.rules import Ruleset
-from xrv.validate import MalformedDocumentError, ValidationEngine, ValidationError
+from xrv.validate import ValidationEngine, ValidationError
 
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
 
@@ -130,7 +131,7 @@ class TestFailureModes:
     ) -> None:
         broken = tmp_path / "broken.xml"
         broken.write_text("<Invoice>")
-        with pytest.raises(MalformedDocumentError):
+        with pytest.raises(MalformedXmlError):
             engine.findings(broken, Syntax.UBL)
 
     def test_the_rule_layer_alone_still_rejects_malformed_xml(
@@ -139,5 +140,13 @@ class TestFailureModes:
         """rule_findings bypasses the schema, so it needs its own guard."""
         broken = tmp_path / "broken.xml"
         broken.write_text("<Invoice>")
-        with pytest.raises(ValidationError):
+        with pytest.raises(MalformedXmlError):
             engine.rule_findings(broken, Syntax.UBL)
+
+    def test_bytes_and_a_path_give_the_same_report(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        invoice = corpus / "01.01a-INVOICE_ubl.xml"
+        assert engine.findings(invoice, Syntax.UBL) == engine.findings(
+            invoice.read_bytes(), Syntax.UBL
+        )

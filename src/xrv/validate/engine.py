@@ -21,6 +21,7 @@ from typing import Self
 from saxonche import PySaxonProcessor, PyXsltExecutable
 
 from xrv.core import Finding, Syntax
+from xrv.ingest import parse, to_text
 from xrv.rules import Ruleset
 from xrv.validate.structure import StructureValidator
 from xrv.validate.svrl import parse_svrl
@@ -68,21 +69,26 @@ class ValidationEngine:
         number fails structurally and never reaches the rule that says so. The
         FATAL finding is the honest answer in that case.
         """
-        document = self._require_document(source)
-        structural = self.structure.findings(document, syntax)
+        payload = self._payload(source)
+        structural = self.structure.findings(payload, syntax)
         if structural:
             return structural
-        return self.rule_findings(document, syntax)
+        return self.rule_findings(payload, syntax)
 
     @staticmethod
-    def _require_document(source: Path | str) -> Path:
-        """A missing file is not a malformed one, and should not be reported as one."""
+    def _payload(source: Path | str | bytes) -> bytes:
+        """Read the document once, whatever form it arrived in.
+
+        A missing file is not a malformed one, and should not be reported as one.
+        """
+        if isinstance(source, bytes):
+            return source
         path = Path(source)
         if not path.is_file():
             raise ValidationError(f"no such document: {path}")
-        return path
+        return path.read_bytes()
 
-    def rule_findings(self, source: Path | str, syntax: Syntax) -> tuple[Finding, ...]:
+    def rule_findings(self, source: Path | str | bytes, syntax: Syntax) -> tuple[Finding, ...]:
         """Run every stylesheet for `syntax` and collect what fired.
 
         Both the EN 16931 core rules and the German CIUS run, in that order. A
@@ -100,16 +106,21 @@ class ValidationEngine:
                 f"engine was not built for {syntax}; it has {sorted(self._compiled)}"
             ) from None
 
-        source_path = self._require_document(source)
+        payload = self._payload(source)
+
+        # Parsed here rather than handed to Saxon as a file path: the same bytes
+        # then go through both layers, and a document declaring an encoding other
+        # than UTF-8 survives, because the declaration was honoured on the way in.
+        node = self._processor.parse_xml(xml_text=to_text(parse(payload)))
 
         collected: list[Finding] = []
         for executable in executables:
             try:
-                svrl = executable.transform_to_string(source_file=str(source_path))
+                svrl = executable.transform_to_string(xdm_node=node)
             except Exception as exc:  # saxonche raises bare exceptions
-                raise ValidationError(f"{source_path.name}: transform failed: {exc}") from exc
+                raise ValidationError(f"transform failed: {exc}") from exc
             if svrl is None:
-                raise ValidationError(f"{source_path.name}: transform returned nothing")
+                raise ValidationError("transform returned nothing")
             collected.extend(parse_svrl(svrl))
         return tuple(collected)
 

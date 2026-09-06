@@ -14,8 +14,9 @@ import pytest
 from lxml import etree
 
 from xrv.core import Severity, Syntax
+from xrv.ingest import MalformedXmlError
 from xrv.rules import Ruleset, RulesetNotFoundError
-from xrv.validate import MalformedDocumentError, StructureValidator
+from xrv.validate import StructureValidator
 
 UBL_NS = {"cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"}
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
@@ -147,9 +148,18 @@ class TestRejects:
         """A document that does not parse is not a document to report on."""
         broken = tmp_path / "broken.xml"
         broken.write_text("<Invoice>")
-        with pytest.raises(MalformedDocumentError, match="not well-formed"):
+        with pytest.raises(MalformedXmlError, match="not well-formed"):
             structure.findings(broken, Syntax.UBL)
 
     def test_a_missing_file(self, structure: StructureValidator, tmp_path: Path) -> None:
-        with pytest.raises(MalformedDocumentError, match="cannot read"):
+        with pytest.raises(OSError):
             structure.findings(tmp_path / "absent.xml", Syntax.UBL)
+
+    def test_bytes_and_a_path_give_the_same_answer(
+        self, structure: StructureValidator, corpus: Path
+    ) -> None:
+        """In production the document arrives as an upload, not a file."""
+        invoice = corpus / "01.01a-INVOICE_ubl.xml"
+        assert structure.findings(invoice, Syntax.UBL) == structure.findings(
+            invoice.read_bytes(), Syntax.UBL
+        )
