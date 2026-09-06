@@ -46,7 +46,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 [tool.ruff.lint.isort]
 # scripts/ holds our own code, not third-party packages. Without this, importing
 # a script in a test sorts it in among the dependencies.
-known-first-party = ["xrv", "fetch_ruleset"]
+known-first-party = ["xrv", "fetch_ruleset", "mutation"]
 
 [tool.mypy]
 python_version = "3.12"
