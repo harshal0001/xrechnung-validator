@@ -94,6 +94,7 @@ without failing the document.
 | Core domain model, rule set registry | done |
 | SVRL parsing, Saxon validation engine | done |
 | XSD structural validation | done |
+| Ingest: sniffing, routing, hardened parsing | done |
 | ZUGFeRD PDF unwrapping, profile detection | not started |
 | Mutation test suite | in progress — 15 rules proven, both syntaxes and both layers |
 | API, frontend, explanations | not started |
@@ -113,7 +114,7 @@ Only the pair means anything.
 | Business rules proven to fire | **15** across 21 mutations (14 German CIUS, 7 EN 16931 core), UBL and CII |
 | Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
-| Validation latency p50 / p95 | 72 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
+| Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
 | Cold start to first response | — |
 | Explanation accuracy on the eval set | — |
 
