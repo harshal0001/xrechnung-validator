@@ -1,8 +1,8 @@
-# Week-1 spike image.
+# Service image.
 #
-# The point of this file is that the SAME image runs on your laptop, on Lambda
-# (via the Web Adapter extension), on Cloud Run, and on Render — with no code
-# branches. That is what keeps the hosting decision reversible until week 5.
+# The point of this file is that the SAME image runs locally, on Lambda (via the
+# Web Adapter extension), on Cloud Run, and on Render — with no code branches.
+# That is what keeps the hosting decision reversible.
 #
 #   docker build -t xrv:spike .
 #   docker run --rm xrv:spike python scripts/spike_saxon.py
@@ -44,8 +44,8 @@ RUN uv pip install --system \
         "pydantic-settings>=2.6,<3"
 
 # ---- app layer --------------------------------------------------------------
-# The ruleset IS baked in — plan section 6.3. A cold start that also downloads
-# and unzips a ruleset is a cold start nobody sits through.
+# The ruleset IS baked in. A cold start that also downloads and unzips a ruleset
+# is a cold start nobody sits through.
 #
 # The test corpus is deliberately NOT baked in. It is 5.6 MB of test data with no
 # place in a production image, so the spike mounts it instead:
@@ -57,6 +57,6 @@ COPY rulesets/ ./rulesets/
 
 ENV XRV_RULESET_DIR=/app/rulesets
 
-# Week 4 replaces this with the uvicorn CMD. For now the image's job is to prove
-# the native library loads and the stylesheets run.
+# Replaced with the uvicorn CMD once the API lands. For now the image's job is to
+# prove the native library loads and the stylesheets run.
 CMD ["python", "scripts/spike_saxon.py"]
