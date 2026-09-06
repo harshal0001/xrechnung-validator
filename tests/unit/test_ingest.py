@@ -20,6 +20,7 @@ from xrv.ingest import (
     Media,
     PayloadTooLargeError,
     UnsupportedDocumentError,
+    ZugferdError,
     detect_media,
     identify,
     parse,
@@ -99,8 +100,10 @@ class TestRouting:
 
 
 class TestRejections:
-    def test_a_pdf_says_what_to_do_instead(self) -> None:
-        with pytest.raises(UnsupportedDocumentError, match="ZUGFeRD"):
+    def test_a_truncated_pdf_says_it_is_unreadable(self) -> None:
+        """PDFs are unwrapped now, so this reports a broken container rather
+        than an unsupported format."""
+        with pytest.raises(ZugferdError, match="not a readable PDF"):
             identify(b"%PDF-1.7\n1 0 obj")
 
     def test_a_binary_file(self) -> None:
@@ -124,10 +127,10 @@ class TestRejections:
             identify(b"<Invoice")
 
     def test_rejection_messages_say_what_is_accepted(self) -> None:
-        for payload in (b"\x89PNG", b"%PDF-1.7"):
-            with pytest.raises(UnsupportedDocumentError) as caught:
-                identify(payload)
-            assert "XML" in str(caught.value) or "ZUGFeRD" in str(caught.value)
+        with pytest.raises(UnsupportedDocumentError) as caught:
+            identify(b"\x89PNG\r\n\x1a\n")
+        assert "XML" in str(caught.value)
+        assert "ZUGFeRD" in str(caught.value)
 
 
 class TestUntrustedInput:
