@@ -172,6 +172,26 @@ class TestOperationalEndpoints:
         assert all(len(entry["sha256"]) == 64 for entry in entries)
         assert any(entry["loaded"] for entry in entries)
 
+    def test_the_frontend_is_served_when_it_has_been_built(self, client: TestClient) -> None:
+        """One container, one origin, no CORS.
+
+        The built UI is not committed, so whether it is mounted depends on
+        whether `npm run build` has run. Asserted conditionally rather than
+        skipped, so this says something in both cases: with a build, the page is
+        served; without one, the API still answers on its own paths.
+        """
+        from xrv.api.app import FRONTEND_DIST
+
+        mounted = {route.name for route in app.routes if getattr(route, "name", None)}
+        if FRONTEND_DIST.is_dir():
+            assert "frontend" in mounted
+            page = client.get("/")
+            assert page.status_code == 200
+            assert "text/html" in page.headers["content-type"]
+        else:
+            assert "frontend" not in mounted
+        assert client.get("/healthz").status_code == 200
+
     def test_the_schema_documents_the_endpoint(self, client: TestClient) -> None:
         schema = client.get("/openapi.json").json()
         assert "/validate" in schema["paths"]
