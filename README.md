@@ -99,7 +99,8 @@ without failing the document.
 | Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
 | Typed bindings wired into parsing | not started |
 | Explanation layer: boundary, catalogue, review workflow | done — 25 drafted, 0 reviewed |
-| API, frontend | not started |
+| HTTP API | done |
+| Frontend | not started |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
 
@@ -128,6 +129,16 @@ uv sync --all-extras          # resolves from uv.lock, so CI and local match
 
 # Fetch the current KoSIT rule set and reference invoices
 uv run python scripts/fetch_ruleset.py --testsuite
+```
+
+Run the service:
+
+```bash
+uv run uvicorn xrv.api:app --reload
+# http://127.0.0.1:8000/docs
+
+curl -F file=@invoice.xml http://127.0.0.1:8000/validate
+curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?explain=true"
 ```
 
 Run the checks CI runs:
