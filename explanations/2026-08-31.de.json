@@ -1,0 +1,132 @@
+{
+  "ruleset_version": "2026-08-31",
+  "language": "de",
+  "_note": "Written once per rule set version and served with no model call. reviewed=false means the text has not yet been read by a person; the provider withholds those by default.",
+  "entries": {
+    "BR-02": {
+      "explanation": "Die Rechnungsnummer (BT-1) fehlt. Jede Rechnung braucht eine eindeutige, fortlaufende Nummer – sie identifiziert den Vorgang in der Buchhaltung beider Seiten und ist umsatzsteuerlich vorgeschrieben.",
+      "reviewed": false,
+      "rule_text_digest": "ef3fa39aa40f91b2"
+    },
+    "BR-03": {
+      "explanation": "Das Rechnungsdatum (BT-2) fehlt. Es bestimmt, in welchen Zeitraum die Rechnung gebucht wird und ab wann Zahlungsfristen laufen.",
+      "reviewed": false,
+      "rule_text_digest": "16f0175c46080d4e"
+    },
+    "BR-05": {
+      "explanation": "Die Rechnungswährung (BT-5) fehlt. Ohne sie sind die Beträge nicht eindeutig – 100 kann Euro oder Franken bedeuten.",
+      "reviewed": false,
+      "rule_text_digest": "65996a3e396605b9"
+    },
+    "BR-08": {
+      "explanation": "Die Anschrift des Rechnungsstellers (BG-5) fehlt. Wer die Rechnung stellt, muss mit vollständiger Adresse erkennbar sein.",
+      "reviewed": false,
+      "rule_text_digest": "3d702cca17105faa"
+    },
+    "BR-10": {
+      "explanation": "Die Anschrift des Rechnungsempfängers (BG-8) fehlt. Der Empfänger muss mit vollständiger Adresse benannt sein.",
+      "reviewed": false,
+      "rule_text_digest": "6e9f719e32c9f37f"
+    },
+    "BR-16": {
+      "explanation": "Die Rechnung enthält keine einzige Rechnungsposition (BG-25). Eine Rechnung ohne Positionen sagt nicht, wofür bezahlt werden soll. Häufige Ursache: die Positionen sind beim Export aus dem Vorsystem verloren gegangen.",
+      "reviewed": false,
+      "rule_text_digest": "a5ece4a512a32aae"
+    },
+    "BR-CL-01": {
+      "explanation": "Der Rechnungstyp ist kein zulässiger Code. Er muss aus der Codeliste UNTDID 1001 stammen – für eine normale Rechnung ist das 380, für eine Gutschrift 381.",
+      "reviewed": false,
+      "rule_text_digest": "6ea9a6dc141bfeda"
+    },
+    "BR-CL-04": {
+      "explanation": "Die Währung ist kein gültiger ISO-4217-Code. Erwartet wird ein dreistelliges Kürzel wie EUR oder CHF.",
+      "reviewed": false,
+      "rule_text_digest": "5e03f8523a485ced"
+    },
+    "BR-CL-14": {
+      "explanation": "Der Ländercode ist kein gültiger ISO-3166-1-Code. Erwartet wird ein zweistelliges Kürzel wie DE oder AT.",
+      "reviewed": false,
+      "rule_text_digest": "31b964956bfc4b25"
+    },
+    "BR-CL-17": {
+      "explanation": "Der Umsatzsteuer-Kategoriecode ist nicht zulässig. Er muss aus der Codeliste UNCL 5305 stammen – etwa S für den Regelsatz, AE für Reverse Charge oder Z für den Nullsatz.",
+      "reviewed": false,
+      "rule_text_digest": "eb45453974dcb143"
+    },
+    "BR-CO-09": {
+      "explanation": "Die Umsatzsteuer-Identifikationsnummer beginnt nicht mit dem Länderpräfix. Sie muss mit dem zweistelligen Ländercode geschrieben werden – für Deutschland also DE123456789, nicht 123456789.",
+      "reviewed": false,
+      "rule_text_digest": "9079bdbbd75ef74d"
+    },
+    "BR-CO-10": {
+      "explanation": "Die Summe der Positionsbeträge (BT-106) stimmt nicht mit den einzelnen Positionen überein. Der Kopfbetrag muss exakt der Summe aller Netto-Positionsbeträge entsprechen. Typische Ursache sind Rundungen, die pro Position anders gerechnet wurden als in der Summe.",
+      "reviewed": false,
+      "rule_text_digest": "3a5fddaf3578e501"
+    },
+    "BR-CO-13": {
+      "explanation": "Der Nettogesamtbetrag (BT-109) geht nicht auf. Er muss der Summe der Positionen abzüglich Nachlässe und zuzüglich Zuschläge auf Dokumentebene entsprechen. Meist fehlt ein Nachlass oder Zuschlag in der Rechnung.",
+      "reviewed": false,
+      "rule_text_digest": "95893e686b3786b2"
+    },
+    "BR-CO-14": {
+      "explanation": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) stimmt nicht mit der Aufschlüsselung nach Steuersätzen überein. Die Summe der einzelnen Steuerbeträge muss den Gesamtbetrag ergeben.",
+      "reviewed": false,
+      "rule_text_digest": "0e668b178cad4877"
+    },
+    "BR-CO-15": {
+      "explanation": "Der Bruttogesamtbetrag (BT-112) ist nicht Nettobetrag plus Umsatzsteuer. Einer der drei Werte ist falsch – häufig, weil einer davon nachträglich geändert wurde, ohne die anderen anzupassen.",
+      "reviewed": false,
+      "rule_text_digest": "6bdbeae81d6a4405"
+    },
+    "BR-CO-16": {
+      "explanation": "Der Zahlbetrag (BT-115) geht nicht auf. Er muss dem Bruttobetrag abzüglich bereits gezahlter Beträge und zuzüglich eines Rundungsbetrags entsprechen. Häufig fehlt eine bereits geleistete Anzahlung.",
+      "reviewed": false,
+      "rule_text_digest": "059100aa0c453cd4"
+    },
+    "BR-DE-1": {
+      "explanation": "Es fehlen Angaben zur Zahlung (BG-16). Die Rechnung muss mitteilen, wie sie bezahlt werden soll – etwa per Überweisung mit IBAN, per Lastschrift oder per Karte. Ohne diese Angabe kann die Zahlung nicht ausgelöst werden.",
+      "reviewed": false,
+      "rule_text_digest": "924c951d935f64fd"
+    },
+    "BR-DE-15": {
+      "explanation": "Die Käuferreferenz (BT-10) fehlt. Öffentliche Auftraggeber in Deutschland nutzen dieses Feld – meist die Leitweg-ID – um die Rechnung intern an die richtige Stelle weiterzuleiten. Ohne sie kann die Rechnung nicht zugeordnet werden und wird abgewiesen. Die Referenz steht in der Regel in der Bestellung oder im Auftragsschreiben.",
+      "reviewed": false,
+      "rule_text_digest": "45fdc2d795a75062"
+    },
+    "BR-DE-2": {
+      "explanation": "Die Kontaktdaten des Rechnungsstellers (BG-6) fehlen vollständig. Für Rückfragen zur Rechnung verlangt der deutsche Standard einen Ansprechpartner mit Name, Telefonnummer und E-Mail-Adresse.",
+      "reviewed": false,
+      "rule_text_digest": "2d54658cceb72936"
+    },
+    "BR-DE-3": {
+      "explanation": "Der Ort des Rechnungsstellers (BT-37) fehlt. Die vollständige Anschrift ist umsatzsteuerlich vorgeschrieben; der Ort ist ein Pflichtbestandteil davon.",
+      "reviewed": false,
+      "rule_text_digest": "4d2cfdddd00945e1"
+    },
+    "BR-DE-4": {
+      "explanation": "Die Postleitzahl des Rechnungsstellers (BT-38) fehlt. Sie gehört zur vollständigen Anschrift, die auf einer Rechnung angegeben sein muss.",
+      "reviewed": false,
+      "rule_text_digest": "97fa6bb625657b81"
+    },
+    "BR-DE-6": {
+      "explanation": "Die Telefonnummer des Ansprechpartners (BT-42) fehlt. Der deutsche Standard verlangt sie, damit Rückfragen zur Rechnung ohne Umweg geklärt werden können.",
+      "reviewed": false,
+      "rule_text_digest": "1063eb7739fc9ff8"
+    },
+    "BR-DE-7": {
+      "explanation": "Die E-Mail-Adresse des Ansprechpartners (BT-43) fehlt. Sie ist zusammen mit Name und Telefonnummer Pflicht, damit Rückfragen zugestellt werden können.",
+      "reviewed": false,
+      "rule_text_digest": "8c3cd38b3b2b3cf3"
+    },
+    "BR-DE-8": {
+      "explanation": "Der Ort des Rechnungsempfängers (BT-52) fehlt. Die Anschrift des Empfängers muss vollständig sein, sonst ist die Rechnung umsatzsteuerlich nicht ordnungsgemäß.",
+      "reviewed": false,
+      "rule_text_digest": "0850855b6afa3df4"
+    },
+    "BR-DE-9": {
+      "explanation": "Die Postleitzahl des Rechnungsempfängers (BT-53) fehlt. Sie gehört zur vollständigen Empfängeranschrift.",
+      "reviewed": false,
+      "rule_text_digest": "2a8dc0f18e7475ae"
+    }
+  }
+}
