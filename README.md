@@ -100,7 +100,7 @@ without failing the document.
 | Typed bindings wired into parsing | not started |
 | Explanation layer: boundary, catalogue, review workflow | done — 25 drafted, 0 reviewed |
 | HTTP API | done |
-| Frontend | not started |
+| Frontend | done |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
 
@@ -137,8 +137,19 @@ Run the service:
 uv run uvicorn xrv.api:app --reload
 # http://127.0.0.1:8000/docs
 
+# The UI, with hot reload and the API proxied through it:
+cd frontend && npm install && npm run dev
+# http://127.0.0.1:5173
+
 curl -F file=@invoice.xml http://127.0.0.1:8000/validate
 curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?explain=true"
+```
+
+Or run both from one container, the way it deploys:
+
+```bash
+docker build -t xrv . && docker run --rm -p 8080:8080 xrv
+# http://localhost:8080
 ```
 
 Run the checks CI runs:

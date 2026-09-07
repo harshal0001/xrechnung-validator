@@ -34,6 +34,7 @@ htmlcov/
 
 node_modules/
 frontend/dist/
+frontend/*.tsbuildinfo
 
 .env
 .env.*

@@ -18,6 +18,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from xrv.api.service import ValidationService
 from xrv.core import ValidationReport
@@ -28,6 +29,11 @@ from xrv.rules import RulesetNotFoundError
 #: Read in chunks so a huge upload is refused partway rather than after the
 #: whole thing has been buffered. FastAPI would otherwise happily hold it all.
 CHUNK = 1 << 16
+
+#: The built frontend, when there is one. Serving it from the same process means
+#: one container, one origin and no CORS — the demo is a URL, not a setup guide.
+#: Absent in development, where Vite serves the UI and proxies the API.
+FRONTEND_DIST = Path("frontend/dist")
 
 DESCRIPTION = """
 Validates German e-invoices against EN 16931 and the KoSIT XRechnung rule set,
@@ -164,3 +170,9 @@ async def _too_large(request: Request, exc: PayloadTooLargeError) -> JSONRespons
 @app.exception_handler(RulesetNotFoundError)
 async def _no_ruleset(request: Request, exc: RulesetNotFoundError) -> JSONResponse:
     return _problem(404, "ruleset_not_found", str(exc))
+
+
+# Mounted last so every API route above wins the path it owns. html=True serves
+# index.html for unknown paths, which is what a single-page app needs.
+if FRONTEND_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")

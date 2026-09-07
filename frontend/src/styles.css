@@ -1,0 +1,336 @@
+/* A German administrative document rendered for a screen: plain, dense enough
+   to read quickly, with severity carried by a colour AND a label so it survives
+   both colour blindness and a monochrome print. */
+
+:root {
+  --paper: #f4f6f3;
+  --surface: #ffffff;
+  --ink: #15191b;
+  --ink-2: #4b5257;
+  --ink-3: #78827f;
+  --rule: #d9ded7;
+  --accent: #0e5a6b;
+
+  --fatal: #7d2a20;
+  --error: #9e3226;
+  --warning: #8a6109;
+  --info: #0e5a6b;
+  --ok: #2c6e49;
+
+  --fatal-bg: #f7e9e7;
+  --error-bg: #f9ece9;
+  --warning-bg: #f7f0de;
+  --info-bg: #e4eff1;
+  --ok-bg: #e3efe8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1214;
+    --surface: #171b1d;
+    --ink: #e7ebe9;
+    --ink-2: #a6afac;
+    --ink-3: #7c8683;
+    --rule: #2a3134;
+    --accent: #5cbacd;
+
+    --fatal: #e79a90;
+    --error: #e08a80;
+    --warning: #d6a544;
+    --info: #5cbacd;
+    --ok: #6fc190;
+
+    --fatal-bg: #2c1512;
+    --error-bg: #2a1512;
+    --warning-bg: #2a2210;
+    --info-bg: #12292f;
+    --ok-bg: #11251a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.6 "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code {
+  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.875em;
+}
+
+.page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.lede {
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 46rem;
+}
+
+/* ---- upload ---- */
+.dropzone {
+  border: 1.5px dashed var(--rule);
+  background: var(--surface);
+  padding: 2.75rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone:hover,
+.dropzone--active {
+  border-color: var(--accent);
+  border-style: solid;
+}
+
+.dropzone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dropzone__main {
+  margin: 0 0 0.35rem;
+  font-weight: 500;
+}
+
+.dropzone__hint {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 0.875rem;
+}
+
+.option {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.option em {
+  display: block;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.status {
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* ---- result ---- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+
+.panel h2 {
+  font-size: 1.125rem;
+  margin: 0 0 0.35rem;
+}
+
+.panel--problem {
+  padding: 1.25rem 1.5rem;
+  border-left: 3px solid var(--error);
+}
+
+.panel--problem p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.verdict {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  border-left: 3px solid transparent;
+}
+
+.verdict p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.verdict--ok {
+  border-left-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.verdict--ok h2 {
+  color: var(--ok);
+}
+
+.verdict--bad {
+  border-left-color: var(--error);
+  background: var(--error-bg);
+}
+
+.verdict--bad h2 {
+  color: var(--error);
+}
+
+.notice {
+  margin: 0;
+  padding: 0.875rem 1.5rem;
+  background: var(--warning-bg);
+  color: var(--warning);
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 2rem;
+  margin: 0;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.fact {
+  padding: 0.35rem 0;
+}
+
+.fact dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.fact dd {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* ---- findings ---- */
+.findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.finding {
+  padding: 1.125rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  border-left: 3px solid var(--rule);
+}
+
+.finding:last-child {
+  border-bottom: none;
+}
+
+.finding--fatal {
+  border-left-color: var(--fatal);
+}
+.finding--error {
+  border-left-color: var(--error);
+}
+.finding--warning {
+  border-left-color: var(--warning);
+}
+.finding--info {
+  border-left-color: var(--info);
+}
+
+.finding__head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.finding__rule {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.finding__severity {
+  font-size: 0.6875rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  cursor: help;
+}
+
+.finding--fatal .finding__severity {
+  color: var(--fatal);
+  background: var(--fatal-bg);
+}
+.finding--error .finding__severity {
+  color: var(--error);
+  background: var(--error-bg);
+}
+.finding--warning .finding__severity {
+  color: var(--warning);
+  background: var(--warning-bg);
+}
+.finding--info .finding__severity {
+  color: var(--info);
+  background: var(--info-bg);
+}
+
+.finding__explanation {
+  margin: 0 0 0.5rem;
+  color: var(--ink);
+}
+
+.finding__rule-text {
+  margin: 0 0 0.6rem;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.finding__where,
+.finding__value {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.finding__where code,
+.finding__value code {
+  color: var(--ink-2);
+  word-break: break-all;
+}
+
+.provenance {
+  margin: 0;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  border-top: 1px solid var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
