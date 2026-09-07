@@ -138,3 +138,11 @@ def make_zugferd_pdf():
 def cii_invoice(corpus: Path) -> bytes:
     """A real CII reference invoice, to embed in constructed PDFs."""
     return (corpus / "01.01a-INVOICE_uncefact.xml").read_bytes()
+
+
+@pytest.fixture(scope="session")
+def catalogue(real_ruleset):
+    """The committed explanation catalogue for the fetched rule set."""
+    from xrv.explain import Catalogue
+
+    return Catalogue.for_ruleset(real_ruleset.version, base=ROOT / "explanations")
