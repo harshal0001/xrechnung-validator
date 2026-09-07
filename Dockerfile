@@ -1,15 +1,28 @@
-# Service image.
+# Service image: API and frontend in one container.
 #
 # The point of this file is that the SAME image runs locally, on Lambda (via the
 # Web Adapter extension), on Cloud Run, and on Render — with no code branches.
 # That is what keeps the hosting decision reversible.
 #
-#   docker build -t xrv:spike .
-#   docker run --rm xrv:spike python scripts/spike_saxon.py
+#   docker build -t xrv .
+#   docker run --rm -p 8080:8080 xrv
+#   curl -F file=@invoice.xml http://localhost:8080/validate
 #
-# Multi-arch check (the decision this spike exists to make):
-#   docker build --platform linux/arm64 -t xrv:spike-arm64 .
+# arm64 builds too, which is what keeps Lambda Graviton on the table:
+#   docker build --platform linux/arm64 -t xrv:arm64 .
 
+# ---- frontend build --------------------------------------------------------
+# Built here rather than committed, so dist/ never drifts from src/. The output
+# is ~50 kB gzipped and is served by the API itself: one container, one origin,
+# no CORS to configure.
+FROM node:20-slim AS frontend
+WORKDIR /ui
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# ---- service ---------------------------------------------------------------
 FROM python:3.12-slim AS base
 
 # libxml2/libxslt for lxml, qpdf for pikepdf, and a JRE-free Saxon — SaxonC-HE
@@ -59,6 +72,8 @@ COPY src/ ./src/
 COPY explanations/ ./explanations/
 COPY pyproject.toml README.md ./
 RUN uv pip install --system --no-deps -e .
+
+COPY --from=frontend /ui/dist ./frontend/dist
 
 # COPY is happy to copy a directory containing nothing but a manifest, which is
 # exactly what a fresh clone has — manifest.json is committed, the resources are
