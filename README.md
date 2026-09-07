@@ -98,7 +98,8 @@ without failing the document.
 | ZUGFeRD PDF unwrapping, profile detection | done |
 | Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
 | Typed bindings wired into parsing | not started |
-| API, frontend, explanations | not started |
+| Explanation layer: boundary, catalogue, review workflow | done — 25 drafted, 0 reviewed |
+| API, frontend | not started |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
 
@@ -117,6 +118,7 @@ Only the pair means anything.
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
 | Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
 | Cold start to first response | — |
+| Explanations reviewed by a person | **0 of 25 drafted** — unreviewed text is withheld, not served |
 | Explanation accuracy on the eval set | — |
 
 ## Local development
