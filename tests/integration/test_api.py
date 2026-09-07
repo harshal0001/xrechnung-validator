@@ -1,0 +1,179 @@
+"""The HTTP surface, against the real rule set.
+
+Nothing is mocked: the app that runs here compiles the same schemas and
+stylesheets it would in production and validates real reference invoices. The
+tests that matter most are the error mappings — a validation service is judged
+on what it says when something is wrong at least as much as when nothing is.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
+
+from xrv.api import app
+from xrv.ingest import MAX_BYTES
+
+UBL = "01.01a-INVOICE_ubl.xml"
+CII = "01.01a-INVOICE_uncefact.xml"
+
+
+@pytest.fixture(scope="module")
+def client(real_ruleset) -> Iterator[TestClient]:
+    """A started app, so startup compilation happens once for the module."""
+    with TestClient(app) as started:
+        yield started
+
+
+def upload(client: TestClient, payload: bytes, name: str = "invoice.xml", **params):
+    return client.post("/validate", files={"file": (name, payload)}, params=params)
+
+
+class TestValidating:
+    @pytest.mark.parametrize(("name", "syntax"), [(UBL, "UBL"), (CII, "CII")])
+    def test_a_valid_invoice_comes_back_clean(
+        self, client: TestClient, corpus: Path, name: str, syntax: str
+    ) -> None:
+        response = upload(client, (corpus / name).read_bytes())
+        assert response.status_code == 200
+        body = response.json()
+        assert body["syntax"] == syntax
+        assert body["source"] == "xml"
+        assert not [f for f in body["findings"] if f["severity"] in {"fatal", "error"}]
+
+    def test_every_response_carries_its_provenance(self, client: TestClient, corpus: Path) -> None:
+        """A result that cannot say which rules produced it stops meaning
+        anything the moment the rules move."""
+        body = upload(client, (corpus / UBL).read_bytes()).json()
+        assert body["ruleset_version"]
+        assert len(body["ruleset_sha256"]) == 64
+        assert body["duration_ms"] > 0
+
+    def test_a_broken_invoice_reports_the_rule(self, client: TestClient, corpus: Path) -> None:
+        cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        from lxml import etree
+
+        tree = etree.parse(str(corpus / UBL))
+        tree.getroot().remove(tree.getroot().find(f"{{{cbc}}}BuyerReference"))
+        payload = etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+        body = upload(client, payload).json()
+        assert "BR-DE-15" in {f["rule_id"] for f in body["findings"]}
+
+    def test_a_zugferd_pdf_is_unwrapped(
+        self, client: TestClient, make_zugferd_pdf, cii_invoice: bytes
+    ) -> None:
+        body = upload(client, make_zugferd_pdf(cii_invoice), name="invoice.pdf").json()
+        assert body["source"] == "zugferd-pdf"
+        assert body["syntax"] == "CII"
+        assert body["profile"] == "XRECHNUNG"
+        assert body["mandate_ready"] is True
+
+    def test_a_thin_profile_is_flagged_rather_than_drowned_in_failures(
+        self, client: TestClient, make_zugferd_pdf, cii_invoice: bytes
+    ) -> None:
+        """MINIMUM has no line items. Reporting dozens of rule failures would
+        read as "your invoice is broken" when the truth is "this profile is not
+        an invoice"."""
+        thin = cii_invoice.replace(
+            b"urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+            b"urn:factur-x.eu:1p0:minimum",
+        )
+        body = upload(client, make_zugferd_pdf(thin), name="invoice.pdf").json()
+        assert body["mandate_ready"] is False
+        assert len(body["findings"]) == 1
+        assert body["findings"][0]["rule_id"] == "PROFILE-NOT-MANDATE-READY"
+
+
+class TestExplanations:
+    def test_explain_is_off_by_default(self, client: TestClient, corpus: Path) -> None:
+        """The fast path stays fast; explanations are opt-in."""
+        body = upload(client, (corpus / UBL).read_bytes()).json()
+        assert all(f["explanation"] is None for f in body["findings"])
+
+    def test_unreviewed_explanations_are_still_withheld(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """Asking for explanations does not lower the bar for serving them.
+
+        Every entry in the committed catalogue is currently unreviewed, so this
+        asserts the review gate holds through the whole stack rather than only
+        in the provider's own unit tests.
+        """
+        body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
+        assert all(f["explanation"] is None for f in body["findings"])
+
+    def test_the_rule_text_is_always_there_regardless(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """An explanation improves a finding; it never replaces having one."""
+        body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
+        assert all(f["rule_text"] for f in body["findings"])
+
+
+class TestErrorMapping:
+    def test_an_image_is_unsupported_media(self, client: TestClient) -> None:
+        response = upload(client, b"\x89PNG\r\n\x1a\n", name="scan.png")
+        assert response.status_code == 415
+        assert response.json()["error"] == "unsupported_document"
+
+    def test_a_document_that_is_not_an_invoice(self, client: TestClient) -> None:
+        order = b'<Order xmlns="urn:oasis:names:specification:ubl:schema:xsd:Order-2"/>'
+        assert upload(client, order).status_code == 415
+
+    def test_malformed_xml_is_unprocessable(self, client: TestClient) -> None:
+        response = upload(client, b"<Invoice>")
+        assert response.status_code == 422
+        assert response.json()["error"] == "malformed_xml"
+
+    def test_a_pdf_with_no_invoice_in_it(self, client: TestClient, make_zugferd_pdf) -> None:
+        response = upload(client, make_zugferd_pdf(None), name="scan.pdf")
+        assert response.status_code == 422
+        assert response.json()["error"] == "unreadable_pdf"
+
+    def test_an_oversized_upload_is_refused(self, client: TestClient) -> None:
+        response = upload(client, b"<a/>" + b"\0" * (MAX_BYTES + 1))
+        assert response.status_code == 413
+
+    def test_an_unknown_ruleset_version(self, client: TestClient, corpus: Path) -> None:
+        response = upload(client, (corpus / UBL).read_bytes(), ruleset="1999-01-01")
+        assert response.status_code == 404
+        assert response.json()["error"] == "ruleset_not_found"
+
+    def test_errors_explain_themselves(self, client: TestClient) -> None:
+        """A stack trace is not an error message someone can act on."""
+        detail = upload(client, b"\x89PNG\r\n\x1a\n", name="scan.png").json()["detail"]
+        assert "XML" in detail or "ZUGFeRD" in detail
+
+
+class TestOperationalEndpoints:
+    def test_healthz_reports_warm_state(self, client: TestClient) -> None:
+        body = client.get("/healthz").json()
+        assert body["status"] == "ok"
+        assert body["warm"] is True
+        assert body["rulesets_loaded"]
+
+    def test_healthz_does_no_validation(self, client: TestClient) -> None:
+        """A probe that validated a document would queue behind real work and
+        start failing under exactly the load it exists to report on."""
+        import time
+
+        started = time.perf_counter()
+        for _ in range(20):
+            assert client.get("/healthz").status_code == 200
+        assert (time.perf_counter() - started) < 1.0
+
+    def test_rulesets_lists_provenance(self, client: TestClient) -> None:
+        entries = client.get("/rulesets").json()["rulesets"]
+        assert entries
+        assert all(len(entry["sha256"]) == 64 for entry in entries)
+        assert any(entry["loaded"] for entry in entries)
+
+    def test_the_schema_documents_the_endpoint(self, client: TestClient) -> None:
+        schema = client.get("/openapi.json").json()
+        assert "/validate" in schema["paths"]
+        responses = schema["paths"]["/validate"]["post"]["responses"]
+        assert {"200", "413", "415", "422"} <= set(responses)

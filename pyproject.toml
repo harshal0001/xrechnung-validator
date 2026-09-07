@@ -14,7 +14,8 @@ dependencies = [
     "saxonche>=13.0.0,<14",   # SaxonC-HE. Native library. The constraint that shapes deployment.
     "lxml>=5.3,<7",           # XSD validation + tree work
     "pikepdf>=9,<10",         # PDF/A-3 embedded file extraction
-    "fastapi>=0.115,<1",      # not wired up yet; pinned here so image size is honest
+    "fastapi>=0.115,<1",
+    "python-multipart>=0.0.20",  # multipart uploads; a runtime need, not a dev one
     "uvicorn[standard]>=0.32,<1",
     "pydantic>=2.9,<3",
     "pydantic-settings>=2.6,<3",
@@ -29,6 +30,7 @@ codegen = [
 
 [dependency-groups]
 dev = [
+    "httpx2>=0.28",           # starlette's TestClient transport
     "lxml-stubs>=0.5",
     "pytest>=8.3",
     "pytest-cov>=6.0",

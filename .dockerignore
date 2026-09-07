@@ -11,5 +11,7 @@ node_modules/
 tests/corpus/_downloaded/
 .spike-out/
 spike-results.json
-# Nothing in the image needs docs, and this keeps local notes out of the context.
+# Nothing in the image needs docs except the one pyproject reads, and this keeps
+# local notes out of the build context.
 *.md
+!README.md

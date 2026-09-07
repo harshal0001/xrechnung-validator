@@ -39,6 +39,7 @@ RUN uv pip install --system \
         "lxml>=5.3,<7" \
         "pikepdf>=9,<10" \
         "fastapi>=0.115,<1" \
+        "python-multipart>=0.0.20" \
         "uvicorn[standard]>=0.32,<1" \
         "pydantic>=2.9,<3" \
         "pydantic-settings>=2.6,<3"
@@ -54,6 +55,10 @@ RUN uv pip install --system \
 # measured image size worth writing down.
 COPY scripts/ ./scripts/
 COPY rulesets/ ./rulesets/
+COPY src/ ./src/
+COPY explanations/ ./explanations/
+COPY pyproject.toml README.md ./
+RUN uv pip install --system --no-deps -e .
 
 # COPY is happy to copy a directory containing nothing but a manifest, which is
 # exactly what a fresh clone has — manifest.json is committed, the resources are
@@ -61,8 +66,12 @@ COPY rulesets/ ./rulesets/
 # uploads an invoice.
 RUN python scripts/fetch_ruleset.py --verify /app/rulesets
 
-ENV XRV_RULESET_DIR=/app/rulesets
+ENV XRV_RULESET_DIR=/app/rulesets \
+    PORT=8080
 
-# Replaced with the uvicorn CMD once the API lands. For now the image's job is to
-# prove the native library loads and the stylesheets run.
-CMD ["python", "scripts/spike_saxon.py"]
+EXPOSE 8080
+
+# One worker on purpose. SaxonC-HE is not thread-safe, so validation is
+# serialised inside the process anyway; concurrency comes from running more
+# processes, which is also how Lambda and Cloud Run scale a container.
+CMD ["sh", "-c", "uvicorn xrv.api:app --host 0.0.0.0 --port ${PORT} --workers 1"]

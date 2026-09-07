@@ -56,7 +56,7 @@ class ValidationEngine:
     def saxon_version(self) -> str:
         return str(self._processor.version)
 
-    def findings(self, source: Path | str, syntax: Syntax) -> tuple[Finding, ...]:
+    def findings(self, source: Path | str | bytes, syntax: Syntax) -> tuple[Finding, ...]:
         """Validate a document: structure first, then business rules.
 
         Structural failure stops the run. Business rules are written against a
