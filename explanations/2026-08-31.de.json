@@ -13,9 +13,9 @@
         "Sourced [UStG] Nr. 4: 'eine fortlaufende Nummer ... die zur Identifizierung der Rechnung vom Rechnungsaussteller einmalig vergeben wird'. 'fortlaufend' belongs here in why — it is law, not rule text. Cut: 'Buchhaltung beider Seiten' (gloss, no source)."
       ],
       "rule_text_digest": "ef3fa39aa40f91b2",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "ef3fa39aa40f91b2",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-03": {
       "what": "Das Ausstellungsdatum der Rechnung (BT-2, Rechnungsdatum) fehlt.",
@@ -25,9 +25,9 @@
         "Sourced [UStG] Nr. 3: 'das Ausstellungsdatum'. Cut: Buchungszeitraum / Zahlungsfristen — no official source."
       ],
       "rule_text_digest": "16f0175c46080d4e",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "16f0175c46080d4e",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-05": {
       "what": "Die Rechnungswährung (BT-5) fehlt.",
@@ -36,9 +36,9 @@
         "Cut: the Euro/Franken illustration is not a claim about any document. Empty why is honest."
       ],
       "rule_text_digest": "65996a3e396605b9",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "65996a3e396605b9",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-08": {
       "what": "Die Anschrift des Verkäufers (BG-5) fehlt.",
@@ -48,9 +48,9 @@
         "Sourced [UStG] Nr. 1: 'den vollständigen Namen und die vollständige Anschrift des leistenden Unternehmers und des Leistungsempfängers'."
       ],
       "rule_text_digest": "3d702cca17105faa",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "3d702cca17105faa",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-10": {
       "what": "Die Anschrift des Käufers (BG-8) fehlt.",
@@ -60,9 +60,9 @@
         "Sourced [UStG] Nr. 1 (same clause as BR-08)."
       ],
       "rule_text_digest": "6e9f719e32c9f37f",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6e9f719e32c9f37f",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-16": {
       "what": "Die Rechnung enthält keine Rechnungsposition (BG-25).",
