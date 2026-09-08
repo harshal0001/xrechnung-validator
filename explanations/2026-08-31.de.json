@@ -133,21 +133,22 @@
         "Sourced: 'DE' prefix follows from 'ISO 3166-1 alpha-2' and the EL exception is in the rule text [L1 BR-CO-09]. Kept unchanged."
       ],
       "rule_text_digest": "9079bdbbd75ef74d",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "9079bdbbd75ef74d",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-10": {
-      "what": "Die Summe der Positionsbeträge (BT-106) stimmt nicht mit den einzelnen Positionen überein.",
+      "what": "Die Summe der Netto-Positionsbeträge (BT-106) stimmt nicht mit den Netto-Beträgen der einzelnen Positionen (BT-131) überein.",
       "why": "",
       "review_notes": [
         "Sentence 2 may be derivable from the rule text — if so, move it back into what.",
-        "Cut: 'Typische Ursache sind Rundungen' — folklore, no source. The remaining sentence only restated what."
+        "Cut: 'Typische Ursache sind Rundungen' — folklore, no source. The remaining sentence only restated what.",
+        "Reviewer decision 2026-09-08: 'netto' restored — the official text says 'Invoice line net amount' for both BT-106 and BT-131, and what had dropped it. Both identifiers now cited."
       ],
       "rule_text_digest": "3a5fddaf3578e501",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "3a5fddaf3578e501",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-13": {
       "what": "Der Nettogesamtbetrag (BT-109) entspricht nicht der Summe der Positionen abzüglich Nachlässe und zuzüglich Zuschläge auf Dokumentebene.",
@@ -157,9 +158,9 @@
         "Sourced [MODEL]: BT-107 and BT-108 names. Cut: 'Meist fehlt ...' — folklore, no source."
       ],
       "rule_text_digest": "95893e686b3786b2",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "95893e686b3786b2",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-14": {
       "what": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) entspricht nicht der Summe der Steuerbeträge je Umsatzsteuerkategorie (BT-117).",
@@ -168,9 +169,9 @@
         "'nach Steuersätzen' corrected to 'je Umsatzsteuerkategorie': the official text is 'Σ VAT category tax amount (BT-117)', and the model distinguishes category from rate."
       ],
       "rule_text_digest": "0e668b178cad4877",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "0e668b178cad4877",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-15": {
       "what": "Der Bruttogesamtbetrag (BT-112) entspricht nicht Nettobetrag plus Umsatzsteuer.",
@@ -179,9 +180,9 @@
         "Cut: 'häufig nachträglich geändert' — folklore, no source."
       ],
       "rule_text_digest": "6bdbeae81d6a4405",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6bdbeae81d6a4405",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-16": {
       "what": "Der Zahlbetrag (BT-115) entspricht nicht dem Bruttobetrag abzüglich bereits gezahlter Beträge zuzüglich des Rundungsbetrags.",
