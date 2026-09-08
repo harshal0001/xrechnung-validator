@@ -17,9 +17,11 @@
       "reviewed_at": null
     },
     "BR-03": {
-      "what": "Das Rechnungsdatum (BT-2) fehlt.",
+      "what": "Das Ausstellungsdatum der Rechnung (BT-2, Rechnungsdatum) fehlt.",
       "why": "Es bestimmt, in welchen Zeitraum die Rechnung gebucht wird und ab wann Zahlungsfristen laufen.",
-      "review_notes": [],
+      "review_notes": [
+        "'Rechnungsdatum' alone rendered 'issue date' loosely; 'Ausstellungsdatum' is the literal term and leads, with the everyday word kept in brackets."
+      ],
       "rule_text_digest": "16f0175c46080d4e",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -68,11 +70,12 @@
       "reviewed_at": null
     },
     "BR-CL-01": {
-      "what": "Der Rechnungstyp (BT-3) ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
-      "why": "Für eine normale Rechnung ist das 380, für eine Gutschrift 381.",
+      "what": "Der Rechnungstyp ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
+      "why": "Der Rechnungstyp ist das Feld BT-3. Für eine normale Rechnung ist der Code 380, für eine Gutschrift 381.",
       "review_notes": [
         "Confirmed against 2026-08-31 text: only UNTDID 1001 is named, not 380/381 — the codes stay in why.",
-        "BT-3 added — the rule text says 'document type code' without a BT; verify BT-3 against the spec."
+        "BT-3 added — the rule text says 'document type code' without a BT; verify BT-3 against the spec.",
+        "BT-3 moved from what to why: the BR-CL-01 rule text names no identifier. BT-3 = Invoice type code is grounded in BR-04, not in this rule."
       ],
       "rule_text_digest": "6ea9a6dc141bfeda",
       "reviewed_digest": null,
@@ -142,9 +145,11 @@
       "reviewed_at": null
     },
     "BR-CO-14": {
-      "what": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) entspricht nicht der Summe der einzelnen Steuerbeträge in der Aufschlüsselung nach Steuersätzen.",
+      "what": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) entspricht nicht der Summe der Steuerbeträge je Umsatzsteuerkategorie (BT-117).",
       "why": "",
-      "review_notes": [],
+      "review_notes": [
+        "'nach Steuersätzen' corrected to 'je Umsatzsteuerkategorie': the official text is 'Σ VAT category tax amount (BT-117)', and the model distinguishes category from rate."
+      ],
       "rule_text_digest": "0e668b178cad4877",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -226,18 +231,22 @@
       "reviewed_at": null
     },
     "BR-DE-6": {
-      "what": "Die Telefonnummer des Ansprechpartners (BT-42) fehlt.",
+      "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) fehlt.",
       "why": "Der deutsche Standard verlangt sie, damit Rückfragen zur Rechnung ohne Umweg geklärt werden können.",
-      "review_notes": [],
+      "review_notes": [
+        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries."
+      ],
       "rule_text_digest": "1063eb7739fc9ff8",
       "reviewed_digest": null,
       "reviewed_by": null,
       "reviewed_at": null
     },
     "BR-DE-7": {
-      "what": "Die E-Mail-Adresse des Ansprechpartners (BT-43) fehlt.",
+      "what": "Die E-Mail-Adresse des Verkäufer-Ansprechpartners (BT-43) fehlt.",
       "why": "Sie ist zusammen mit Name und Telefonnummer Pflicht, damit Rückfragen zugestellt werden können.",
-      "review_notes": [],
+      "review_notes": [
+        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries."
+      ],
       "rule_text_digest": "8c3cd38b3b2b3cf3",
       "reviewed_digest": null,
       "reviewed_by": null,
