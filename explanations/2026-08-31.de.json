@@ -72,9 +72,9 @@
         "Sourced [UStG] Nr. 5 for the statutory duty; BG-25 is the rule's own term. Cut: 'Häufige Ursache: Export aus dem Vorsystem' — folklore, no source."
       ],
       "rule_text_digest": "a5ece4a512a32aae",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "a5ece4a512a32aae",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CL-01": {
       "what": "Der Rechnungstyp ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
@@ -86,9 +86,9 @@
         "Sourced: BT-3 = 'Invoice type code' [MODEL] via BR-04; codes 380 and 381 present in the UNTDID 1001 list [CL]."
       ],
       "rule_text_digest": "6ea9a6dc141bfeda",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6ea9a6dc141bfeda",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CL-04": {
       "what": "Die Währung ist kein gültiger ISO-4217-Code.",
@@ -97,9 +97,9 @@
         "Sourced: 'alpha-3' is in the rule text [L1 BR-CL-04]; EUR and CHF present in the ISO 4217 list [CL]."
       ],
       "rule_text_digest": "5e03f8523a485ced",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "5e03f8523a485ced",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CL-14": {
       "what": "Der Ländercode ist kein gültiger ISO-3166-1-Code.",
@@ -108,21 +108,22 @@
         "Sourced: 'ISO 3166-1 alpha-2' is named in the rule text of BR-CO-09 [L1]; DE and AT present in the ISO 3166-1 list [CL]."
       ],
       "rule_text_digest": "31b964956bfc4b25",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "31b964956bfc4b25",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CL-17": {
       "what": "Der Umsatzsteuer-Kategoriecode ist kein zulässiger Code aus der Codeliste UNCL 5305.",
-      "why": "Zulässige Codes nach UNCL 5305 sind zum Beispiel S (Regelsatz), AE (Steuerschuldnerschaft des Leistungsempfängers, Reverse Charge) oder Z (Nullsatz).",
+      "why": "Zulässige Codes nach UNCL 5305 sind zum Beispiel S, AE oder Z.",
       "review_notes": [
         "Confirmed against 2026-08-31 text: only the UNCL 5305 code list is named — S/AE/Z stay in why. Text differs between UBL and CII ('UNCL 5305' vs 'UNCL5305').",
-        "Sourced: codes S, AE, Z present in the UNCL 5305 list [CL]. The German glosses are the UNCL 5305 category meanings; reviewer may prefer the spec's exact wording."
+        "Sourced: codes S, AE, Z present in the UNCL 5305 list [CL]. The German glosses are the UNCL 5305 category meanings; reviewer may prefer the spec's exact wording.",
+        "Reviewer decision 2026-09-08: glosses (Regelsatz, Reverse Charge, Nullsatz) removed — the codes are verified present in the compiled list [CL]; their meanings were not fetched from an official document this session. Codes only."
       ],
       "rule_text_digest": "eb45453974dcb143",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "eb45453974dcb143",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-CO-09": {
       "what": "Die Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), des Steuervertreters des Verkäufers (BT-63) oder des Käufers (BT-48) beginnt nicht mit dem Länderpräfix nach ISO 3166-1 alpha-2.",
