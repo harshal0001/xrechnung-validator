@@ -94,17 +94,44 @@ class TestExplanations:
         body = upload(client, (corpus / UBL).read_bytes()).json()
         assert all(f["explanation"] is None for f in body["findings"])
 
-    def test_unreviewed_explanations_are_still_withheld(
-        self, client: TestClient, corpus: Path
-    ) -> None:
-        """Asking for explanations does not lower the bar for serving them.
-
-        Every entry in the committed catalogue is currently unreviewed, so this
-        asserts the review gate holds through the whole stack rather than only
-        in the provider's own unit tests.
-        """
+    def test_a_valid_invoice_gets_no_explanations(self, client: TestClient, corpus: Path) -> None:
+        """Nothing blocking fires on a reference invoice, so there is nothing to
+        explain — only the informational BR-DE-TMP-32, which has no entry."""
         body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
         assert all(f["explanation"] is None for f in body["findings"])
+
+    def test_a_reviewed_rule_is_explained_in_two_fields(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """The whole stack, end to end: a broken invoice comes back with the
+        reviewed German attached, and the grounded restatement and the sourced
+        context arrive as separate fields rather than one concatenated string."""
+        from lxml import etree
+
+        cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        tree = etree.parse(str(corpus / UBL))
+        tree.getroot().remove(tree.getroot().find(f"{{{cbc}}}BuyerReference"))
+        payload = etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+        body = upload(client, payload, explain="true").json()
+        finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
+        assert finding["explanation"] == "Die Käuferreferenz (BT-10) fehlt."
+        assert "Leitweg-ID" in finding["context"]
+        assert finding["context"] not in finding["explanation"]
+
+    def test_explanations_stay_off_unless_asked(self, client: TestClient, corpus: Path) -> None:
+        """Even for a reviewed rule, the default path serves none."""
+        from lxml import etree
+
+        cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        tree = etree.parse(str(corpus / UBL))
+        tree.getroot().remove(tree.getroot().find(f"{{{cbc}}}BuyerReference"))
+        payload = etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+        body = upload(client, payload).json()
+        finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
+        assert finding["explanation"] is None
+        assert finding["context"] is None
 
     def test_the_rule_text_is_always_there_regardless(
         self, client: TestClient, corpus: Path
