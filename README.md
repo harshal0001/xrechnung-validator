@@ -98,7 +98,7 @@ without failing the document.
 | ZUGFeRD PDF unwrapping, profile detection | done |
 | Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
 | Typed bindings wired into parsing | not started |
-| Explanation layer: boundary, catalogue, review workflow | done — 25 drafted, 0 reviewed |
+| Explanation layer: boundary, catalogue, review workflow | done — 25 reviewed and serving |
 | HTTP API | done |
 | Frontend | done |
 | Deployment | not started |
@@ -119,7 +119,7 @@ Only the pair means anything.
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
 | Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
 | Cold start to first response | — |
-| Explanations reviewed by a person | **0 of 25 drafted** — unreviewed text is withheld, not served |
+| Explanations reviewed by a person | **25 of 25** — every `what` traced to the official rule text, every `why` to a cited public source (§ 14 UStG, the federal e-invoicing portal, the EN 16931 model, or the ruleset itself); unsourceable claims were cut |
 | Explanation accuracy on the eval set | — |
 
 ## Local development
