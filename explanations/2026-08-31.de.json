@@ -1,132 +1,269 @@
 {
+  "schema_version": 2,
   "ruleset_version": "2026-08-31",
   "language": "de",
-  "_note": "Written once per rule set version and served with no model call. reviewed=false means the text has not yet been read by a person; the provider withholds those by default.",
+  "_note": "`what` must trace to the official rule text and is the only field the fidelity eval checks. `why` is editorial context, human-approved, not claimed as grounded. An entry is served only when reviewed_digest == rule_text_digest. Terminology follows the XRechnung specification: Verkäufer (Seller), Käufer (Buyer).",
   "entries": {
     "BR-02": {
-      "explanation": "Die Rechnungsnummer (BT-1) fehlt. Jede Rechnung braucht eine eindeutige, fortlaufende Nummer – sie identifiziert den Vorgang in der Buchhaltung beider Seiten und ist umsatzsteuerlich vorgeschrieben.",
-      "reviewed": false,
-      "rule_text_digest": "ef3fa39aa40f91b2"
+      "what": "Die Rechnungsnummer (BT-1) fehlt.",
+      "why": "Jede Rechnung braucht eine eindeutige Nummer – sie identifiziert den Vorgang in der Buchhaltung beider Seiten und ist umsatzsteuerlich vorgeschrieben.",
+      "review_notes": [
+        "Confirmed against 2026-08-31 text: 'An Invoice shall have an Invoice number (BT-1)' — presence only, so 'fortlaufend' was correctly removed from what.",
+        "\"umsatzsteuerlich vorgeschrieben\" is German law (§14 UStG), not rule text — stays in why."
+      ],
+      "rule_text_digest": "ef3fa39aa40f91b2",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-03": {
-      "explanation": "Das Rechnungsdatum (BT-2) fehlt. Es bestimmt, in welchen Zeitraum die Rechnung gebucht wird und ab wann Zahlungsfristen laufen.",
-      "reviewed": false,
-      "rule_text_digest": "16f0175c46080d4e"
+      "what": "Das Rechnungsdatum (BT-2) fehlt.",
+      "why": "Es bestimmt, in welchen Zeitraum die Rechnung gebucht wird und ab wann Zahlungsfristen laufen.",
+      "review_notes": [],
+      "rule_text_digest": "16f0175c46080d4e",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-05": {
-      "explanation": "Die Rechnungswährung (BT-5) fehlt. Ohne sie sind die Beträge nicht eindeutig – 100 kann Euro oder Franken bedeuten.",
-      "reviewed": false,
-      "rule_text_digest": "65996a3e396605b9"
+      "what": "Die Rechnungswährung (BT-5) fehlt.",
+      "why": "Ohne sie sind die Beträge nicht eindeutig – 100 kann Euro oder Franken bedeuten.",
+      "review_notes": [],
+      "rule_text_digest": "65996a3e396605b9",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-08": {
-      "explanation": "Die Anschrift des Rechnungsstellers (BG-5) fehlt. Wer die Rechnung stellt, muss mit vollständiger Adresse erkennbar sein.",
-      "reviewed": false,
-      "rule_text_digest": "3d702cca17105faa"
+      "what": "Die Anschrift des Verkäufers (BG-5) fehlt.",
+      "why": "Wer die Rechnung stellt, muss mit vollständiger Adresse erkennbar sein.",
+      "review_notes": [
+        "Terminology: Rechnungssteller → Verkäufer (spec term)."
+      ],
+      "rule_text_digest": "3d702cca17105faa",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-10": {
-      "explanation": "Die Anschrift des Rechnungsempfängers (BG-8) fehlt. Der Empfänger muss mit vollständiger Adresse benannt sein.",
-      "reviewed": false,
-      "rule_text_digest": "6e9f719e32c9f37f"
+      "what": "Die Anschrift des Käufers (BG-8) fehlt.",
+      "why": "Der Käufer muss mit vollständiger Adresse benannt sein.",
+      "review_notes": [
+        "Terminology: Rechnungsempfänger → Käufer (spec term)."
+      ],
+      "rule_text_digest": "6e9f719e32c9f37f",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-16": {
-      "explanation": "Die Rechnung enthält keine einzige Rechnungsposition (BG-25). Eine Rechnung ohne Positionen sagt nicht, wofür bezahlt werden soll. Häufige Ursache: die Positionen sind beim Export aus dem Vorsystem verloren gegangen.",
-      "reviewed": false,
-      "rule_text_digest": "a5ece4a512a32aae"
+      "what": "Die Rechnung enthält keine Rechnungsposition (BG-25).",
+      "why": "Eine Rechnung ohne Positionen sagt nicht, wofür bezahlt werden soll. Häufige Ursache: die Positionen sind beim Export aus dem Vorsystem verloren gegangen.",
+      "review_notes": [
+        "\"Häufige Ursache\" is speculation — keep only if a reviewer with AP experience agrees it is common."
+      ],
+      "rule_text_digest": "a5ece4a512a32aae",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CL-01": {
-      "explanation": "Der Rechnungstyp ist kein zulässiger Code. Er muss aus der Codeliste UNTDID 1001 stammen – für eine normale Rechnung ist das 380, für eine Gutschrift 381.",
-      "reviewed": false,
-      "rule_text_digest": "6ea9a6dc141bfeda"
+      "what": "Der Rechnungstyp (BT-3) ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
+      "why": "Für eine normale Rechnung ist das 380, für eine Gutschrift 381.",
+      "review_notes": [
+        "Confirmed against 2026-08-31 text: only UNTDID 1001 is named, not 380/381 — the codes stay in why.",
+        "BT-3 added — the rule text says 'document type code' without a BT; verify BT-3 against the spec."
+      ],
+      "rule_text_digest": "6ea9a6dc141bfeda",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CL-04": {
-      "explanation": "Die Währung ist kein gültiger ISO-4217-Code. Erwartet wird ein dreistelliges Kürzel wie EUR oder CHF.",
-      "reviewed": false,
-      "rule_text_digest": "5e03f8523a485ced"
+      "what": "Die Währung ist kein gültiger ISO-4217-Code.",
+      "why": "Erwartet wird ein dreistelliges Kürzel wie EUR oder CHF.",
+      "review_notes": [],
+      "rule_text_digest": "5e03f8523a485ced",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CL-14": {
-      "explanation": "Der Ländercode ist kein gültiger ISO-3166-1-Code. Erwartet wird ein zweistelliges Kürzel wie DE oder AT.",
-      "reviewed": false,
-      "rule_text_digest": "31b964956bfc4b25"
+      "what": "Der Ländercode ist kein gültiger ISO-3166-1-Code.",
+      "why": "Erwartet wird ein zweistelliges Kürzel wie DE oder AT.",
+      "review_notes": [],
+      "rule_text_digest": "31b964956bfc4b25",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CL-17": {
-      "explanation": "Der Umsatzsteuer-Kategoriecode ist nicht zulässig. Er muss aus der Codeliste UNCL 5305 stammen – etwa S für den Regelsatz, AE für Reverse Charge oder Z für den Nullsatz.",
-      "reviewed": false,
-      "rule_text_digest": "eb45453974dcb143"
+      "what": "Der Umsatzsteuer-Kategoriecode ist kein zulässiger Code aus der Codeliste UNCL 5305.",
+      "why": "Zulässig sind etwa S für den Regelsatz, AE für Reverse Charge oder Z für den Nullsatz.",
+      "review_notes": [
+        "Confirmed against 2026-08-31 text: only the UNCL 5305 code list is named — S/AE/Z stay in why. Text differs between UBL and CII ('UNCL 5305' vs 'UNCL5305')."
+      ],
+      "rule_text_digest": "eb45453974dcb143",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-09": {
-      "explanation": "Die Umsatzsteuer-Identifikationsnummer beginnt nicht mit dem Länderpräfix. Sie muss mit dem zweistelligen Ländercode geschrieben werden – für Deutschland also DE123456789, nicht 123456789.",
-      "reviewed": false,
-      "rule_text_digest": "9079bdbbd75ef74d"
+      "what": "Die Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), des Steuervertreters des Verkäufers (BT-63) oder des Käufers (BT-48) beginnt nicht mit dem Länderpräfix nach ISO 3166-1 alpha-2.",
+      "why": "Für Deutschland also DE123456789, nicht 123456789. Ausnahme laut Regeltext: Griechenland darf das Präfix EL verwenden.",
+      "review_notes": [
+        "Confirmed against 2026-08-31 text: the rule covers BT-31, BT-63 and BT-48 and carries a Greece 'EL' exception — all three fields and the exception are now named."
+      ],
+      "rule_text_digest": "9079bdbbd75ef74d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-10": {
-      "explanation": "Die Summe der Positionsbeträge (BT-106) stimmt nicht mit den einzelnen Positionen überein. Der Kopfbetrag muss exakt der Summe aller Netto-Positionsbeträge entsprechen. Typische Ursache sind Rundungen, die pro Position anders gerechnet wurden als in der Summe.",
-      "reviewed": false,
-      "rule_text_digest": "3a5fddaf3578e501"
+      "what": "Die Summe der Positionsbeträge (BT-106) stimmt nicht mit den einzelnen Positionen überein.",
+      "why": "Der Kopfbetrag muss exakt der Summe aller Netto-Positionsbeträge entsprechen. Typische Ursache sind Rundungen, die pro Position anders gerechnet wurden als in der Summe.",
+      "review_notes": [
+        "Sentence 2 may be derivable from the rule text — if so, move it back into what."
+      ],
+      "rule_text_digest": "3a5fddaf3578e501",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-13": {
-      "explanation": "Der Nettogesamtbetrag (BT-109) geht nicht auf. Er muss der Summe der Positionen abzüglich Nachlässe und zuzüglich Zuschläge auf Dokumentebene entsprechen. Meist fehlt ein Nachlass oder Zuschlag in der Rechnung.",
-      "reviewed": false,
-      "rule_text_digest": "95893e686b3786b2"
+      "what": "Der Nettogesamtbetrag (BT-109) entspricht nicht der Summe der Positionen abzüglich Nachlässe und zuzüglich Zuschläge auf Dokumentebene.",
+      "why": "Meist fehlt ein Nachlass oder Zuschlag in der Rechnung.",
+      "review_notes": [
+        "The formula in what should match the rule text's formula exactly — compare term by term."
+      ],
+      "rule_text_digest": "95893e686b3786b2",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-14": {
-      "explanation": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) stimmt nicht mit der Aufschlüsselung nach Steuersätzen überein. Die Summe der einzelnen Steuerbeträge muss den Gesamtbetrag ergeben.",
-      "reviewed": false,
-      "rule_text_digest": "0e668b178cad4877"
+      "what": "Der ausgewiesene Umsatzsteuerbetrag (BT-110) entspricht nicht der Summe der einzelnen Steuerbeträge in der Aufschlüsselung nach Steuersätzen.",
+      "why": "",
+      "review_notes": [],
+      "rule_text_digest": "0e668b178cad4877",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-15": {
-      "explanation": "Der Bruttogesamtbetrag (BT-112) ist nicht Nettobetrag plus Umsatzsteuer. Einer der drei Werte ist falsch – häufig, weil einer davon nachträglich geändert wurde, ohne die anderen anzupassen.",
-      "reviewed": false,
-      "rule_text_digest": "6bdbeae81d6a4405"
+      "what": "Der Bruttogesamtbetrag (BT-112) entspricht nicht Nettobetrag plus Umsatzsteuer.",
+      "why": "Einer der drei Werte ist falsch – häufig, weil einer davon nachträglich geändert wurde, ohne die anderen anzupassen.",
+      "review_notes": [],
+      "rule_text_digest": "6bdbeae81d6a4405",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-CO-16": {
-      "explanation": "Der Zahlbetrag (BT-115) geht nicht auf. Er muss dem Bruttobetrag abzüglich bereits gezahlter Beträge und zuzüglich eines Rundungsbetrags entsprechen. Häufig fehlt eine bereits geleistete Anzahlung.",
-      "reviewed": false,
-      "rule_text_digest": "059100aa0c453cd4"
+      "what": "Der Zahlbetrag (BT-115) entspricht nicht dem Bruttobetrag abzüglich bereits gezahlter Beträge zuzüglich des Rundungsbetrags.",
+      "why": "Häufig fehlt eine bereits geleistete Anzahlung.",
+      "review_notes": [
+        "Compare the formula against the rule text term by term."
+      ],
+      "rule_text_digest": "059100aa0c453cd4",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-1": {
-      "explanation": "Es fehlen Angaben zur Zahlung (BG-16). Die Rechnung muss mitteilen, wie sie bezahlt werden soll – etwa per Überweisung mit IBAN, per Lastschrift oder per Karte. Ohne diese Angabe kann die Zahlung nicht ausgelöst werden.",
-      "reviewed": false,
-      "rule_text_digest": "924c951d935f64fd"
+      "what": "Es fehlen Angaben zur Zahlung (BG-16).",
+      "why": "Die Rechnung muss mitteilen, wie sie bezahlt werden soll – etwa per Überweisung mit IBAN, per Lastschrift oder per Karte. Ohne diese Angabe kann die Zahlung nicht ausgelöst werden.",
+      "review_notes": [],
+      "rule_text_digest": "924c951d935f64fd",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-15": {
-      "explanation": "Die Käuferreferenz (BT-10) fehlt. Öffentliche Auftraggeber in Deutschland nutzen dieses Feld – meist die Leitweg-ID – um die Rechnung intern an die richtige Stelle weiterzuleiten. Ohne sie kann die Rechnung nicht zugeordnet werden und wird abgewiesen. Die Referenz steht in der Regel in der Bestellung oder im Auftragsschreiben.",
-      "reviewed": false,
-      "rule_text_digest": "45fdc2d795a75062"
+      "what": "Die Käuferreferenz (BT-10) fehlt.",
+      "why": "Öffentliche Auftraggeber in Deutschland nutzen dieses Feld – meist die Leitweg-ID – um die Rechnung intern an die richtige Stelle weiterzuleiten. Ohne sie kann die Rechnung nicht zugeordnet werden. Die Referenz steht in der Regel in der Bestellung oder im Auftragsschreiben.",
+      "review_notes": [
+        "\"wird abgewiesen\" removed — it is a claim about recipient behaviour, not rule text. Reinstate in why only if a reviewer confirms it.",
+        "Confirmed against 2026-08-31 text: the rule says only 'Buyer reference (BT-10) muss übermittelt werden' — Leitweg-ID is not in the text and correctly stays in why."
+      ],
+      "rule_text_digest": "45fdc2d795a75062",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-2": {
-      "explanation": "Die Kontaktdaten des Rechnungsstellers (BG-6) fehlen vollständig. Für Rückfragen zur Rechnung verlangt der deutsche Standard einen Ansprechpartner mit Name, Telefonnummer und E-Mail-Adresse.",
-      "reviewed": false,
-      "rule_text_digest": "2d54658cceb72936"
+      "what": "Die Kontaktdaten des Verkäufers (BG-6) fehlen.",
+      "why": "Für Rückfragen zur Rechnung verlangt der deutsche Standard einen Ansprechpartner mit Name, Telefonnummer und E-Mail-Adresse.",
+      "review_notes": [
+        "Confirmed against 2026-08-31 text: BR-DE-2 only requires the SELLER CONTACT group (BG-6). Name/phone/email are BR-DE-5/6/7 — correctly kept in why.",
+        "Terminology: Rechnungssteller → Verkäufer."
+      ],
+      "rule_text_digest": "2d54658cceb72936",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-3": {
-      "explanation": "Der Ort des Rechnungsstellers (BT-37) fehlt. Die vollständige Anschrift ist umsatzsteuerlich vorgeschrieben; der Ort ist ein Pflichtbestandteil davon.",
-      "reviewed": false,
-      "rule_text_digest": "4d2cfdddd00945e1"
+      "what": "Der Ort des Verkäufers (BT-37) fehlt.",
+      "why": "Die vollständige Anschrift ist umsatzsteuerlich vorgeschrieben; der Ort ist ein Pflichtbestandteil davon.",
+      "review_notes": [
+        "Terminology: Rechnungssteller → Verkäufer."
+      ],
+      "rule_text_digest": "4d2cfdddd00945e1",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-4": {
-      "explanation": "Die Postleitzahl des Rechnungsstellers (BT-38) fehlt. Sie gehört zur vollständigen Anschrift, die auf einer Rechnung angegeben sein muss.",
-      "reviewed": false,
-      "rule_text_digest": "97fa6bb625657b81"
+      "what": "Die Postleitzahl des Verkäufers (BT-38) fehlt.",
+      "why": "Sie gehört zur vollständigen Anschrift, die auf einer Rechnung angegeben sein muss.",
+      "review_notes": [
+        "Terminology: Rechnungssteller → Verkäufer."
+      ],
+      "rule_text_digest": "97fa6bb625657b81",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-6": {
-      "explanation": "Die Telefonnummer des Ansprechpartners (BT-42) fehlt. Der deutsche Standard verlangt sie, damit Rückfragen zur Rechnung ohne Umweg geklärt werden können.",
-      "reviewed": false,
-      "rule_text_digest": "1063eb7739fc9ff8"
+      "what": "Die Telefonnummer des Ansprechpartners (BT-42) fehlt.",
+      "why": "Der deutsche Standard verlangt sie, damit Rückfragen zur Rechnung ohne Umweg geklärt werden können.",
+      "review_notes": [],
+      "rule_text_digest": "1063eb7739fc9ff8",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-7": {
-      "explanation": "Die E-Mail-Adresse des Ansprechpartners (BT-43) fehlt. Sie ist zusammen mit Name und Telefonnummer Pflicht, damit Rückfragen zugestellt werden können.",
-      "reviewed": false,
-      "rule_text_digest": "8c3cd38b3b2b3cf3"
+      "what": "Die E-Mail-Adresse des Ansprechpartners (BT-43) fehlt.",
+      "why": "Sie ist zusammen mit Name und Telefonnummer Pflicht, damit Rückfragen zugestellt werden können.",
+      "review_notes": [],
+      "rule_text_digest": "8c3cd38b3b2b3cf3",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-8": {
-      "explanation": "Der Ort des Rechnungsempfängers (BT-52) fehlt. Die Anschrift des Empfängers muss vollständig sein, sonst ist die Rechnung umsatzsteuerlich nicht ordnungsgemäß.",
-      "reviewed": false,
-      "rule_text_digest": "0850855b6afa3df4"
+      "what": "Der Ort des Käufers (BT-52) fehlt.",
+      "why": "Die Anschrift des Käufers muss vollständig sein, sonst ist die Rechnung umsatzsteuerlich nicht ordnungsgemäß.",
+      "review_notes": [
+        "Terminology: Rechnungsempfänger → Käufer."
+      ],
+      "rule_text_digest": "0850855b6afa3df4",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-9": {
-      "explanation": "Die Postleitzahl des Rechnungsempfängers (BT-53) fehlt. Sie gehört zur vollständigen Empfängeranschrift.",
-      "reviewed": false,
-      "rule_text_digest": "2a8dc0f18e7475ae"
+      "what": "Die Postleitzahl des Käufers (BT-53) fehlt.",
+      "why": "Sie gehört zur vollständigen Käuferanschrift.",
+      "review_notes": [
+        "Terminology: Rechnungsempfänger → Käufer."
+      ],
+      "rule_text_digest": "2a8dc0f18e7475ae",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     }
   }
 }

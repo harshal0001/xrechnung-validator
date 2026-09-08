@@ -89,7 +89,11 @@ def report_check(texts: dict[str, str], catalogue: Catalogue) -> int:
         for rule_id, entry in catalogue.entries.items()
         if rule_id in texts and not entry.matches(texts[rule_id])
     )
-    unreviewed = sorted(r for r, e in catalogue.entries.items() if not e.reviewed)
+    unreviewed = sorted(
+        rule_id
+        for rule_id, entry in catalogue.entries.items()
+        if rule_id in texts and not entry.is_reviewed_for(texts[rule_id])
+    )
 
     print(f"  entries      {len(catalogue.entries)}")
     print(f"  reviewed     {catalogue.reviewed_count}")
@@ -111,7 +115,13 @@ def report_check(texts: dict[str, str], catalogue: Catalogue) -> int:
 
 
 def refresh(path: Path, texts: dict[str, str]) -> int:
-    """Rewrite digests to the current rule texts, keeping explanations and flags."""
+    """Rewrite `rule_text_digest` to the rule text now in force.
+
+    Deliberately never touches `reviewed_digest`. That is what makes a KoSIT
+    rewording un-review an entry: the two digests stop matching, and the entry is
+    withheld until a person reads the new text and approves it again. Refreshing
+    both would silently launder an unreviewed change into production.
+    """
     raw = json.loads(path.read_text(encoding="utf-8"))
     changed = []
     for rule_id, body in raw["entries"].items():
@@ -123,6 +133,8 @@ def refresh(path: Path, texts: dict[str, str]) -> int:
             changed.append(rule_id)
     path.write_text(json.dumps(raw, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"  refreshed {len(changed)} digest(s)" + (f": {', '.join(changed)}" if changed else ""))
+    if changed:
+        print("  reviewed_digest left untouched — those entries are now un-reviewed.")
     return 0
 
 

@@ -102,16 +102,35 @@ class Finding(BaseModel):
     xpath: str = Field(description="Location of the offending node in the document")
     offending_value: str | None = None
     explanation: str | None = Field(
-        default=None, description="Plain-German explanation, filled by explain/"
+        default=None,
+        description=(
+            "Plain-German restatement of the rule, filled by explain/. Traceable "
+            "to the official rule text."
+        ),
+    )
+    context: str | None = Field(
+        default=None,
+        description=(
+            "Editorial context — typical causes, consequences, background. Human "
+            "approved but NOT derivable from the rule text, so it is kept separate "
+            "rather than folded into `explanation`, which would present it as "
+            "grounded when it is not."
+        ),
     )
 
     @property
     def blocking(self) -> bool:
         return self.severity.blocking
 
-    def with_explanation(self, explanation: str) -> Self:
-        """Return a copy carrying an explanation. The original is unchanged."""
-        return self.model_copy(update={"explanation": explanation})
+    def with_explanation(self, explanation: str, context: str | None = None) -> Self:
+        """Return a copy carrying an explanation. The original is unchanged.
+
+        `context` stays a separate field on purpose: concatenating it into
+        `explanation` would make editorial text indistinguishable from the
+        grounded restatement, which is the one distinction this layer exists to
+        keep.
+        """
+        return self.model_copy(update={"explanation": explanation, "context": context})
 
 
 class ValidationReport(BaseModel):

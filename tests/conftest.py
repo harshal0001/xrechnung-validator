@@ -146,3 +146,28 @@ def catalogue(real_ruleset):
     from xrv.explain import Catalogue
 
     return Catalogue.for_ruleset(real_ruleset.version, base=ROOT / "explanations")
+
+
+@pytest.fixture(scope="session")
+def rule_texts(real_ruleset) -> dict[str, str]:
+    """Every rule id in the fetched stylesheets, with its normative text.
+
+    Extracted the same way `xrv.validate.svrl` does, so a catalogue checked
+    against this is checked against what a finding will actually carry.
+    """
+    import re
+
+    from lxml import etree
+
+    svrl = "http://purl.oclc.org/dsdl/svrl"
+    found: dict[str, str] = {}
+    for key in real_ruleset.paths:
+        if not key.startswith("xslt_"):
+            continue
+        for node in etree.parse(str(real_ruleset.path(key))).iter(f"{{{svrl}}}failed-assert"):
+            rule_id = node.get("id")
+            text_node = node.find(f"{{{svrl}}}text")
+            if rule_id and rule_id not in found and text_node is not None:
+                raw = " ".join("".join(text_node.itertext()).split())
+                found[rule_id] = re.sub(rf"^\[{re.escape(rule_id)}\]\s*-?\s*", "", raw)
+    return found

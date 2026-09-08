@@ -137,12 +137,18 @@ class TestUntrustedInput:
     """The parser configuration is load-bearing, so it is asserted, not assumed."""
 
     def test_external_entities_are_not_resolved(self, tmp_path: Path) -> None:
-        """XXE: without this, uploading an invoice reads files off the server."""
+        """XXE: without this, uploading an invoice reads files off the server.
+
+        The URI is built with `Path.as_uri()` rather than by gluing `file://` to
+        a path. On Windows the naive form produces `file://C:\\Users\\...`, which
+        libxml2 rejects as malformed — so the attack never ran and the test passed
+        for the wrong reason, on the one platform where it silently did nothing.
+        """
         secret = tmp_path / "secret.txt"
         secret.write_text("CANARY-8f21")
         payload = (
             b'<?xml version="1.0"?>\n'
-            b'<!DOCTYPE r [<!ENTITY xxe SYSTEM "file://' + str(secret).encode() + b'">]>\n'
+            b'<!DOCTYPE r [<!ENTITY xxe SYSTEM "' + secret.as_uri().encode() + b'">]>\n'
             b'<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">'
             b"<ID>&xxe;</ID></Invoice>"
         )
@@ -155,7 +161,7 @@ class TestUntrustedInput:
         secret.write_text("CANARY-8f21")
         payload = (
             b'<?xml version="1.0"?>\n'
-            b'<!DOCTYPE r [<!ENTITY xxe SYSTEM "file://' + str(secret).encode() + b'">]>\n'
+            b'<!DOCTYPE r [<!ENTITY xxe SYSTEM "' + secret.as_uri().encode() + b'">]>\n'
             b"<Invoice><ID>&xxe;</ID></Invoice>"
         )
         permissive = etree.XMLParser(resolve_entities=True, load_dtd=True, no_network=False)

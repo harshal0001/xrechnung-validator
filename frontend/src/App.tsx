@@ -187,8 +187,16 @@ function FindingRow({ finding }: { finding: Finding }) {
 
       {/* The explanation leads when there is one; the normative text is always
           shown underneath, because that is what the finding is grounded in and
-          the reader should be able to check it. */}
+          the reader should be able to check it. Context is marked as editorial —
+          it is useful and human-approved, but it is not in any rule text, and
+          presenting it as though it were would be a quiet lie. */}
       {finding.explanation && <p className="finding__explanation">{finding.explanation}</p>}
+      {finding.context && (
+        <p className="finding__context">
+          <span className="finding__context-label">Hintergrund</span>
+          {finding.context}
+        </p>
+      )}
       <p className="finding__rule-text">{finding.rule_text}</p>
 
       <p className="finding__where">

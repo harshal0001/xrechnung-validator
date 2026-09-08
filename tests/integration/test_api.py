@@ -113,6 +113,20 @@ class TestExplanations:
         body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
         assert all(f["rule_text"] for f in body["findings"])
 
+    def test_explanation_and_context_are_separate_fields(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """One restates the rule and is checkable against it; the other is
+        editorial. Concatenating them in the response would hand a consumer no
+        way to tell which is which."""
+        schema = client.get("/openapi.json").json()
+        finding = schema["components"]["schemas"]["Finding"]["properties"]
+        assert "explanation" in finding
+        assert "context" in finding
+
+        body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
+        assert all("context" in f for f in body["findings"])
+
 
 class TestErrorMapping:
     def test_an_image_is_unsupported_media(self, client: TestClient) -> None:

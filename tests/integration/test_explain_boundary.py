@@ -22,6 +22,7 @@ from lxml import etree
 
 from xrv.core import Finding, Severity
 from xrv.explain import (
+    EXPLANATION_FIELDS,
     GROUNDING_FIELDS,
     Catalogue,
     CatalogueProvider,
@@ -106,13 +107,14 @@ class TestNothingLeaks:
                     f"back to the document"
                 )
 
-    def test_the_finding_carries_only_the_grounding_fields(self) -> None:
-        """Widening this set has to be a deliberate, visible act.
+    def test_the_finding_carries_only_grounding_and_explanation_fields(self) -> None:
+        """Widening either set has to be a deliberate, visible act.
 
         A field added to Finding is a field an explainer can read, so the model
-        and the declared grounding set are asserted to agree.
+        and the declared sets are asserted to agree. GROUNDING_FIELDS is what an
+        explanation may be built from; EXPLANATION_FIELDS is what it writes back.
         """
-        assert set(Finding.model_fields) == GROUNDING_FIELDS | {"explanation"}
+        assert set(Finding.model_fields) == GROUNDING_FIELDS | EXPLANATION_FIELDS
 
 
 class TestTheExplainerIsGivenNothingElse:
@@ -164,20 +166,19 @@ class TestCatalogueProviderInPractice:
         """
         provider = CatalogueProvider(catalogue)
         held = {f.name: getattr(provider, f.name) for f in dataclass_fields(provider)}
-        assert set(held) == {"catalogue", "require_reviewed", "require_current_text"}
+        assert set(held) == {"catalogue", "require_reviewed"}
         assert isinstance(held["catalogue"], Catalogue)
-        assert all(
-            isinstance(held[name], bool) for name in ("require_reviewed", "require_current_text")
-        )
+        assert isinstance(held["require_reviewed"], bool)
 
     def test_the_catalogue_itself_holds_only_text(self, catalogue: Catalogue) -> None:
         """Entries are strings and a flag. Nothing in the catalogue can be
         followed back to a document either."""
         for rule_id, entry in catalogue.entries.items():
             assert isinstance(rule_id, str)
-            assert isinstance(entry.explanation, str)
-            assert isinstance(entry.reviewed, bool)
+            assert isinstance(entry.what, str)
+            assert isinstance(entry.why, str)
             assert isinstance(entry.rule_text_digest, str)
+            assert entry.reviewed_digest is None or isinstance(entry.reviewed_digest, str)
 
     def test_findings_without_an_entry_are_returned_unchanged(
         self, findings: tuple[Finding, ...], catalogue
