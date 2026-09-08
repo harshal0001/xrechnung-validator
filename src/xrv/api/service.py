@@ -20,7 +20,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from xrv.core import Finding, Severity, ValidationReport
-from xrv.explain import Catalogue, CatalogueError, CatalogueProvider, NullProvider
+from xrv.explain import (
+    DEFAULT_LANGUAGE,
+    LANGUAGES,
+    Catalogue,
+    CatalogueError,
+    CatalogueProvider,
+    LanguageNotAvailableError,
+    NullProvider,
+)
 from xrv.explain.port import ExplanationProvider
 from xrv.ingest import Document, identify
 from xrv.rules import Ruleset, RulesetNotFoundError, RulesetRegistry, default_registry
@@ -39,7 +47,10 @@ class ValidationService:
     registry: RulesetRegistry = field(default_factory=default_registry)
     catalogue_dir: Path | None = None
     _engines: dict[str, ValidationEngine] = field(default_factory=dict, init=False)
-    _providers: dict[str, ExplanationProvider] = field(default_factory=dict, init=False)
+    #: Keyed by (ruleset version, language). A missing catalogue for a language is
+    #: not an error — the normative rule text is always there — so absent keys
+    #: simply mean "no explanations in that language for that version".
+    _providers: dict[tuple[str, str], ExplanationProvider] = field(default_factory=dict, init=False)
     _lock: threading.Lock = field(default_factory=threading.Lock, init=False)
 
     def warm(self, version: str | None = None) -> str:
@@ -63,26 +74,43 @@ class ValidationService:
         if engine is None:
             engine = ValidationEngine(ruleset)
             self._engines[ruleset.version] = engine
-            self._providers[ruleset.version] = self._provider_for(ruleset)
+            for language in LANGUAGES:
+                provider = self._provider_for(ruleset, language)
+                if provider is not None:
+                    self._providers[(ruleset.version, language)] = provider
         return engine
 
-    def _provider_for(self, ruleset: Ruleset) -> ExplanationProvider:
-        """The catalogue for this rule set version, or nothing.
+    def _provider_for(self, ruleset: Ruleset, language: str) -> ExplanationProvider | None:
+        """The catalogue for this rule set version and language, or None.
 
         A missing catalogue is not an error. Explanations improve a report; the
         normative rule text is always there regardless.
         """
         if self.catalogue_dir is None:
-            return NullProvider()
+            return None
         try:
-            return CatalogueProvider(Catalogue.for_ruleset(ruleset.version, self.catalogue_dir))
+            catalogue = Catalogue.for_ruleset(ruleset.version, self.catalogue_dir, language)
         except CatalogueError:
-            return NullProvider()
+            return None
+        return CatalogueProvider(catalogue)
+
+    def languages(self, version: str) -> tuple[str, ...]:
+        """Languages with a loaded explanation catalogue for this version."""
+        return tuple(lang for (v, lang) in sorted(self._providers) if v == version)
 
     def validate(
-        self, payload: bytes, *, explain: bool = False, version: str | None = None
+        self,
+        payload: bytes,
+        *,
+        explain: bool = False,
+        version: str | None = None,
+        language: str = DEFAULT_LANGUAGE,
     ) -> ValidationReport:
         """Identify, validate and describe one uploaded document."""
+        if language not in LANGUAGES:
+            raise LanguageNotAvailableError(
+                f"no explanations in '{language}'; available: {', '.join(LANGUAGES)}"
+            )
         started = time.perf_counter()
         document = identify(payload)
         ruleset = self.registry.get(version)
@@ -91,7 +119,7 @@ class ValidationService:
             engine = self._engine_for(ruleset)
             findings = self._findings(engine, document)
             if explain:
-                findings = self._explain(findings, ruleset.version)
+                findings = self._explain(findings, ruleset.version, language)
 
         return ValidationReport(
             syntax=document.syntax,
@@ -128,9 +156,11 @@ class ValidationService:
             )
         return engine.findings(document.content, document.syntax)
 
-    def _explain(self, findings: tuple[Finding, ...], version: str) -> tuple[Finding, ...]:
+    def _explain(
+        self, findings: tuple[Finding, ...], version: str, language: str
+    ) -> tuple[Finding, ...]:
         """Attach explanation and editorial context, where a reviewed entry exists."""
-        provider = self._providers.get(version, NullProvider())
+        provider = self._providers.get((version, language), NullProvider())
         return tuple(
             finding.with_explanation(what, provider.context(finding))
             if (what := provider.explain(finding))
@@ -147,6 +177,7 @@ class ValidationService:
                     "version": ruleset.version,
                     "sha256": ruleset.sha256,
                     "loaded": ruleset.version in self._engines,
+                    "explanation_languages": list(self.languages(ruleset.version)),
                 }
             )
         if not available:

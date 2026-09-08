@@ -28,7 +28,12 @@ from lxml import etree
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from xrv.explain.catalogue import LANGUAGE, Catalogue, rule_text_digest  # noqa: E402
+from xrv.explain.catalogue import (  # noqa: E402
+    DEFAULT_LANGUAGE,
+    LANGUAGES,
+    Catalogue,
+    rule_text_digest,
+)
 from xrv.rules import default_registry  # noqa: E402
 
 SVRL_NS = "http://purl.oclc.org/dsdl/svrl"
@@ -63,8 +68,8 @@ def priority_of(rule_id: str) -> int:
     return len(PRIORITY)
 
 
-def catalogue_path(version: str) -> Path:
-    return ROOT / "explanations" / f"{version}.{LANGUAGE}.json"
+def catalogue_path(version: str, language: str) -> Path:
+    return ROOT / "explanations" / f"{version}.{language}.json"
 
 
 def report_missing(texts: dict[str, str], catalogue: Catalogue, limit: int) -> int:
@@ -145,11 +150,14 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="report drift and review status")
     ap.add_argument("--refresh", action="store_true", help="rewrite digests in place")
     ap.add_argument("--limit", type=int, default=40, help="how many rules to list")
+    ap.add_argument(
+        "--language", default=DEFAULT_LANGUAGE, choices=LANGUAGES, help="catalogue language"
+    )
     args = ap.parse_args()
 
     ruleset = default_registry().get(args.version)
     texts = rule_texts(ruleset)
-    path = catalogue_path(ruleset.version)
+    path = catalogue_path(ruleset.version, args.language)
 
     print(f"rule set {ruleset.version} — {len(texts)} distinct rules")
     print(f"catalogue {path.relative_to(ROOT)}\n")
