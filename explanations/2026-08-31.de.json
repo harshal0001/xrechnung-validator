@@ -192,9 +192,9 @@
         "Sourced [MODEL]: BT-113 and BT-114 names. Cut: 'Häufig fehlt eine Anzahlung' — folklore, no source."
       ],
       "rule_text_digest": "059100aa0c453cd4",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "059100aa0c453cd4",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-DE-1": {
       "what": "Es fehlen Angaben zur Zahlung (BG-16).",
@@ -203,9 +203,9 @@
         "Sourced [L1]: BR-DE-23-a (30, 58 → CREDIT TRANSFER BG-17), BR-DE-24-a (48, 54, 55 → card), BR-DE-19 (IBAN in BT-84). Cut: 'Lastschrift' (no rule text quoted for its code) and 'kann die Zahlung nicht ausgelöst werden' (consequence, no source)."
       ],
       "rule_text_digest": "924c951d935f64fd",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "924c951d935f64fd",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-DE-15": {
       "what": "Die Käuferreferenz (BT-10) fehlt.",
@@ -229,9 +229,9 @@
         "Sourced [L1]: BR-DE-5 'Seller contact point (BT-41)', BR-DE-6 'telephone number (BT-42)', BR-DE-7 'email address (BT-43)'. Cut: 'Für Rückfragen' — purpose, no source."
       ],
       "rule_text_digest": "2d54658cceb72936",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "2d54658cceb72936",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-DE-3": {
       "what": "Der Ort des Verkäufers (BT-37) fehlt.",
@@ -241,9 +241,9 @@
         "Sourced [UStG] Nr. 1 for the address duty; [L1] BR-DE-3/4 for city and post code as separate mandatory fields."
       ],
       "rule_text_digest": "4d2cfdddd00945e1",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "4d2cfdddd00945e1",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-DE-4": {
       "what": "Die Postleitzahl des Verkäufers (BT-38) fehlt.",
@@ -253,9 +253,9 @@
         "Sourced [UStG] Nr. 1 for the address duty; [L1] BR-DE-3/4 for city and post code as separate mandatory fields."
       ],
       "rule_text_digest": "97fa6bb625657b81",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "97fa6bb625657b81",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-08"
     },
     "BR-DE-6": {
       "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) fehlt.",
