@@ -6,10 +6,11 @@
   "entries": {
     "BR-02": {
       "what": "Die Rechnungsnummer (BT-1) fehlt.",
-      "why": "Jede Rechnung braucht eine eindeutige Nummer – sie identifiziert den Vorgang in der Buchhaltung beider Seiten und ist umsatzsteuerlich vorgeschrieben.",
+      "why": "Eine Rechnung muss eine fortlaufende Nummer tragen, die der Aussteller einmalig vergibt (§ 14 Abs. 4 Nr. 4 UStG).",
       "review_notes": [
         "Confirmed against 2026-08-31 text: 'An Invoice shall have an Invoice number (BT-1)' — presence only, so 'fortlaufend' was correctly removed from what.",
-        "\"umsatzsteuerlich vorgeschrieben\" is German law (§14 UStG), not rule text — stays in why."
+        "\"umsatzsteuerlich vorgeschrieben\" is German law (§14 UStG), not rule text — stays in why.",
+        "Sourced [UStG] Nr. 4: 'eine fortlaufende Nummer ... die zur Identifizierung der Rechnung vom Rechnungsaussteller einmalig vergeben wird'. 'fortlaufend' belongs here in why — it is law, not rule text. Cut: 'Buchhaltung beider Seiten' (gloss, no source)."
       ],
       "rule_text_digest": "ef3fa39aa40f91b2",
       "reviewed_digest": null,
@@ -18,9 +19,10 @@
     },
     "BR-03": {
       "what": "Das Ausstellungsdatum der Rechnung (BT-2, Rechnungsdatum) fehlt.",
-      "why": "Es bestimmt, in welchen Zeitraum die Rechnung gebucht wird und ab wann Zahlungsfristen laufen.",
+      "why": "Das Ausstellungsdatum ist eine gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 3 UStG).",
       "review_notes": [
-        "'Rechnungsdatum' alone rendered 'issue date' loosely; 'Ausstellungsdatum' is the literal term and leads, with the everyday word kept in brackets."
+        "'Rechnungsdatum' alone rendered 'issue date' loosely; 'Ausstellungsdatum' is the literal term and leads, with the everyday word kept in brackets.",
+        "Sourced [UStG] Nr. 3: 'das Ausstellungsdatum'. Cut: Buchungszeitraum / Zahlungsfristen — no official source."
       ],
       "rule_text_digest": "16f0175c46080d4e",
       "reviewed_digest": null,
@@ -29,8 +31,10 @@
     },
     "BR-05": {
       "what": "Die Rechnungswährung (BT-5) fehlt.",
-      "why": "Ohne sie sind die Beträge nicht eindeutig – 100 kann Euro oder Franken bedeuten.",
-      "review_notes": [],
+      "why": "",
+      "review_notes": [
+        "Cut: the Euro/Franken illustration is not a claim about any document. Empty why is honest."
+      ],
       "rule_text_digest": "65996a3e396605b9",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -38,9 +42,10 @@
     },
     "BR-08": {
       "what": "Die Anschrift des Verkäufers (BG-5) fehlt.",
-      "why": "Wer die Rechnung stellt, muss mit vollständiger Adresse erkennbar sein.",
+      "why": "Der vollständige Name und die vollständige Anschrift des leistenden Unternehmers sind gesetzliche Pflichtangaben (§ 14 Abs. 4 Nr. 1 UStG).",
       "review_notes": [
-        "Terminology: Rechnungssteller → Verkäufer (spec term)."
+        "Terminology: Rechnungssteller → Verkäufer (spec term).",
+        "Sourced [UStG] Nr. 1: 'den vollständigen Namen und die vollständige Anschrift des leistenden Unternehmers und des Leistungsempfängers'."
       ],
       "rule_text_digest": "3d702cca17105faa",
       "reviewed_digest": null,
@@ -49,9 +54,10 @@
     },
     "BR-10": {
       "what": "Die Anschrift des Käufers (BG-8) fehlt.",
-      "why": "Der Käufer muss mit vollständiger Adresse benannt sein.",
+      "why": "Der vollständige Name und die vollständige Anschrift des Leistungsempfängers sind gesetzliche Pflichtangaben (§ 14 Abs. 4 Nr. 1 UStG).",
       "review_notes": [
-        "Terminology: Rechnungsempfänger → Käufer (spec term)."
+        "Terminology: Rechnungsempfänger → Käufer (spec term).",
+        "Sourced [UStG] Nr. 1 (same clause as BR-08)."
       ],
       "rule_text_digest": "6e9f719e32c9f37f",
       "reviewed_digest": null,
@@ -60,9 +66,10 @@
     },
     "BR-16": {
       "what": "Die Rechnung enthält keine Rechnungsposition (BG-25).",
-      "why": "Eine Rechnung ohne Positionen sagt nicht, wofür bezahlt werden soll. Häufige Ursache: die Positionen sind beim Export aus dem Vorsystem verloren gegangen.",
+      "why": "Menge und Art der gelieferten Gegenstände bzw. Umfang und Art der Leistung sind gesetzliche Pflichtangaben (§ 14 Abs. 4 Nr. 5 UStG). Im Standard tragen die Rechnungspositionen (BG-25) diese Angaben.",
       "review_notes": [
-        "\"Häufige Ursache\" is speculation — keep only if a reviewer with AP experience agrees it is common."
+        "\"Häufige Ursache\" is speculation — keep only if a reviewer with AP experience agrees it is common.",
+        "Sourced [UStG] Nr. 5 for the statutory duty; BG-25 is the rule's own term. Cut: 'Häufige Ursache: Export aus dem Vorsystem' — folklore, no source."
       ],
       "rule_text_digest": "a5ece4a512a32aae",
       "reviewed_digest": null,
@@ -71,11 +78,12 @@
     },
     "BR-CL-01": {
       "what": "Der Rechnungstyp ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
-      "why": "Der Rechnungstyp ist das Feld BT-3. Für eine normale Rechnung ist der Code 380, für eine Gutschrift 381.",
+      "why": "Der Rechnungstyp ist das Feld BT-3 (Invoice type code). Für eine Rechnung ist der Code 380, für eine Gutschrift 381.",
       "review_notes": [
         "Confirmed against 2026-08-31 text: only UNTDID 1001 is named, not 380/381 — the codes stay in why.",
         "BT-3 added — the rule text says 'document type code' without a BT; verify BT-3 against the spec.",
-        "BT-3 moved from what to why: the BR-CL-01 rule text names no identifier. BT-3 = Invoice type code is grounded in BR-04, not in this rule."
+        "BT-3 moved from what to why: the BR-CL-01 rule text names no identifier. BT-3 = Invoice type code is grounded in BR-04, not in this rule.",
+        "Sourced: BT-3 = 'Invoice type code' [MODEL] via BR-04; codes 380 and 381 present in the UNTDID 1001 list [CL]."
       ],
       "rule_text_digest": "6ea9a6dc141bfeda",
       "reviewed_digest": null,
@@ -84,8 +92,10 @@
     },
     "BR-CL-04": {
       "what": "Die Währung ist kein gültiger ISO-4217-Code.",
-      "why": "Erwartet wird ein dreistelliges Kürzel wie EUR oder CHF.",
-      "review_notes": [],
+      "why": "Erwartet wird ein dreistelliger Code nach ISO 4217, zum Beispiel EUR oder CHF.",
+      "review_notes": [
+        "Sourced: 'alpha-3' is in the rule text [L1 BR-CL-04]; EUR and CHF present in the ISO 4217 list [CL]."
+      ],
       "rule_text_digest": "5e03f8523a485ced",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -93,8 +103,10 @@
     },
     "BR-CL-14": {
       "what": "Der Ländercode ist kein gültiger ISO-3166-1-Code.",
-      "why": "Erwartet wird ein zweistelliges Kürzel wie DE oder AT.",
-      "review_notes": [],
+      "why": "Erwartet wird ein zweistelliger Code nach ISO 3166-1 alpha-2, zum Beispiel DE oder AT.",
+      "review_notes": [
+        "Sourced: 'ISO 3166-1 alpha-2' is named in the rule text of BR-CO-09 [L1]; DE and AT present in the ISO 3166-1 list [CL]."
+      ],
       "rule_text_digest": "31b964956bfc4b25",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -102,9 +114,10 @@
     },
     "BR-CL-17": {
       "what": "Der Umsatzsteuer-Kategoriecode ist kein zulässiger Code aus der Codeliste UNCL 5305.",
-      "why": "Zulässig sind etwa S für den Regelsatz, AE für Reverse Charge oder Z für den Nullsatz.",
+      "why": "Zulässige Codes nach UNCL 5305 sind zum Beispiel S (Regelsatz), AE (Steuerschuldnerschaft des Leistungsempfängers, Reverse Charge) oder Z (Nullsatz).",
       "review_notes": [
-        "Confirmed against 2026-08-31 text: only the UNCL 5305 code list is named — S/AE/Z stay in why. Text differs between UBL and CII ('UNCL 5305' vs 'UNCL5305')."
+        "Confirmed against 2026-08-31 text: only the UNCL 5305 code list is named — S/AE/Z stay in why. Text differs between UBL and CII ('UNCL 5305' vs 'UNCL5305').",
+        "Sourced: codes S, AE, Z present in the UNCL 5305 list [CL]. The German glosses are the UNCL 5305 category meanings; reviewer may prefer the spec's exact wording."
       ],
       "rule_text_digest": "eb45453974dcb143",
       "reviewed_digest": null,
@@ -115,7 +128,8 @@
       "what": "Die Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), des Steuervertreters des Verkäufers (BT-63) oder des Käufers (BT-48) beginnt nicht mit dem Länderpräfix nach ISO 3166-1 alpha-2.",
       "why": "Für Deutschland also DE123456789, nicht 123456789. Ausnahme laut Regeltext: Griechenland darf das Präfix EL verwenden.",
       "review_notes": [
-        "Confirmed against 2026-08-31 text: the rule covers BT-31, BT-63 and BT-48 and carries a Greece 'EL' exception — all three fields and the exception are now named."
+        "Confirmed against 2026-08-31 text: the rule covers BT-31, BT-63 and BT-48 and carries a Greece 'EL' exception — all three fields and the exception are now named.",
+        "Sourced: 'DE' prefix follows from 'ISO 3166-1 alpha-2' and the EL exception is in the rule text [L1 BR-CO-09]. Kept unchanged."
       ],
       "rule_text_digest": "9079bdbbd75ef74d",
       "reviewed_digest": null,
@@ -124,9 +138,10 @@
     },
     "BR-CO-10": {
       "what": "Die Summe der Positionsbeträge (BT-106) stimmt nicht mit den einzelnen Positionen überein.",
-      "why": "Der Kopfbetrag muss exakt der Summe aller Netto-Positionsbeträge entsprechen. Typische Ursache sind Rundungen, die pro Position anders gerechnet wurden als in der Summe.",
+      "why": "",
       "review_notes": [
-        "Sentence 2 may be derivable from the rule text — if so, move it back into what."
+        "Sentence 2 may be derivable from the rule text — if so, move it back into what.",
+        "Cut: 'Typische Ursache sind Rundungen' — folklore, no source. The remaining sentence only restated what."
       ],
       "rule_text_digest": "3a5fddaf3578e501",
       "reviewed_digest": null,
@@ -135,9 +150,10 @@
     },
     "BR-CO-13": {
       "what": "Der Nettogesamtbetrag (BT-109) entspricht nicht der Summe der Positionen abzüglich Nachlässe und zuzüglich Zuschläge auf Dokumentebene.",
-      "why": "Meist fehlt ein Nachlass oder Zuschlag in der Rechnung.",
+      "why": "Nachlässe und Zuschläge auf Dokumentebene sind die Felder BT-107 (Sum of allowances on document level) und BT-108 (Sum of charges on document level).",
       "review_notes": [
-        "The formula in what should match the rule text's formula exactly — compare term by term."
+        "The formula in what should match the rule text's formula exactly — compare term by term.",
+        "Sourced [MODEL]: BT-107 and BT-108 names. Cut: 'Meist fehlt ...' — folklore, no source."
       ],
       "rule_text_digest": "95893e686b3786b2",
       "reviewed_digest": null,
@@ -157,8 +173,10 @@
     },
     "BR-CO-15": {
       "what": "Der Bruttogesamtbetrag (BT-112) entspricht nicht Nettobetrag plus Umsatzsteuer.",
-      "why": "Einer der drei Werte ist falsch – häufig, weil einer davon nachträglich geändert wurde, ohne die anderen anzupassen.",
-      "review_notes": [],
+      "why": "",
+      "review_notes": [
+        "Cut: 'häufig nachträglich geändert' — folklore, no source."
+      ],
       "rule_text_digest": "6bdbeae81d6a4405",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -166,9 +184,10 @@
     },
     "BR-CO-16": {
       "what": "Der Zahlbetrag (BT-115) entspricht nicht dem Bruttobetrag abzüglich bereits gezahlter Beträge zuzüglich des Rundungsbetrags.",
-      "why": "Häufig fehlt eine bereits geleistete Anzahlung.",
+      "why": "Bereits gezahlte Beträge sind das Feld BT-113 (Paid amount), der Rundungsbetrag ist BT-114 (Rounding amount).",
       "review_notes": [
-        "Compare the formula against the rule text term by term."
+        "Compare the formula against the rule text term by term.",
+        "Sourced [MODEL]: BT-113 and BT-114 names. Cut: 'Häufig fehlt eine Anzahlung' — folklore, no source."
       ],
       "rule_text_digest": "059100aa0c453cd4",
       "reviewed_digest": null,
@@ -177,8 +196,10 @@
     },
     "BR-DE-1": {
       "what": "Es fehlen Angaben zur Zahlung (BG-16).",
-      "why": "Die Rechnung muss mitteilen, wie sie bezahlt werden soll – etwa per Überweisung mit IBAN, per Lastschrift oder per Karte. Ohne diese Angabe kann die Zahlung nicht ausgelöst werden.",
-      "review_notes": [],
+      "why": "Die Zahlungsart steht in BT-81 (Payment means type code) — etwa Überweisung (Codes 30, 58; dann mit IBAN in BT-84) oder Kartenzahlung (Codes 48, 54, 55).",
+      "review_notes": [
+        "Sourced [L1]: BR-DE-23-a (30, 58 → CREDIT TRANSFER BG-17), BR-DE-24-a (48, 54, 55 → card), BR-DE-19 (IBAN in BT-84). Cut: 'Lastschrift' (no rule text quoted for its code) and 'kann die Zahlung nicht ausgelöst werden' (consequence, no source)."
+      ],
       "rule_text_digest": "924c951d935f64fd",
       "reviewed_digest": null,
       "reviewed_by": null,
@@ -186,10 +207,11 @@
     },
     "BR-DE-15": {
       "what": "Die Käuferreferenz (BT-10) fehlt.",
-      "why": "Öffentliche Auftraggeber in Deutschland nutzen dieses Feld – meist die Leitweg-ID – um die Rechnung intern an die richtige Stelle weiterzuleiten. Ohne sie kann die Rechnung nicht zugeordnet werden. Die Referenz steht in der Regel in der Bestellung oder im Auftragsschreiben.",
+      "why": "Öffentliche Auftraggeber in Deutschland nutzen dieses Feld für die Leitweg-ID, über die die zentrale Rechnungseingangsplattform die Rechnung an die zuständige Stelle weiterleitet. Der Auftraggeber teilt die Leitweg-ID bei der Bestellung mit.",
       "review_notes": [
         "\"wird abgewiesen\" removed — it is a claim about recipient behaviour, not rule text. Reinstate in why only if a reviewer confirms it.",
-        "Confirmed against 2026-08-31 text: the rule says only 'Buyer reference (BT-10) muss übermittelt werden' — Leitweg-ID is not in the text and correctly stays in why."
+        "Confirmed against 2026-08-31 text: the rule says only 'Buyer reference (BT-10) muss übermittelt werden' — Leitweg-ID is not in the text and correctly stays in why.",
+        "Sourced [BUND]: 'Die Leitweg-ID wird im Standard XRechnung im Feld Käuferreferenz (BT-10) angegeben'; 'ermöglicht eine elektronische Adressierung und Weiterleitung ... an die angeschlossenen ERP- bzw. Freigabesysteme'; 'Bei der Bestellung teilt der Rechnungsempfänger (Auftraggeber) dem Rechnungssteller die Leitweg-ID mit'. Cut: 'kann nicht zugeordnet werden' (inference)."
       ],
       "rule_text_digest": "45fdc2d795a75062",
       "reviewed_digest": null,
@@ -198,10 +220,11 @@
     },
     "BR-DE-2": {
       "what": "Die Kontaktdaten des Verkäufers (BG-6) fehlen.",
-      "why": "Für Rückfragen zur Rechnung verlangt der deutsche Standard einen Ansprechpartner mit Name, Telefonnummer und E-Mail-Adresse.",
+      "why": "Die Gruppe umfasst den Ansprechpartner (BT-41), seine Telefonnummer (BT-42) und seine E-Mail-Adresse (BT-43); XRechnung verlangt jedes dieser Felder einzeln (BR-DE-5, BR-DE-6, BR-DE-7).",
       "review_notes": [
         "Confirmed against 2026-08-31 text: BR-DE-2 only requires the SELLER CONTACT group (BG-6). Name/phone/email are BR-DE-5/6/7 — correctly kept in why.",
-        "Terminology: Rechnungssteller → Verkäufer."
+        "Terminology: Rechnungssteller → Verkäufer.",
+        "Sourced [L1]: BR-DE-5 'Seller contact point (BT-41)', BR-DE-6 'telephone number (BT-42)', BR-DE-7 'email address (BT-43)'. Cut: 'Für Rückfragen' — purpose, no source."
       ],
       "rule_text_digest": "2d54658cceb72936",
       "reviewed_digest": null,
@@ -210,9 +233,10 @@
     },
     "BR-DE-3": {
       "what": "Der Ort des Verkäufers (BT-37) fehlt.",
-      "why": "Die vollständige Anschrift ist umsatzsteuerlich vorgeschrieben; der Ort ist ein Pflichtbestandteil davon.",
+      "why": "Die vollständige Anschrift ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-37) und Postleitzahl (BT-38) als eigene Pflichtfelder (BR-DE-3, BR-DE-4).",
       "review_notes": [
-        "Terminology: Rechnungssteller → Verkäufer."
+        "Terminology: Rechnungssteller → Verkäufer.",
+        "Sourced [UStG] Nr. 1 for the address duty; [L1] BR-DE-3/4 for city and post code as separate mandatory fields."
       ],
       "rule_text_digest": "4d2cfdddd00945e1",
       "reviewed_digest": null,
@@ -221,9 +245,10 @@
     },
     "BR-DE-4": {
       "what": "Die Postleitzahl des Verkäufers (BT-38) fehlt.",
-      "why": "Sie gehört zur vollständigen Anschrift, die auf einer Rechnung angegeben sein muss.",
+      "why": "Die vollständige Anschrift ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-37) und Postleitzahl (BT-38) als eigene Pflichtfelder (BR-DE-3, BR-DE-4).",
       "review_notes": [
-        "Terminology: Rechnungssteller → Verkäufer."
+        "Terminology: Rechnungssteller → Verkäufer.",
+        "Sourced [UStG] Nr. 1 for the address duty; [L1] BR-DE-3/4 for city and post code as separate mandatory fields."
       ],
       "rule_text_digest": "97fa6bb625657b81",
       "reviewed_digest": null,
@@ -232,9 +257,10 @@
     },
     "BR-DE-6": {
       "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) fehlt.",
-      "why": "Der deutsche Standard verlangt sie, damit Rückfragen zur Rechnung ohne Umweg geklärt werden können.",
+      "why": "Name (BT-41), Telefonnummer (BT-42) und E-Mail-Adresse (BT-43) des Ansprechpartners bilden zusammen die Gruppe SELLER CONTACT (BG-6), die XRechnung vorschreibt (BR-DE-2, BR-DE-5 bis BR-DE-7).",
       "review_notes": [
-        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries."
+        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries.",
+        "Sourced [L1]: BR-DE-2 (group), BR-DE-5/6/7 (fields). Cut: 'damit Rückfragen ... geklärt werden' — purpose, no source."
       ],
       "rule_text_digest": "1063eb7739fc9ff8",
       "reviewed_digest": null,
@@ -243,9 +269,10 @@
     },
     "BR-DE-7": {
       "what": "Die E-Mail-Adresse des Verkäufer-Ansprechpartners (BT-43) fehlt.",
-      "why": "Sie ist zusammen mit Name und Telefonnummer Pflicht, damit Rückfragen zugestellt werden können.",
+      "why": "Name (BT-41), Telefonnummer (BT-42) und E-Mail-Adresse (BT-43) des Ansprechpartners bilden zusammen die Gruppe SELLER CONTACT (BG-6), die XRechnung vorschreibt (BR-DE-2, BR-DE-5 bis BR-DE-7).",
       "review_notes": [
-        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries."
+        "Party naming aligned with BR-DE-3/4: 'Seller contact ...' rendered as 'Verkäufer-Ansprechpartner' so the seller is named, as in the other entries.",
+        "Sourced [L1]: BR-DE-2 (group), BR-DE-5/6/7 (fields). Cut: 'damit Rückfragen ... geklärt werden' — purpose, no source."
       ],
       "rule_text_digest": "8c3cd38b3b2b3cf3",
       "reviewed_digest": null,
@@ -254,9 +281,10 @@
     },
     "BR-DE-8": {
       "what": "Der Ort des Käufers (BT-52) fehlt.",
-      "why": "Die Anschrift des Käufers muss vollständig sein, sonst ist die Rechnung umsatzsteuerlich nicht ordnungsgemäß.",
+      "why": "Die vollständige Anschrift des Leistungsempfängers ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-52) und Postleitzahl (BT-53) als eigene Pflichtfelder (BR-DE-8, BR-DE-9).",
       "review_notes": [
-        "Terminology: Rechnungsempfänger → Käufer."
+        "Terminology: Rechnungsempfänger → Käufer.",
+        "Sourced [UStG] Nr. 1; [L1] BR-DE-8/9. Cut (BR-DE-8): 'sonst nicht ordnungsgemäß' — consequence, no source."
       ],
       "rule_text_digest": "0850855b6afa3df4",
       "reviewed_digest": null,
@@ -265,14 +293,22 @@
     },
     "BR-DE-9": {
       "what": "Die Postleitzahl des Käufers (BT-53) fehlt.",
-      "why": "Sie gehört zur vollständigen Käuferanschrift.",
+      "why": "Die vollständige Anschrift des Leistungsempfängers ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-52) und Postleitzahl (BT-53) als eigene Pflichtfelder (BR-DE-8, BR-DE-9).",
       "review_notes": [
-        "Terminology: Rechnungsempfänger → Käufer."
+        "Terminology: Rechnungsempfänger → Käufer.",
+        "Sourced [UStG] Nr. 1; [L1] BR-DE-8/9. Cut (BR-DE-8): 'sonst nicht ordnungsgemäß' — consequence, no source."
       ],
       "rule_text_digest": "2a8dc0f18e7475ae",
       "reviewed_digest": null,
       "reviewed_by": null,
       "reviewed_at": null
     }
+  },
+  "_sources": {
+    "UStG": "§ 14 Abs. 4 UStG, gesetze-im-internet.de/ustg_1980/__14.html — statutory mandatory invoice contents",
+    "BUND": "e-rechnung-bund.de/faq/leitweg-id — federal e-invoicing portal, Leitweg-ID FAQ",
+    "L1": "the rule text of the named rule in this ruleset (rulesets/2026-08-31)",
+    "MODEL": "EN 16931 abstract model, github.com/ConnectingEurope/eInvoicing-EN16931 ubl/schematron/abstract/EN16931-model.sch — BT names",
+    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it"
   }
 }
