@@ -39,3 +39,10 @@ frontend/*.tsbuildinfo
 .env
 .env.*
 !.env.example
+
+# Locally generated sample invoices, derived from the fetched corpus.
+samples/
+
+# Agent handoff notes. Kept local: it names the private planning doc and
+# carries internal links that do not belong in a repo destined to be public.
+CLAUDE.md

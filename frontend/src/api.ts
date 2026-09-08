@@ -17,8 +17,11 @@ export interface Finding {
   /** Where in the document, as the validator reported it. */
   xpath: string;
   offending_value: string | null;
-  /** Plain German, when a reviewed explanation exists for this rule. */
+  /** Plain German restatement of the rule. Traceable to the official text. */
   explanation: string | null;
+  /** Editorial context — causes, consequences, background. Not derivable from
+   *  the rule text, so it is shown as clearly secondary. */
+  context: string | null;
 }
 
 export interface ValidationReport {

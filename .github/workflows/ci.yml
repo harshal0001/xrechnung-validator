@@ -61,6 +61,15 @@ jobs:
       - name: Type check
         run: uv run mypy src/xrv
 
+      # The catalogue is data, and data drifts. --check fails on an explanation
+      # written against rule text the current rule set no longer has.
+      - name: Explanation catalogue
+        run: |
+          uv run python scripts/review_sheet.py --check \
+            --ruleset "rulesets/$RULESET_VERSION" \
+            --explanations "explanations/$RULESET_VERSION.de.json" \
+            --out /tmp/review.md
+
       # XRV_REQUIRE_RULESET turns the "no ruleset fetched" skip into a failure.
       # That skip is right on a clean checkout and wrong here: a silent skip
       # would hide the ruleset drift the guard exists to catch.

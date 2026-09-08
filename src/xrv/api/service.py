@@ -129,9 +129,12 @@ class ValidationService:
         return engine.findings(document.content, document.syntax)
 
     def _explain(self, findings: tuple[Finding, ...], version: str) -> tuple[Finding, ...]:
+        """Attach explanation and editorial context, where a reviewed entry exists."""
         provider = self._providers.get(version, NullProvider())
         return tuple(
-            finding.with_explanation(text) if (text := provider.explain(finding)) else finding
+            finding.with_explanation(what, provider.context(finding))
+            if (what := provider.explain(finding))
+            else finding
             for finding in findings
         )
 

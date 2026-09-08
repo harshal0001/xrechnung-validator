@@ -26,6 +26,11 @@ from xrv.core import Finding
 #: The boundary tests read this, so widening it is a deliberate, visible act.
 GROUNDING_FIELDS = frozenset({"rule_id", "severity", "rule_text", "xpath", "offending_value"})
 
+#: Fields an explainer writes rather than reads — outputs, not grounding inputs.
+#: `explanation` restates the rule and is checkable against it; `context` is
+#: editorial and is kept separate precisely so the two are never confused.
+EXPLANATION_FIELDS = frozenset({"explanation", "context"})
+
 
 @runtime_checkable
 class ExplanationProvider(Protocol):
@@ -39,9 +44,14 @@ class ExplanationProvider(Protocol):
 
     def explain(self, finding: Finding) -> str | None: ...
 
+    def context(self, finding: Finding) -> str | None: ...
+
 
 class NullProvider:
     """Explains nothing. The default, so the service works with no catalogue."""
 
     def explain(self, finding: Finding) -> str | None:
+        return None
+
+    def context(self, finding: Finding) -> str | None:
         return None
