@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { ApiError, isBlocking, isValid, validate } from "./api";
 import type { Finding, Severity, ValidationReport } from "./api";
-import { SEVERITY_LABEL, SEVERITY_MEANING, SOURCE_LABEL, SYNTAX_LABEL, readablePath } from "./labels";
+import { LANGS, SEVERITY_LABEL, SEVERITY_MEANING, SOURCE_LABEL, SYNTAX_LABEL, UI, readablePath } from "./labels";
+import type { Lang } from "./labels";
 
 type State =
   | { status: "idle" }
@@ -18,24 +19,26 @@ function bySeverity(a: Finding, b: Finding): number {
 export default function App() {
   const [state, setState] = useState<State>({ status: "idle" });
   const [explain, setExplain] = useState(true);
+  const [lang, setLang] = useState<Lang>("de");
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const t = UI[lang];
 
   const check = useCallback(
     async (file: File) => {
       setState({ status: "checking", filename: file.name });
       try {
-        const report = await validate(file, explain);
+        const report = await validate(file, explain, lang, t.unreachable ?? "");
         setState({ status: "done", filename: file.name, report });
       } catch (caught) {
         const error =
           caught instanceof ApiError
             ? caught
-            : new ApiError(0, "unknown", "Unerwarteter Fehler bei der Prüfung.");
+            : new ApiError(0, "unknown", t.unexpected ?? "");
         setState({ status: "failed", filename: file.name, error });
       }
     },
-    [explain],
+    [explain, lang, t],
   );
 
   const onDrop = useCallback(
@@ -51,11 +54,23 @@ export default function App() {
   return (
     <div className="page">
       <header>
-        <h1>XRechnung prüfen</h1>
-        <p className="lede">
-          Rechnung als XML (UBL oder UN/CEFACT CII) oder als ZUGFeRD-PDF hochladen. Geprüft wird
-          gegen EN 16931 und den KoSIT-Regelsatz für XRechnung.
-        </p>
+        <div className="masthead">
+          <h1>{t.title}</h1>
+          <div className="lang" role="group" aria-label={t.language}>
+            {LANGS.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={code === lang ? "lang__btn lang__btn--on" : "lang__btn"}
+                aria-pressed={code === lang}
+                onClick={() => setLang(code)}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="lede">{t.lede}</p>
       </header>
 
       <section
@@ -72,7 +87,7 @@ export default function App() {
         }}
         role="button"
         tabIndex={0}
-        aria-label="Rechnung auswählen oder hierher ziehen"
+        aria-label={t.dropAria}
       >
         <input
           ref={input}
@@ -84,41 +99,49 @@ export default function App() {
             if (file) void check(file);
           }}
         />
-        <p className="dropzone__main">Datei hierher ziehen oder klicken</p>
-        <p className="dropzone__hint">XML oder PDF · maximal 16 MB</p>
+        <p className="dropzone__main">{t.dropMain}</p>
+        <p className="dropzone__hint">{t.dropHint}</p>
       </section>
 
       <label className="option">
         <input type="checkbox" checked={explain} onChange={(e) => setExplain(e.target.checked)} />
         <span>
-          Erklärungen anzeigen
-          <em>Nur geprüfte Erklärungen werden ausgeliefert.</em>
+          {t.explainOption}
+          <em>{t.explainNote}</em>
         </span>
       </label>
 
       {state.status === "checking" && (
         <p className="status" role="status">
-          {state.filename} wird geprüft …
+          {state.filename} {t.checking}
         </p>
       )}
 
-      {state.status === "failed" && <Failure error={state.error} filename={state.filename} />}
+      {state.status === "failed" && (
+        <Failure error={state.error} filename={state.filename} lang={lang} />
+      )}
 
-      {state.status === "done" && <Report filename={state.filename} report={state.report} />}
+      {state.status === "done" && (
+        <Report filename={state.filename} report={state.report} lang={lang} />
+      )}
     </div>
   );
 }
 
-function Failure({ error, filename }: { error: ApiError; filename: string }) {
+function Failure({ error, filename, lang }: { error: ApiError; filename: string; lang: Lang }) {
+  const t = UI[lang];
   return (
     <section className="panel panel--problem" role="alert">
-      <h2>{filename} konnte nicht geprüft werden</h2>
+      <h2>
+        {filename} {t.failedTitle}
+      </h2>
       <p>{error.message}</p>
     </section>
   );
 }
 
-function Report({ filename, report }: { filename: string; report: ValidationReport }) {
+function Report({ filename, report, lang }: { filename: string; report: ValidationReport; lang: Lang }) {
+  const t = UI[lang];
   const blocking = report.findings.filter(isBlocking);
   const other = report.findings.filter((f) => !isBlocking(f));
   const clean = isValid(report);
@@ -126,40 +149,31 @@ function Report({ filename, report }: { filename: string; report: ValidationRepo
   return (
     <section className="panel">
       <header className={`verdict verdict--${clean ? "ok" : "bad"}`}>
-        <h2>{clean ? "Keine blockierenden Fehler" : `${blocking.length} blockierende(r) Fehler`}</h2>
-        <p>
-          {clean
-            ? "Die Rechnung erfüllt die geprüften Regeln."
-            : "Die Rechnung würde in dieser Form abgewiesen."}
-        </p>
+        <h2>{clean ? t.clean : `${blocking.length} ${t.blocking}`}</h2>
+        <p>{clean ? t.cleanSub : t.blockingSub}</p>
       </header>
 
-      {!report.mandate_ready && (
-        <p className="notice">
-          Dieses ZUGFeRD-Profil enthält zu wenige Felder für die deutsche Rechnungspflicht.
-          Geschäftsregeln wurden nicht geprüft.
-        </p>
-      )}
+      {!report.mandate_ready && <p className="notice">{t.thinProfile}</p>}
 
       <dl className="facts">
-        <Fact label="Datei" value={filename} />
-        <Fact label="Format" value={SYNTAX_LABEL[report.syntax] ?? report.syntax} />
-        <Fact label="Quelle" value={SOURCE_LABEL[report.source] ?? report.source} />
-        {report.profile && <Fact label="Profil" value={report.profile} />}
-        <Fact label="Regelsatz" value={report.ruleset_version} />
-        <Fact label="Dauer" value={`${Math.round(report.duration_ms)} ms`} />
+        <Fact label={t.file ?? ""} value={filename} />
+        <Fact label={t.format ?? ""} value={SYNTAX_LABEL[report.syntax] ?? report.syntax} />
+        <Fact label={t.source ?? ""} value={SOURCE_LABEL[lang][report.source] ?? report.source} />
+        {report.profile && <Fact label={t.profile ?? ""} value={report.profile} />}
+        <Fact label={t.ruleset ?? ""} value={report.ruleset_version} />
+        <Fact label={t.duration ?? ""} value={`${Math.round(report.duration_ms)} ms`} />
       </dl>
 
       {report.findings.length > 0 && (
         <ul className="findings">
           {[...blocking, ...other].sort(bySeverity).map((finding, index) => (
-            <FindingRow key={`${finding.rule_id}-${index}`} finding={finding} />
+            <FindingRow key={`${finding.rule_id}-${index}`} finding={finding} lang={lang} />
           ))}
         </ul>
       )}
 
       <p className="provenance">
-        Geprüft gegen KoSIT-Regelsatz {report.ruleset_version} · SHA-256{" "}
+        {t.provenance} {report.ruleset_version} · SHA-256{" "}
         <code>{report.ruleset_sha256.slice(0, 16)}…</code>
       </p>
     </section>
@@ -175,13 +189,14 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FindingRow({ finding }: { finding: Finding }) {
+function FindingRow({ finding, lang }: { finding: Finding; lang: Lang }) {
+  const t = UI[lang];
   return (
     <li className={`finding finding--${finding.severity}`}>
       <div className="finding__head">
         <code className="finding__rule">{finding.rule_id}</code>
-        <span className="finding__severity" title={SEVERITY_MEANING[finding.severity]}>
-          {SEVERITY_LABEL[finding.severity]}
+        <span className="finding__severity" title={SEVERITY_MEANING[lang][finding.severity]}>
+          {SEVERITY_LABEL[lang][finding.severity]}
         </span>
       </div>
 
@@ -193,20 +208,20 @@ function FindingRow({ finding }: { finding: Finding }) {
       {finding.explanation && <p className="finding__explanation">{finding.explanation}</p>}
       {finding.context && (
         <p className="finding__context">
-          <span className="finding__context-label">Hintergrund</span>
+          <span className="finding__context-label">{t.context}</span>
           {finding.context}
         </p>
       )}
       <p className="finding__rule-text">{finding.rule_text}</p>
 
       <p className="finding__where">
-        <span>Fundstelle</span>
+        <span>{t.where}</span>
         <code title={finding.xpath}>{readablePath(finding.xpath)}</code>
       </p>
 
       {finding.offending_value && (
         <p className="finding__value">
-          <span>Wert</span>
+          <span>{t.value}</span>
           <code>{finding.offending_value}</code>
         </p>
       )}

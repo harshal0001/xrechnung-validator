@@ -1,0 +1,290 @@
+{
+  "schema_version": 2,
+  "ruleset_version": "2026-08-31",
+  "language": "en",
+  "_note": "`what` must trace to the official rule text and is the only field the fidelity eval checks. `why` is editorial context, human-approved, not claimed as grounded. An entry is served only when reviewed_digest == rule_text_digest. Terminology follows the XRechnung specification: Verkäufer (Seller), Käufer (Buyer).",
+  "_sources": {
+    "UStG": "§ 14 Abs. 4 UStG, gesetze-im-internet.de/ustg_1980/__14.html — statutory mandatory invoice contents",
+    "BUND": "e-rechnung-bund.de/faq/leitweg-id — federal e-invoicing portal, Leitweg-ID FAQ",
+    "L1": "the rule text of the named rule in this ruleset (rulesets/2026-08-31)",
+    "MODEL": "EN 16931 abstract model, github.com/ConnectingEurope/eInvoicing-EN16931 ubl/schematron/abstract/EN16931-model.sch — BT names",
+    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it"
+  },
+  "entries": {
+    "BR-02": {
+      "what": "The invoice number (BT-1) is missing.",
+      "why": "An invoice must carry a sequential number that the issuer assigns only once (§ 14 Abs. 4 Nr. 4 UStG).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 4. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "ef3fa39aa40f91b2",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-03": {
+      "what": "The invoice issue date (BT-2) is missing.",
+      "why": "The issue date is a statutory mandatory item (§ 14 Abs. 4 Nr. 3 UStG).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 3. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "16f0175c46080d4e",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-05": {
+      "what": "The invoice currency code (BT-5) is missing.",
+      "why": "",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "65996a3e396605b9",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-08": {
+      "what": "The seller's postal address (BG-5) is missing.",
+      "why": "The full name and full address of the supplier are statutory mandatory items (§ 14 Abs. 4 Nr. 1 UStG).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "3d702cca17105faa",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-10": {
+      "what": "The buyer's postal address (BG-8) is missing.",
+      "why": "The full name and full address of the recipient are statutory mandatory items (§ 14 Abs. 4 Nr. 1 UStG).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "6e9f719e32c9f37f",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-16": {
+      "what": "The invoice contains no invoice line (BG-25).",
+      "why": "Quantity and kind of the goods delivered, or scope and kind of the service, are statutory mandatory items (§ 14 Abs. 4 Nr. 5 UStG). In the standard, the invoice lines (BG-25) carry these details.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 5; BG-25 is the rule's own term. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "a5ece4a512a32aae",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CL-01": {
+      "what": "The document type code is not a permitted code from code list UNTDID 1001.",
+      "why": "The document type is field BT-3 (Invoice type code). An invoice uses code 380, a credit note 381.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-3 via BR-04; [CL] 380, 381. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "6ea9a6dc141bfeda",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CL-04": {
+      "what": "The invoice currency code is not a valid ISO 4217 code.",
+      "why": "A three-letter code from ISO 4217 is expected, for example EUR or CHF.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CL-04 says alpha-3; [CL] EUR, CHF. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "5e03f8523a485ced",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CL-14": {
+      "what": "The country code is not a valid ISO 3166-1 code.",
+      "why": "A two-letter code from ISO 3166-1 alpha-2 is expected, for example DE or AT.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CO-09 names alpha-2; [CL] DE, AT. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "31b964956bfc4b25",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CL-17": {
+      "what": "The VAT category code is not a permitted code from code list UNCL 5305.",
+      "why": "Permitted codes from UNCL 5305 include S, AE and Z.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [CL] S, AE, Z — codes only, per the German reviewer decision. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "eb45453974dcb143",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-09": {
+      "what": "The seller VAT identifier (BT-31), the seller tax representative VAT identifier (BT-63) or the buyer VAT identifier (BT-48) does not start with the ISO 3166-1 alpha-2 country prefix.",
+      "why": "For Germany that means DE123456789, not 123456789. Exception per the rule text: Greece may use the prefix EL.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CO-09. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "9079bdbbd75ef74d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-10": {
+      "what": "The sum of invoice line net amounts (BT-106) does not match the net amounts of the individual lines (BT-131).",
+      "why": "",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "3a5fddaf3578e501",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-13": {
+      "what": "The invoice total amount without VAT (BT-109) does not equal the sum of line net amounts minus document-level allowances plus document-level charges.",
+      "why": "Document-level allowances and charges are fields BT-107 (Sum of allowances on document level) and BT-108 (Sum of charges on document level).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-107, BT-108. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "95893e686b3786b2",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-14": {
+      "what": "The invoice total VAT amount (BT-110) does not equal the sum of the VAT category tax amounts (BT-117).",
+      "why": "",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "0e668b178cad4877",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-15": {
+      "what": "The invoice total amount with VAT (BT-112) does not equal the total without VAT plus the VAT amount.",
+      "why": "",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "6bdbeae81d6a4405",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-CO-16": {
+      "what": "The amount due for payment (BT-115) does not equal the total with VAT minus the paid amount plus the rounding amount.",
+      "why": "The paid amount is field BT-113 (Paid amount); the rounding amount is BT-114 (Rounding amount).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-113, BT-114. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "059100aa0c453cd4",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-1": {
+      "what": "Payment instructions (BG-16) are missing.",
+      "why": "The payment means is given in BT-81 (Payment means type code) — for example credit transfer (codes 30, 58, then with an IBAN in BT-84) or card payment (codes 48, 54, 55).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-23-a, BR-DE-24-a, BR-DE-19. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "924c951d935f64fd",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-15": {
+      "what": "The buyer reference (BT-10) is missing.",
+      "why": "The German federal administration uses this field for the Leitweg-ID, by which the federal central invoice intake platform routes the invoice to the responsible office. The contracting authority communicates the Leitweg-ID when placing the order.",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [BUND] — narrowed to the federal level, as in the German entry. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "45fdc2d795a75062",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-2": {
+      "what": "The seller contact (BG-6) is missing.",
+      "why": "The group comprises the contact point (BT-41), its telephone number (BT-42) and its email address (BT-43); XRechnung requires each of these fields individually (BR-DE-5, BR-DE-6, BR-DE-7).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-5/6/7. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "2d54658cceb72936",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-3": {
+      "what": "The seller city (BT-37) is missing.",
+      "why": "The full address is a statutory mandatory item (§ 14 Abs. 4 Nr. 1 UStG); XRechnung makes city (BT-37) and post code (BT-38) separate mandatory fields (BR-DE-3, BR-DE-4).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-3/4. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "4d2cfdddd00945e1",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-4": {
+      "what": "The seller post code (BT-38) is missing.",
+      "why": "The full address is a statutory mandatory item (§ 14 Abs. 4 Nr. 1 UStG); XRechnung makes city (BT-37) and post code (BT-38) separate mandatory fields (BR-DE-3, BR-DE-4).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-3/4. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "97fa6bb625657b81",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-6": {
+      "what": "The seller contact telephone number (BT-42) is missing.",
+      "why": "Contact point (BT-41), telephone number (BT-42) and email address (BT-43) together form the SELLER CONTACT group (BG-6), which XRechnung requires (BR-DE-2, BR-DE-5 to BR-DE-7).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-2, BR-DE-5/6/7. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "1063eb7739fc9ff8",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-7": {
+      "what": "The seller contact email address (BT-43) is missing.",
+      "why": "Contact point (BT-41), telephone number (BT-42) and email address (BT-43) together form the SELLER CONTACT group (BG-6), which XRechnung requires (BR-DE-2, BR-DE-5 to BR-DE-7).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-2, BR-DE-5/6/7. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "8c3cd38b3b2b3cf3",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-8": {
+      "what": "The buyer city (BT-52) is missing.",
+      "why": "The full address of the recipient is a statutory mandatory item (§ 14 Abs. 4 Nr. 1 UStG); XRechnung makes city (BT-52) and post code (BT-53) separate mandatory fields (BR-DE-8, BR-DE-9).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-8/9. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "0850855b6afa3df4",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-9": {
+      "what": "The buyer post code (BT-53) is missing.",
+      "why": "The full address of the recipient is a statutory mandatory item (§ 14 Abs. 4 Nr. 1 UStG); XRechnung makes city (BT-52) and post code (BT-53) separate mandatory fields (BR-DE-8, BR-DE-9).",
+      "review_notes": [
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-8/9. Not yet reviewed in English."
+      ],
+      "rule_text_digest": "2a8dc0f18e7475ae",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    }
+  }
+}

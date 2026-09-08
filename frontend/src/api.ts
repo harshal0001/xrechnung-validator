@@ -58,15 +58,20 @@ export class ApiError extends Error {
   }
 }
 
-export async function validate(file: File, explain: boolean): Promise<ValidationReport> {
+export async function validate(
+  file: File,
+  explain: boolean,
+  lang: string,
+  unreachableMessage: string,
+): Promise<ValidationReport> {
   const body = new FormData();
   body.append("file", file);
 
   let response: Response;
   try {
-    response = await fetch(`/validate?explain=${explain}`, { method: "POST", body });
+    response = await fetch(`/validate?explain=${explain}&lang=${lang}`, { method: "POST", body });
   } catch {
-    throw new ApiError(0, "unreachable", "Der Dienst ist nicht erreichbar.");
+    throw new ApiError(0, "unreachable", unreachableMessage);
   }
 
   if (!response.ok) {
@@ -79,7 +84,7 @@ export async function validate(file: File, explain: boolean): Promise<Validation
     throw new ApiError(
       response.status,
       detail.error ?? "error",
-      detail.detail ?? `Die Prüfung ist fehlgeschlagen (HTTP ${response.status}).`,
+      detail.detail ?? `HTTP ${response.status}`,
     );
   }
 

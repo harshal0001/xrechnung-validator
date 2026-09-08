@@ -29,8 +29,18 @@ from pathlib import Path
 from xrv.core import Finding
 
 CATALOGUE_DIR = Path("explanations")
-LANGUAGE = "de"
+#: Languages a catalogue may be written in. German is the default because the
+#: mandate is German and so are the people who hit these rules; English exists
+#: for everyone else reading the same report.
+LANGUAGES: tuple[str, ...] = ("de", "en")
+DEFAULT_LANGUAGE = "de"
+#: Kept for callers that predate the language parameter.
+LANGUAGE = DEFAULT_LANGUAGE
 SCHEMA_VERSION = 2
+
+
+class LanguageNotAvailableError(ValueError):
+    """A language this service does not write explanations in."""
 
 
 class CatalogueError(ValueError):
@@ -131,9 +141,15 @@ class Catalogue:
         )
 
     @classmethod
-    def for_ruleset(cls, version: str, base: Path | None = None) -> Catalogue:
+    def for_ruleset(
+        cls, version: str, base: Path | None = None, language: str = DEFAULT_LANGUAGE
+    ) -> Catalogue:
+        if language not in LANGUAGES:
+            raise LanguageNotAvailableError(
+                f"no explanations in '{language}'; available: {', '.join(LANGUAGES)}"
+            )
         directory = base if base is not None else CATALOGUE_DIR
-        return cls.load(directory / f"{version}.{LANGUAGE}.json")
+        return cls.load(directory / f"{version}.{language}.json")
 
     @property
     def reviewed_count(self) -> int:
