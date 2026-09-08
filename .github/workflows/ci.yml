@@ -63,12 +63,14 @@ jobs:
 
       # The catalogue is data, and data drifts. --check fails on an explanation
       # written against rule text the current rule set no longer has.
-      - name: Explanation catalogue
+      - name: Explanation catalogues
         run: |
-          uv run python scripts/review_sheet.py --check \
-            --ruleset "rulesets/$RULESET_VERSION" \
-            --explanations "explanations/$RULESET_VERSION.de.json" \
-            --out /tmp/review.md
+          for lang in de en; do
+            uv run python scripts/review_sheet.py --check \
+              --ruleset "rulesets/$RULESET_VERSION" \
+              --explanations "explanations/$RULESET_VERSION.$lang.json" \
+              --out "/tmp/review.$lang.md"
+          done
 
       # XRV_REQUIRE_RULESET turns the "no ruleset fetched" skip into a failure.
       # That skip is right on a clean checkout and wrong here: a silent skip

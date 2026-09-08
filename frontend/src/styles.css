@@ -81,6 +81,42 @@ h1 {
   margin: 0 0 0.5rem;
 }
 
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Two flat buttons, the active one filled. A switch, not a dropdown: there are
+   exactly two options and both should be visible at once. */
+.lang {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+}
+
+.lang__btn {
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.7rem;
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 0;
+  cursor: pointer;
+}
+
+.lang__btn--on {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.lang__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .lede {
   color: var(--ink-2);
   margin: 0;

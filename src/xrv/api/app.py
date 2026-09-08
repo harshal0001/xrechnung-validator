@@ -22,6 +22,7 @@ from fastapi.staticfiles import StaticFiles
 
 from xrv.api.service import ValidationService
 from xrv.core import ValidationReport
+from xrv.explain import DEFAULT_LANGUAGE, LanguageNotAvailableError
 from xrv.ingest import MAX_BYTES, MalformedXmlError, PayloadTooLargeError, UnsupportedDocumentError
 from xrv.ingest.zugferd import ZugferdError
 from xrv.rules import RulesetNotFoundError
@@ -102,6 +103,7 @@ async def read_capped(upload: UploadFile) -> bytes:
     response_model=ValidationReport,
     summary="Validate an invoice",
     responses={
+        400: {"description": "A language this service has no explanations in"},
         413: {"description": "Upload too large"},
         415: {"description": "Not an e-invoice this service validates"},
         422: {"description": "Recognisable but unreadable — malformed XML, or an unusable PDF"},
@@ -118,9 +120,13 @@ async def validate(
         str | None,
         Query(description="Rule set version; defaults to the newest available"),
     ] = None,
+    lang: Annotated[
+        str,
+        Query(description="Language for explanations: de or en"),
+    ] = DEFAULT_LANGUAGE,
 ) -> ValidationReport:
     payload = await read_capped(file)
-    return service.validate(payload, explain=explain, version=ruleset)
+    return service.validate(payload, explain=explain, version=ruleset, language=lang)
 
 
 @app.get("/rulesets", summary="Rule set versions and their provenance")
@@ -170,6 +176,11 @@ async def _too_large(request: Request, exc: PayloadTooLargeError) -> JSONRespons
 @app.exception_handler(RulesetNotFoundError)
 async def _no_ruleset(request: Request, exc: RulesetNotFoundError) -> JSONResponse:
     return _problem(404, "ruleset_not_found", str(exc))
+
+
+@app.exception_handler(LanguageNotAvailableError)
+async def _no_language(request: Request, exc: LanguageNotAvailableError) -> JSONResponse:
+    return _problem(400, "unknown_language", str(exc))
 
 
 # Mounted last so every API route above wins the path it owns. html=True serves

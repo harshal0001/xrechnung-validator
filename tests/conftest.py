@@ -171,3 +171,11 @@ def rule_texts(real_ruleset) -> dict[str, str]:
                 raw = " ".join("".join(text_node.itertext()).split())
                 found[rule_id] = re.sub(rf"^\[{re.escape(rule_id)}\]\s*-?\s*", "", raw)
     return found
+
+
+@pytest.fixture(scope="session")
+def en_catalogue(real_ruleset):
+    """The committed English catalogue, alongside the German one."""
+    from xrv.explain import Catalogue
+
+    return Catalogue.for_ruleset(real_ruleset.version, ROOT / "explanations", language="en")

@@ -23,11 +23,13 @@ import pytest
 
 from xrv.core import Finding, Severity
 from xrv.explain import (
+    LANGUAGES,
     SCHEMA_VERSION,
     Catalogue,
     CatalogueError,
     CatalogueProvider,
     Entry,
+    LanguageNotAvailableError,
     rule_text_digest,
 )
 
@@ -239,3 +241,37 @@ class TestTheCommittedCatalogue:
 
     def test_it_names_the_ruleset_it_belongs_to(self, catalogue: Catalogue, real_ruleset) -> None:
         assert catalogue.ruleset_version == real_ruleset.version
+
+
+class TestLanguages:
+    def test_a_language_the_service_does_not_write_in_is_refused(self, tmp_path: Path) -> None:
+        """Not a missing file: a language that is not on the list at all."""
+        with pytest.raises(LanguageNotAvailableError, match="fr"):
+            Catalogue.for_ruleset("2026-08-31", tmp_path, language="fr")
+
+    def test_both_committed_catalogues_load(
+        self, catalogue: Catalogue, en_catalogue: Catalogue
+    ) -> None:
+        assert catalogue.language == "de"
+        assert en_catalogue.language == "en"
+        assert set(LANGUAGES) == {"de", "en"}
+
+    def test_the_two_catalogues_cover_the_same_rules(
+        self, catalogue: Catalogue, en_catalogue: Catalogue
+    ) -> None:
+        """A rule explained in one language and not the other is a gap a reader
+        would hit by switching language mid-report."""
+        assert set(catalogue.entries) == set(en_catalogue.entries)
+
+    def test_the_two_catalogues_were_written_against_the_same_rule_text(
+        self, catalogue: Catalogue, en_catalogue: Catalogue
+    ) -> None:
+        """Same digest per rule: both explain the text now in force, so a KoSIT
+        rewording un-reviews both at once rather than leaving one stale."""
+        for rule_id, de in catalogue.entries.items():
+            assert en_catalogue.entries[rule_id].rule_text_digest == de.rule_text_digest, rule_id
+
+    def test_english_is_unreviewed_until_someone_reads_it(self, en_catalogue: Catalogue) -> None:
+        """Drafted from the reviewed German, but a translation is a new text and
+        gets its own review. Until then the gate withholds it."""
+        assert en_catalogue.reviewed_count == 0

@@ -155,6 +155,43 @@ class TestExplanations:
         assert all("context" in f for f in body["findings"])
 
 
+class TestLanguages:
+    def _broken(self, corpus: Path) -> bytes:
+        from lxml import etree
+
+        cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        tree = etree.parse(str(corpus / UBL))
+        tree.getroot().remove(tree.getroot().find(f"{{{cbc}}}BuyerReference"))
+        return etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+    def test_german_is_the_default(self, client: TestClient, corpus: Path) -> None:
+        body = upload(client, self._broken(corpus), explain="true").json()
+        finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
+        assert finding["explanation"] == "Die Käuferreferenz (BT-10) fehlt."
+
+    def test_english_is_withheld_while_unreviewed(self, client: TestClient, corpus: Path) -> None:
+        """The English catalogue exists and has an entry for this rule. It is not
+        served, because nobody has reviewed the English yet — the same gate that
+        held the German back before its review holds the English back now."""
+        body = upload(client, self._broken(corpus), explain="true", lang="en").json()
+        finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
+        assert finding["explanation"] is None
+        assert finding["context"] is None
+
+    def test_an_unknown_language_is_refused_with_the_list(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        response = upload(client, self._broken(corpus), lang="fr")
+        assert response.status_code == 400
+        assert response.json()["error"] == "unknown_language"
+        assert "de" in response.json()["detail"] and "en" in response.json()["detail"]
+
+    def test_rulesets_advertise_their_explanation_languages(self, client: TestClient) -> None:
+        entries = client.get("/rulesets").json()["rulesets"]
+        loaded = next(e for e in entries if e["loaded"])
+        assert set(loaded["explanation_languages"]) >= {"de", "en"}
+
+
 class TestErrorMapping:
     def test_an_image_is_unsupported_media(self, client: TestClient) -> None:
         response = upload(client, b"\x89PNG\r\n\x1a\n", name="scan.png")
