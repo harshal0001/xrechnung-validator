@@ -102,7 +102,7 @@ without failing the document.
 | English explanations | 25 of 25 reviewed and serving; `?lang=en` |
 | HTTP API | done |
 | Frontend | done — drag-and-drop, bundled samples, inline source highlighting, DE/EN |
-| Deployment | not started |
+| Deployment | AWS Lambda container on arm64 Graviton behind a Function URL, `eu-central-1`; see `deploy/` |
 | CI (lint, types, tests, multi-arch image build) | done |
 
 ### Measured results
@@ -119,7 +119,7 @@ Only the pair means anything.
 | Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
 | Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
-| Cold start to first response | — |
+| Cold start to first response | — *(measure with `deploy/measure.sh` once deployed)* |
 | Explanations reviewed by a person | German **25 of 25** — every `what` traced to the official rule text, every `why` to a cited public source (§ 14 UStG, the federal e-invoicing portal, the EN 16931 model, or the ruleset itself); unsourceable claims were cut. English **25 of 25** — each `what` checked against the English rule text, each `why` against the approved German and its citation |
 | Explanation accuracy on the eval set | — |
 
@@ -184,6 +184,22 @@ Two things it settled, both worth keeping:
 > `PATH`. Generate with `--structure-style single-package`: the `clusters` layout
 > splits UBL 2.1 into thousands of modules and makes import times an order of
 > magnitude worse.
+
+## Deployment
+
+One container image, no platform branches. It carries the AWS Lambda Web Adapter,
+which the Lambda runtime loads from `/opt/extensions` and every other host simply
+never reads — so **the same image runs unmodified on Cloud Run, Render, or a
+laptop**. Nothing in the application knows where it is running: there is no
+Lambda handler and no second Dockerfile.
+
+Deployed to AWS Lambda as a container on arm64 Graviton behind a Function URL, in
+`eu-central-1` (Frankfurt), so German invoices are processed in Germany. Lambda's
+init phase is unbilled at full vCPU, which is a real fit here: startup compiles
+three XSD schemas and four Schematron stylesheets in 2.4 s, and that cost lands
+where nobody pays for it.
+
+See [`deploy/`](deploy/) for the script and the runbook.
 
 ## Not in scope
 
