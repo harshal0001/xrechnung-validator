@@ -26,7 +26,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from xrv.core import Finding
+from xrv.core import Finding, LocalisedError
 
 CATALOGUE_DIR = Path("explanations")
 #: Languages a catalogue may be written in. German is the default because the
@@ -39,7 +39,7 @@ LANGUAGE = DEFAULT_LANGUAGE
 SCHEMA_VERSION = 2
 
 
-class LanguageNotAvailableError(ValueError):
+class LanguageNotAvailableError(LocalisedError):
     """A language this service does not write explanations in."""
 
 
@@ -146,7 +146,10 @@ class Catalogue:
     ) -> Catalogue:
         if language not in LANGUAGES:
             raise LanguageNotAvailableError(
-                f"no explanations in '{language}'; available: {', '.join(LANGUAGES)}"
+                f"no explanations in '{language}'; available: {', '.join(LANGUAGES)}",
+                code="unknown_language",
+                language=language,
+                available=", ".join(LANGUAGES),
             )
         directory = base if base is not None else CATALOGUE_DIR
         return cls.load(directory / f"{version}.{language}.json")

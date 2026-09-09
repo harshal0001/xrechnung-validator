@@ -10,17 +10,19 @@ from __future__ import annotations
 
 from lxml import etree
 
+from xrv.core import LocalisedError
+
 #: Larger than any real invoice by a wide margin, small enough that a malicious
 #: upload cannot exhaust memory before parsing even begins. A ZUGFeRD PDF is the
 #: bulky case and still sits far below this.
 MAX_BYTES = 16 * 1024 * 1024
 
 
-class PayloadTooLargeError(ValueError):
+class PayloadTooLargeError(LocalisedError):
     """The upload exceeds the size a real invoice could plausibly need."""
 
 
-class MalformedXmlError(ValueError):
+class MalformedXmlError(LocalisedError):
     """The bytes are not well-formed XML."""
 
 
@@ -56,12 +58,12 @@ def parse(payload: bytes) -> etree._ElementTree:
     if len(payload) > MAX_BYTES:
         raise PayloadTooLargeError(f"payload is {len(payload):,} bytes; the limit is {MAX_BYTES:,}")
     if not payload.strip():
-        raise MalformedXmlError("payload is empty")
+        raise MalformedXmlError("payload is empty", code="xml_empty")
 
     try:
         root = etree.fromstring(payload, parser=safe_parser())
     except etree.XMLSyntaxError as exc:
-        raise MalformedXmlError(f"not well-formed XML: {exc}") from exc
+        raise MalformedXmlError(f"not well-formed XML: {exc}", code="xml_malformed") from exc
     return root.getroottree()
 
 

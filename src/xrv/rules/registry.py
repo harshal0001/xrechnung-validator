@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 
-from xrv.core import Syntax
+from xrv.core import LocalisedError, Syntax
 
 MANIFEST_NAME = "manifest.json"
 
@@ -45,7 +45,7 @@ _XSD_KEYS: Mapping[Syntax, Mapping[str, str]] = {
 }
 
 
-class RulesetNotFoundError(LookupError):
+class RulesetNotFoundError(LocalisedError):
     """No ruleset matched, or the rulesets directory is empty."""
 
 
@@ -178,7 +178,12 @@ class RulesetRegistry:
             if ruleset.version == version:
                 return ruleset
         available = ", ".join(self.versions()) or "none"
-        raise RulesetNotFoundError(f"ruleset '{version}' not found (available: {available})")
+        raise RulesetNotFoundError(
+            f"ruleset '{version}' not found (available: {available})",
+            code="ruleset_not_found",
+            version=version,
+            available=available,
+        )
 
 
 def default_registry() -> RulesetRegistry:

@@ -1,8 +1,25 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" translate="no">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- This page ships its own translations and switches them with the DE/EN
+         control. Left to itself, Chrome sees lang="de", offers to translate, and
+         renders a machine translation on top of the real one — mixing the two
+         and producing nonsense like "verletzt BR-DE-15" as "BR-DE-15 injured".
+         Opting out is what keeps the language the reader chose the one they get. -->
+    <meta name="google" content="notranslate" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Public Sans is the typeface of the US government design system: drawn for
+         dense civic forms, legible at small sizes, no personality it has not
+         earned. For a compliance tool that is a reason, not a preference.
+         IBM Plex Mono carries every technical identifier. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <title>XRechnung prüfen</title>
   </head>
   <body>
