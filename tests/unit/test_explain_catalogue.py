@@ -271,7 +271,19 @@ class TestLanguages:
         for rule_id, de in catalogue.entries.items():
             assert en_catalogue.entries[rule_id].rule_text_digest == de.rule_text_digest, rule_id
 
-    def test_english_is_unreviewed_until_someone_reads_it(self, en_catalogue: Catalogue) -> None:
-        """Drafted from the reviewed German, but a translation is a new text and
-        gets its own review. Until then the gate withholds it."""
-        assert en_catalogue.reviewed_count == 0
+    def test_no_entry_is_reviewed_against_stale_text(
+        self, catalogue: Catalogue, en_catalogue: Catalogue
+    ) -> None:
+        """An approval only counts if it was given for the text now in force.
+
+        This replaces a snapshot assertion (English reviewed_count == 0) that the
+        review itself broke. The durable property is the invariant behind the
+        count: every entry with a reviewed_digest has one matching its
+        rule_text_digest, so reviewed_count never silently under-reports a
+        review that drifted.
+        """
+        for language, cat in (("de", catalogue), ("en", en_catalogue)):
+            approved = [e for e in cat.entries.values() if e.reviewed_digest is not None]
+            assert cat.reviewed_count == len(approved), language
+            for entry in approved:
+                assert entry.reviewed_digest == entry.rule_text_digest, language

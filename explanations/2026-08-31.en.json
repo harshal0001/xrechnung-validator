@@ -18,9 +18,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 4. Not yet reviewed in English."
       ],
       "rule_text_digest": "ef3fa39aa40f91b2",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "ef3fa39aa40f91b2",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-03": {
       "what": "The invoice issue date (BT-2) is missing.",
@@ -29,9 +29,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 3. Not yet reviewed in English."
       ],
       "rule_text_digest": "16f0175c46080d4e",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "16f0175c46080d4e",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-05": {
       "what": "The invoice currency code (BT-5) is missing.",
@@ -40,9 +40,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
       ],
       "rule_text_digest": "65996a3e396605b9",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "65996a3e396605b9",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-08": {
       "what": "The seller's postal address (BG-5) is missing.",
@@ -51,9 +51,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
       ],
       "rule_text_digest": "3d702cca17105faa",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "3d702cca17105faa",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-10": {
       "what": "The buyer's postal address (BG-8) is missing.",
@@ -62,9 +62,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
       ],
       "rule_text_digest": "6e9f719e32c9f37f",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6e9f719e32c9f37f",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-16": {
       "what": "The invoice contains no invoice line (BG-25).",
