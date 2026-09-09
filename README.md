@@ -3,212 +3,202 @@
 [![CI](https://github.com/harshal0001/xrechnung-validator/actions/workflows/ci.yml/badge.svg)](https://github.com/harshal0001/xrechnung-validator/actions/workflows/ci.yml)
 
 Validates German e-invoices against EN 16931 and the KoSIT XRechnung rule set, and
-explains each failure in plain German.
+explains each failure in plain German or English.
 
 Validators for this already exist. What is missing is the layer between
-`BR-DE-15 failed` and *"the buyer reference is missing, which the customer's system
-needs in order to route the invoice to the right cost centre."* That layer is the
-point of this project.
+`BR-DE-15 failed` and *"the buyer reference is missing — the federal invoice
+platform routes on that field, and the ordering authority gives it to you with the
+purchase order."* That layer is the point of this project.
 
-> **Status: in development.** The validation core is not finished yet. See
-> [Status](#status) for what works today. This service validates against the
-> published KoSIT rule set; it is not a legal compliance certification.
+> This service validates against the published KoSIT rule set. It is not a legal
+> compliance certification, and it does not claim to be.
+
+---
 
 ## What it does
 
-- Accepts an invoice as **XML** (UBL 2.1 or UN/CEFACT CII) or as a **ZUGFeRD PDF/A-3**,
-  sniffs the payload and routes it.
-- Validates in two layers: **XSD** for structure, **KoSIT Schematron** (compiled to
-  XSLT 2.0, executed via Saxon) for the business rules that actually fail in
-  production — `BR-*`, `BR-CO-*`, `BR-DE-*`.
-- Returns a structured list of findings, each with its rule ID, severity, verbatim
-  rule text, XPath location and offending value.
-- Explains each finding in German, grounded strictly in the rule text.
+Accepts an invoice as **UBL 2.1 XML**, **UN/CEFACT CII XML**, or a **ZUGFeRD /
+Factur-X PDF**, sniffs the payload and routes it. Validates in two layers — XSD for
+structure, KoSIT Schematron (compiled to XSLT 2.0, executed via Saxon) for the
+business rules. Returns a typed report, and shows the failing line in the document.
 
-Rule sets are downloaded, hashed and recorded as data — never vendored as constants.
-Every response carries the `ruleset_version` and `ruleset_sha256` that produced it,
-so a result can always be traced back to a specific published configuration.
+Every response records which rule set version produced it and the SHA-256 of that
+version's bytes.
 
-## Tech stack
+---
 
-| Layer | Choice | Why |
-|---|---|---|
-| Language | Python 3.12 | |
-| API | FastAPI + Pydantic v2 | typed models, OpenAPI for free |
-| Bindings | xsdata | typed dataclasses generated from the official XSDs |
-| XSLT | **SaxonC-HE** (`saxonche`) | KoSIT ships XSLT 2.0; `lxml` only does 1.0 |
-| XML | lxml | XSD validation and tree work |
-| PDF | pikepdf | reads PDF/A-3 embedded attachments |
-| Frontend | React + TypeScript + Vite | static build |
-| Container | Docker | `saxonche` bundles a native library |
-| Tests | pytest | including the mutation suite |
+## What makes it different
 
-`saxonche` bundling a native library is the constraint that shapes deployment: it
-rules out restricted serverless Python runtimes and makes the container the unit of
-deployment.
+Four things, in the order they matter.
 
-## Architecture
+### The explanation is grounded, and the grounding is checkable
 
-```
-Upload (XML or PDF)
-   |
-   +-- ingest/     sniff payload, unwrap PDF/A-3, detect ZUGFeRD profile
-   |
-   +-- bindings/   xsdata-generated types (committed, never hand-edited)
-   |
-   +-- validate/   XSD structural check, then Saxon over KoSIT Schematron,
-   |               SVRL parsed into typed Findings
-   |
-   +-- explain/    grounded German explanation per finding
-   |
-   +-- api/        FastAPI routes
-```
+Each entry is split in two, and the split is the product:
 
-`rules/` owns fetching, hashing and versioning the KoSIT configuration.
-
-**The boundary that matters:** `explain/` never receives the invoice. Its port is
-
-```python
-class ExplanationProvider(Protocol):
-    def explain(self, finding: Finding) -> str: ...
-```
-
-The document is not in the signature, so it cannot reach a model. Explanations are
-generated per rule, offline, once per rule set version, reviewed, and committed
-alongside the rules they describe — so the service serves grounded German text with
-no model call in the request path.
-
-### Severity
-
-A Schematron `failed-assert` is not automatically an error. KoSIT carries severity in
-the SVRL `flag` attribute, and valid invoices legitimately emit informational
-asserts. Only `fatal` and `error` block; `warning` and `information` are reported
-without failing the document.
-
-## Status
-
-| | |
+| Field | What it is |
 |---|---|
-| Dependency spikes (Saxon, xsdata) | done — verified in-container on amd64 and arm64 |
-| Rule set fetching, hashing, versioning | done |
-| Core domain model, rule set registry | done |
-| SVRL parsing, Saxon validation engine | done |
-| XSD structural validation | done |
-| Ingest: sniffing, routing, hardened parsing | done |
-| ZUGFeRD PDF unwrapping, profile detection | done |
-| Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
-| Typed bindings wired into parsing | not started |
-| Explanation layer: boundary, catalogue, review workflow | done — 25 German entries reviewed and serving |
-| English explanations | 25 of 25 reviewed and serving; `?lang=en` |
-| HTTP API | done |
-| Frontend | done — drag-and-drop, bundled samples, inline source highlighting, DE/EN |
-| Deployment | AWS Lambda container on arm64 Graviton behind a Function URL, `eu-central-1`; see `deploy/` |
-| CI (lint, types, tests, multi-arch image build) | done |
+| `what` | Restates the rule. Must be derivable from the official rule text alone. |
+| `why` | Context — cause, consequence, legal background. Useful, human-approved, and **not** in any rule text. |
 
-### Measured results
+They stay separate fields through the model, the API and the interface. Folding them
+together would present editorial text as though it had the standing of a grounded
+restatement.
 
-Filled in from real runs, not estimates. Empty until measured.
+Every `why` sentence traces to a cited public source — § 14 Abs. 4 UStG, the federal
+e-invoicing portal, the EN 16931 abstract model, or a named rule in the rule set —
+with the citation recorded per entry. Anything that could not be sourced was **cut**,
+not softened. Four entries ship with an empty `why` because that was the honest state.
 
-Two numbers are needed, not one. Zero false positives is easy to reach by
-reporting nothing; proving rules fire is easy to reach by reporting everything.
-Only the pair means anything.
+### A language model never sees the invoice
+
+The explainer's signature is `explain(finding) -> str`. It receives a frozen object
+carrying four grounding fields and no reference to the document. There is no code path
+by which it could obtain the invoice, because nothing hands it one.
+
+That is tested, not asserted: a test validates a real invoice and checks that none of
+its distinctive values — IBAN, party names, line items — appear anywhere in the
+findings an explainer receives. It is verified non-vacuous by injecting one and
+confirming the test catches it.
+
+### Explanations are reviewed, and review expires
+
+Each entry records the digest of the rule text it was written against, and serves only
+while that digest still matches. If KoSIT rewords a rule, the entry **un-reviews
+itself** rather than leaving a stale approval standing over text nobody read.
+
+All 50 entries — 25 German, 25 English — have been read and approved by a person
+against their cited sources.
+
+### Accuracy is measured in both directions
+
+Zero false positives is trivially achievable by reporting nothing. Proving rules fire
+is trivially achievable by reporting everything. Only the pair means anything.
+
+---
+
+## Measured results
+
+Every figure from a real run against the official KoSIT corpus and rule set. None is
+an estimate; an empty cell is correct until measured.
 
 | Metric | Value |
 |---|---|
-| Business rules proven to fire | **25** across 38 mutations — 9 German CIUS, 6 EN 16931 core, 6 calculation, 4 code list — UBL and CII |
-| Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
-| Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
-| Cold start to first response | — *(measure with `deploy/measure.sh` once deployed)* |
-| Explanations reviewed by a person | German **25 of 25** — every `what` traced to the official rule text, every `why` to a cited public source (§ 14 UStG, the federal e-invoicing portal, the EN 16931 model, or the ruleset itself); unsourceable claims were cut. English **25 of 25** — each `what` checked against the English rule text, each `why` against the approved German and its citation |
-| Explanation accuracy on the eval set | — |
+| Business rules proven to fire | **25** across 38 mutations — German CIUS, EN 16931 core, calculation, code list — both syntaxes |
+| Rules firing that should not | **0** — every mutation trips its target rule and nothing beyond what it declares |
+| Explanations reviewed by a person | **50 of 50** (25 DE, 25 EN), each traced to the rule text and a cited source |
+| Validation latency | 27 ms/document warm, XSD and both rule sets |
+| Startup | 2.4 s to compile three schemas and four stylesheets |
+| Container image | 218 MB, runs on amd64 and arm64 |
+| Cold start to first response | — |
 
-## Local development
+---
 
-```bash
-uv sync --all-extras          # resolves from uv.lock, so CI and local match
+## Architecture
 
-# Fetch the current KoSIT rule set and reference invoices
-uv run python scripts/fetch_ruleset.py --testsuite
-```
+Ports and adapters. Each module owns one thing; the column that matters is the third.
 
-Run the service:
+| Module | Owns | Must not |
+|---|---|---|
+| `core/` | `Finding`, `ValidationReport`, `Severity` — the contract everything speaks | Import Saxon, lxml or the web framework |
+| `ingest/` | Sniffing, routing, ZUGFeRD unwrapping, hardened parsing | Know anything about rules |
+| `rules/` | Downloading, hashing and version-addressing KoSIT configurations | Execute anything |
+| `validate/` | XSD and Saxon execution; SVRL turned into typed findings | Format text for humans |
+| `explain/` | Grounded explanation, review state, language selection | **See the invoice** |
+| `api/` | Routes, upload handling, error translation | Contain validation logic |
 
-```bash
-uv run uvicorn xrv.api:app --reload
-# http://127.0.0.1:8000/docs
+### The dependency that shapes everything
 
-# The UI, with hot reload and the API proxied through it:
-cd frontend && npm install && npm run dev
-# http://127.0.0.1:5173
+SaxonC-HE bundles a **native library**. KoSIT ships Schematron compiled to XSLT 2.0,
+and lxml only does 1.0 — so Saxon is not negotiable, and the native library rules out
+most plain serverless Python runtimes. That single fact makes a container the
+deployment unit and sets the memory floor.
 
-curl -F file=@invoice.xml http://127.0.0.1:8000/validate
-curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?explain=true"
-curl -F file=@invoice.xml "http://127.0.0.1:8000/validate?explain=true&lang=en"
-curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?include_source=true"   # the XML inside the PDF
-```
+It is also not thread-safe, so validation is serialised inside each process and
+concurrency comes from more processes. That is how both Lambda and Cloud Run scale a
+container anyway.
 
-Or run both from one container, the way it deploys:
+### The rule set is data, never a constant
 
-```bash
-docker build -t xrv . && docker run --rm -p 8080:8080 xrv
-# http://localhost:8080
-```
+The KoSIT validator configuration is downloaded, hashed and recorded — never vendored
+into code. Every fetch writes a manifest naming the release and the SHA-256 of its
+bytes, and every validation response carries both forward.
 
-Run the checks CI runs:
+This exists because **XRechnung 4.0 is in flight**. Building against version-addressed
+rules makes that migration a configuration change rather than a rewrite.
 
-```bash
-uv run ruff check src tests scripts
-uv run ruff format --check src tests scripts
-uv run mypy src/xrv
-uv run pytest
-```
+### Severity is where a naive implementation goes wrong
 
-Tests that need a fetched rule set skip when there is not one, so the suite passes
-on a clean checkout. CI sets `XRV_REQUIRE_RULESET=1` to turn that skip into a
-failure, because a silent skip there would hide rule set drift.
+A failed Schematron assertion is *not* automatically an error. KoSIT carries severity
+in a `flag` attribute, and its `fatal` means a business-rule breach, not a structural
+failure. Reference invoices that are valid by construction still emit informational
+assertions.
 
-Verify the toolchain end to end — Saxon compiling and executing real KoSIT
-stylesheets, and xsdata generating and parsing with the official schemas:
+Treating every failed assertion as a failure would report **33 of 66 valid documents
+as broken**.
 
-```bash
-bash scripts/run_spike.sh            # host + amd64 container
-bash scripts/run_spike.sh --arm64    # also arm64 (emulated; slow)
-```
-
-Binding generation is not yet wired into a script of its own — `scripts/spike_xsdata.py`
-generates from the XSDs shipped in the rule set and is the reference for how it is done.
-Two things it settled, both worth keeping:
-
-> `xsdata` shells out to `ruff` to format generated code, so `ruff` must be on
-> `PATH`. Generate with `--structure-style single-package`: the `clusters` layout
-> splits UBL 2.1 into thousands of modules and makes import times an order of
-> magnitude worse.
+---
 
 ## Deployment
 
-One container image, no platform branches. It carries the AWS Lambda Web Adapter,
-which the Lambda runtime loads from `/opt/extensions` and every other host simply
-never reads — so **the same image runs unmodified on Cloud Run, Render, or a
-laptop**. Nothing in the application knows where it is running: there is no
-Lambda handler and no second Dockerfile.
+**One image, no platform branches.** It carries the AWS Lambda Web Adapter, which the
+Lambda runtime loads from `/opt/extensions` and every other host never reads — so the
+same bytes run on Lambda behind a Function URL, on Cloud Run, on Render, or on a
+laptop. Nothing in the application knows where it is running: there is no Lambda
+handler and no second Dockerfile.
 
-Deployed to AWS Lambda as a container on arm64 Graviton behind a Function URL, in
-`eu-central-1` (Frankfurt), so German invoices are processed in Germany. Lambda's
-init phase is unbilled at full vCPU, which is a real fit here: startup compiles
-three XSD schemas and four Schematron stylesheets in 2.4 s, and that cost lands
+Deployed as a container on **arm64 Graviton** in **`eu-central-1` (Frankfurt)**, so
+German invoices are processed in Germany. Lambda's init phase is unbilled at full
+vCPU, which is a real fit here: the 2.4 s of schema and stylesheet compilation lands
 where nobody pays for it.
 
-See [`deploy/`](deploy/) for the script and the runbook.
+The frontend is served by the same process — one origin, no CORS, one thing to deploy.
+
+---
+
+## Stack
+
+| Layer | Choice | Why this and not the obvious alternative |
+|---|---|---|
+| XSLT engine | **SaxonC-HE** | Not negotiable — KoSIT ships XSLT 2.0 and lxml only does 1.0 |
+| Language | Python 3.12 | The floor the code generator supports |
+| XML | lxml | XSD validation and tree work, with entity resolution off at the boundary |
+| PDF | pikepdf | Reads PDF/A-3 embedded attachments |
+| API | FastAPI + Pydantic v2 | Typed models, schema for free |
+| Frontend | React + TypeScript + Vite | Static build, served from the same container |
+| Container | Docker | Required — Saxon ships a native library |
+| Tests | pytest, vitest | 493 backend, 21 frontend |
+| CI | GitHub Actions | Lint, types, tests and a multi-architecture image build on every change |
+
+---
+
+## Running it
+
+```bash
+docker build -t xrv . && docker run --rm -p 8080:8080 xrv
+```
+
+Then open `http://localhost:8080`. Three sample invoices are bundled, so it can be
+tried without having an XRechnung file to hand.
+
+---
 
 ## Not in scope
 
-Invoice generation, Peppol transmission (Germany mandates the format, not the
-channel), ERP connectors, PDF/A-3 conformance checking, and the ZUGFeRD `EXTENDED`
-profile edge cases.
+Keeping this list short is what makes the project finishable.
+
+- **Invoice generation.** This validates and explains; it does not author.
+- **Peppol transmission.** Germany mandates the format, not the channel.
+- **ERP connectors.**
+- **PDF/A-3 conformance checking.** That is veraPDF's job.
+- **Any claim of legal compliance certification.** The service validates against the
+  published rule set. That statement is true and defensible; the other one is not.
+
+---
 
 ## References
 
 - [KoSIT validator configuration](https://github.com/itplr-kosit/validator-configuration-xrechnung)
-- [KoSIT test suite](https://github.com/itplr-kosit/xrechnung-testsuite)
-- [SaxonC-HE](https://pypi.org/project/saxonche/) · [xsdata](https://pypi.org/project/xsdata/)
+- [EN 16931 Schematron](https://github.com/ConnectingEurope/eInvoicing-EN16931)
+- [German CIUS Schematron](https://github.com/itplr-kosit/xrechnung-schematron)
+- Sample invoices derive from the [KoSIT test suite](https://github.com/itplr-kosit/xrechnung-testsuite) (Apache-2.0); see `frontend/public/samples/NOTICE.md`
