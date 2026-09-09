@@ -169,14 +169,19 @@ class TestLanguages:
         finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
         assert finding["explanation"] == "Die Käuferreferenz (BT-10) fehlt."
 
-    def test_english_is_withheld_while_unreviewed(self, client: TestClient, corpus: Path) -> None:
-        """The English catalogue exists and has an entry for this rule. It is not
-        served, because nobody has reviewed the English yet — the same gate that
-        held the German back before its review holds the English back now."""
+    def test_english_serves_exactly_what_has_been_reviewed(
+        self, client: TestClient, corpus: Path, en_catalogue
+    ) -> None:
+        """The gate as a property rather than a snapshot: a finding gets an
+        English explanation if and only if its rule's English entry has been
+        approved for the text now in force. True at 0 reviewed, true at 25."""
         body = upload(client, self._broken(corpus), explain="true", lang="en").json()
-        finding = next(f for f in body["findings"] if f["rule_id"] == "BR-DE-15")
-        assert finding["explanation"] is None
-        assert finding["context"] is None
+        for finding in body["findings"]:
+            entry = en_catalogue.entries.get(finding["rule_id"])
+            reviewed = entry is not None and entry.is_reviewed_for(finding["rule_text"])
+            assert (finding["explanation"] is not None) == reviewed, finding["rule_id"]
+            if reviewed:
+                assert finding["explanation"] == entry.what
 
     def test_an_unknown_language_is_refused_with_the_list(
         self, client: TestClient, corpus: Path
