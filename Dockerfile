@@ -1,5 +1,11 @@
 # Service image: API and frontend in one container.
 #
+# It carries the AWS Lambda Web Adapter, which the Lambda runtime loads from
+# /opt/extensions and every other host simply never reads. So this is one image,
+# not one per platform: the same bytes run on Lambda behind a Function URL, on
+# Cloud Run, on Render, and on a laptop. Nothing in the application knows or
+# cares which — there is no handler, no platform branch, no second Dockerfile.
+#
 # The point of this file is that the SAME image runs locally, on Lambda (via the
 # Web Adapter extension), on Cloud Run, and on Render — with no code branches.
 # That is what keeps the hosting decision reversible.
@@ -81,8 +87,15 @@ COPY --from=frontend /ui/dist ./frontend/dist
 # uploads an invoice.
 RUN python scripts/fetch_ruleset.py --verify /app/rulesets
 
+# ~3.5 MB. It translates Lambda Function URL events into ordinary HTTP against
+# the server below, which is why the application needs no Lambda handler at all.
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 \
+     /lambda-adapter /opt/extensions/lambda-adapter
+
 ENV XRV_RULESET_DIR=/app/rulesets \
-    PORT=8080
+    PORT=8080 \
+    AWS_LWA_PORT=8080 \
+    AWS_LWA_READINESS_CHECK_PATH=/healthz
 
 EXPOSE 8080
 
