@@ -40,6 +40,14 @@ One worker per instance, deliberately: SaxonC-HE is not thread-safe, so
 validation is serialised inside the process and concurrency comes from more
 instances. That is how Lambda scales anyway.
 
+## One thing that will bite you
+
+`docker buildx --push` attaches provenance and SBOM attestations by default, which
+makes the push an OCI manifest list. **Lambda accepts only a Docker v2 manifest** and
+rejects the image at `CreateFunction` with *"media type ... is not supported"* — after
+the build and the push have both succeeded. The script passes `--provenance=false
+--sbom=false` and forces the Docker media type for exactly this reason.
+
 ## Measure the cold start
 
 The README's results table has an empty "cold start to first response" row. It
