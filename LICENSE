@@ -1,0 +1,17 @@
+Copyright (c) 2026 Harshal Kothari. All rights reserved.
+
+This source code is published so that it can be read and evaluated — as a portfolio
+project and as a reference for how the problem was approached.
+
+No permission is granted to copy, modify, distribute, sublicense, or use this code or
+any substantial part of it, in source or compiled form, for any purpose. Reading it,
+running it locally to see what it does, and quoting short excerpts with attribution
+are fine.
+
+The KoSIT rule sets and the reference invoices this project fetches or derives from
+carry their own licences and are not covered by this notice. Sample invoices under
+frontend/public/samples/ derive from the KoSIT XRechnung test suite and remain under
+the Apache License 2.0; see the NOTICE.md beside them.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. It validates against
+a published rule set and is not a legal compliance certification.
