@@ -64,6 +64,16 @@ export const UI: Record<Lang, Record<string, string>> = {
     failedGeneric: "Die Prüfung ist fehlgeschlagen",
     unexpected: "Unerwarteter Fehler bei der Prüfung.",
     language: "Sprache",
+    orSample: "Oder ein Beispiel ausprobieren",
+    showSource: "Im Dokument zeigen",
+    hideSource: "Ausblenden",
+    contextNote: "Das Element fehlt. Erwartet wird es innerhalb dieses Elements.",
+    noSource: "Die Stelle konnte im Dokument nicht aufgelöst werden.",
+    copySummary: "Zusammenfassung kopieren",
+    copied: "Kopiert",
+    blockingOnly: "Nur blockierende",
+    ruleSource: "Regeltext nachschlagen",
+    findingsHidden: "ausgeblendet",
   },
   en: {
     title: "Check an XRechnung",
@@ -87,6 +97,16 @@ export const UI: Record<Lang, Record<string, string>> = {
     failedGeneric: "The check failed",
     unexpected: "Unexpected error during the check.",
     language: "Language",
+    orSample: "Or try a sample",
+    showSource: "Show in document",
+    hideSource: "Hide",
+    contextNote: "The element is missing. It is expected inside this element.",
+    noSource: "The location could not be resolved in the document.",
+    copySummary: "Copy summary",
+    copied: "Copied",
+    blockingOnly: "Blocking only",
+    ruleSource: "Look up the rule text",
+    findingsHidden: "hidden",
   },
 };
 
@@ -98,3 +118,29 @@ export const UI: Record<Lang, Record<string, string>> = {
 export function readablePath(xpath: string): string {
   return xpath.replace(/Q\{[^}]*\}/g, "").replace(/\{[^}]*\}/g, "") || xpath;
 }
+
+
+/** The bundled demonstration invoices, described in both languages. */
+export interface Sample {
+  file: string;
+  label: Record<Lang, string>;
+  note: Record<Lang, string>;
+}
+
+export const SAMPLES: readonly Sample[] = [
+  {
+    file: "clean.xml",
+    label: { de: "Gültige Rechnung", en: "Valid invoice" },
+    note: { de: "Offizielle Referenznachricht", en: "Official reference message" },
+  },
+  {
+    file: "missing-buyer-reference.xml",
+    label: { de: "Käuferreferenz fehlt", en: "Buyer reference missing" },
+    note: { de: "verletzt BR-DE-15", en: "breaks BR-DE-15" },
+  },
+  {
+    file: "totals-mismatch.xml",
+    label: { de: "Summe stimmt nicht", en: "Totals do not add up" },
+    note: { de: "verletzt BR-CO-10 und BR-CO-13", en: "breaks BR-CO-10 and BR-CO-13" },
+  },
+];

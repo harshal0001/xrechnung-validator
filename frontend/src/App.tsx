@@ -1,8 +1,18 @@
-import { useCallback, useRef, useState } from "react";
-import { ApiError, isBlocking, isValid, validate } from "./api";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { ApiError, isBlocking, isValid, ruleSourceUrl, validate } from "./api";
 import type { Finding, Severity, ValidationReport } from "./api";
-import { LANGS, SEVERITY_LABEL, SEVERITY_MEANING, SOURCE_LABEL, SYNTAX_LABEL, UI, readablePath } from "./labels";
+import {
+  LANGS,
+  SAMPLES,
+  SEVERITY_LABEL,
+  SEVERITY_MEANING,
+  SOURCE_LABEL,
+  SYNTAX_LABEL,
+  UI,
+  readablePath,
+} from "./labels";
 import type { Lang } from "./labels";
+import { locate } from "./locate";
 
 type State =
   | { status: "idle" }
@@ -20,6 +30,7 @@ export default function App() {
   const [state, setState] = useState<State>({ status: "idle" });
   const [explain, setExplain] = useState(true);
   const [lang, setLang] = useState<Lang>("de");
+  const [blockingOnly, setBlockingOnly] = useState(false);
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const t = UI[lang];
@@ -32,13 +43,29 @@ export default function App() {
         setState({ status: "done", filename: file.name, report });
       } catch (caught) {
         const error =
-          caught instanceof ApiError
-            ? caught
-            : new ApiError(0, "unknown", t.unexpected ?? "");
+          caught instanceof ApiError ? caught : new ApiError(0, "unknown", t.unexpected ?? "");
         setState({ status: "failed", filename: file.name, error });
       }
     },
     [explain, lang, t],
+  );
+
+  /** Fetch a bundled sample and run it through the same path as an upload. */
+  const checkSample = useCallback(
+    async (fileName: string) => {
+      try {
+        const response = await fetch(`/samples/${fileName}`);
+        const text = await response.text();
+        await check(new File([text], fileName, { type: "application/xml" }));
+      } catch {
+        setState({
+          status: "failed",
+          filename: fileName,
+          error: new ApiError(0, "unreachable", t.unreachable ?? ""),
+        });
+      }
+    },
+    [check, t],
   );
 
   const onDrop = useCallback(
@@ -103,13 +130,42 @@ export default function App() {
         <p className="dropzone__hint">{t.dropHint}</p>
       </section>
 
-      <label className="option">
-        <input type="checkbox" checked={explain} onChange={(e) => setExplain(e.target.checked)} />
-        <span>
-          {t.explainOption}
-          <em>{t.explainNote}</em>
-        </span>
-      </label>
+      {/* Most visitors will not have an XRechnung file to hand. Without this the
+          page is a dropzone they cannot use, and they leave without seeing it work. */}
+      <section className="samples">
+        <p className="samples__label">{t.orSample}</p>
+        <div className="samples__row">
+          {SAMPLES.map((sample) => (
+            <button
+              key={sample.file}
+              type="button"
+              className="sample"
+              onClick={() => void checkSample(sample.file)}
+            >
+              <span className="sample__label">{sample.label[lang]}</span>
+              <span className="sample__note">{sample.note[lang]}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="options">
+        <label className="option">
+          <input type="checkbox" checked={explain} onChange={(e) => setExplain(e.target.checked)} />
+          <span>
+            {t.explainOption}
+            <em>{t.explainNote}</em>
+          </span>
+        </label>
+        <label className="option">
+          <input
+            type="checkbox"
+            checked={blockingOnly}
+            onChange={(e) => setBlockingOnly(e.target.checked)}
+          />
+          <span>{t.blockingOnly}</span>
+        </label>
+      </div>
 
       {state.status === "checking" && (
         <p className="status" role="status">
@@ -122,7 +178,12 @@ export default function App() {
       )}
 
       {state.status === "done" && (
-        <Report filename={state.filename} report={state.report} lang={lang} />
+        <Report
+          filename={state.filename}
+          report={state.report}
+          lang={lang}
+          blockingOnly={blockingOnly}
+        />
       )}
     </div>
   );
@@ -140,17 +201,65 @@ function Failure({ error, filename, lang }: { error: ApiError; filename: string;
   );
 }
 
-function Report({ filename, report, lang }: { filename: string; report: ValidationReport; lang: Lang }) {
+/** A plain-text rendering, for pasting into an email to whoever sent the invoice. */
+function summarise(report: ValidationReport, filename: string, lang: Lang): string {
   const t = UI[lang];
+  const lines = [
+    `${filename} — ${report.syntax}, ${report.ruleset_version}`,
+    "",
+    ...report.findings.flatMap((finding) => [
+      `[${finding.rule_id}] ${SEVERITY_LABEL[lang][finding.severity]}`,
+      `  ${finding.explanation ?? finding.rule_text}`,
+      ...(finding.context ? [`  ${finding.context}`] : []),
+      `  ${t.where}: ${readablePath(finding.xpath)}`,
+      "",
+    ]),
+    `${t.provenance} ${report.ruleset_version} · ${report.ruleset_sha256.slice(0, 16)}…`,
+  ];
+  return lines.join("\n");
+}
+
+function Report({
+  filename,
+  report,
+  lang,
+  blockingOnly,
+}: {
+  filename: string;
+  report: ValidationReport;
+  lang: Lang;
+  blockingOnly: boolean;
+}) {
+  const t = UI[lang];
+  const [copied, setCopied] = useState(false);
   const blocking = report.findings.filter(isBlocking);
-  const other = report.findings.filter((f) => !isBlocking(f));
   const clean = isValid(report);
+
+  const shown = useMemo(() => {
+    const list = blockingOnly ? blocking : report.findings;
+    return [...list].sort(bySeverity);
+  }, [blockingOnly, blocking, report.findings]);
+  const hidden = report.findings.length - shown.length;
+
+  const copy = useCallback(() => {
+    void navigator.clipboard?.writeText(summarise(report, filename, lang)).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    });
+  }, [report, filename, lang]);
 
   return (
     <section className="panel">
       <header className={`verdict verdict--${clean ? "ok" : "bad"}`}>
-        <h2>{clean ? t.clean : `${blocking.length} ${t.blocking}`}</h2>
-        <p>{clean ? t.cleanSub : t.blockingSub}</p>
+        <div>
+          <h2>{clean ? t.clean : `${blocking.length} ${t.blocking}`}</h2>
+          <p>{clean ? t.cleanSub : t.blockingSub}</p>
+        </div>
+        {report.findings.length > 0 && (
+          <button type="button" className="copy" onClick={copy}>
+            {copied ? t.copied : t.copySummary}
+          </button>
+        )}
       </header>
 
       {!report.mandate_ready && <p className="notice">{t.thinProfile}</p>}
@@ -164,12 +273,23 @@ function Report({ filename, report, lang }: { filename: string; report: Validati
         <Fact label={t.duration ?? ""} value={`${Math.round(report.duration_ms)} ms`} />
       </dl>
 
-      {report.findings.length > 0 && (
+      {shown.length > 0 && (
         <ul className="findings">
-          {[...blocking, ...other].sort(bySeverity).map((finding, index) => (
-            <FindingRow key={`${finding.rule_id}-${index}`} finding={finding} lang={lang} />
+          {shown.map((finding, index) => (
+            <FindingRow
+              key={`${finding.rule_id}-${index}`}
+              finding={finding}
+              lang={lang}
+              sourceXml={report.source_xml}
+            />
           ))}
         </ul>
+      )}
+
+      {hidden > 0 && (
+        <p className="hidden-note">
+          {hidden} {t.findingsHidden}
+        </p>
       )}
 
       <p className="provenance">
@@ -189,8 +309,26 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FindingRow({ finding, lang }: { finding: Finding; lang: Lang }) {
+function FindingRow({
+  finding,
+  lang,
+  sourceXml,
+}: {
+  finding: Finding;
+  lang: Lang;
+  sourceXml: string | null;
+}) {
   const t = UI[lang];
+  const [open, setOpen] = useState(false);
+
+  // Resolved lazily: a report with fifteen findings would otherwise parse the
+  // document fifteen times before anything is on screen.
+  const excerpt = useMemo(
+    () => (open && sourceXml ? locate(sourceXml, finding.xpath) : null),
+    [open, sourceXml, finding.xpath],
+  );
+  const sourceUrl = ruleSourceUrl(finding.rule_id);
+
   return (
     <li className={`finding finding--${finding.severity}`}>
       <div className="finding__head">
@@ -198,6 +336,11 @@ function FindingRow({ finding, lang }: { finding: Finding; lang: Lang }) {
         <span className="finding__severity" title={SEVERITY_MEANING[lang][finding.severity]}>
           {SEVERITY_LABEL[lang][finding.severity]}
         </span>
+        {sourceUrl && (
+          <a className="finding__source-link" href={sourceUrl} target="_blank" rel="noreferrer">
+            {t.ruleSource}
+          </a>
+        )}
       </div>
 
       {/* The explanation leads when there is one; the normative text is always
@@ -217,6 +360,11 @@ function FindingRow({ finding, lang }: { finding: Finding; lang: Lang }) {
       <p className="finding__where">
         <span>{t.where}</span>
         <code title={finding.xpath}>{readablePath(finding.xpath)}</code>
+        {sourceXml && (
+          <button type="button" className="finding__toggle" onClick={() => setOpen(!open)}>
+            {open ? t.hideSource : t.showSource}
+          </button>
+        )}
       </p>
 
       {finding.offending_value && (
@@ -225,6 +373,27 @@ function FindingRow({ finding, lang }: { finding: Finding; lang: Lang }) {
           <code>{finding.offending_value}</code>
         </p>
       )}
+
+      {open &&
+        (excerpt ? (
+          <div className="excerpt">
+            {excerpt.isContext && <p className="excerpt__note">{t.contextNote}</p>}
+            <pre className="excerpt__code">
+              {excerpt.lines.map((line) => (
+                <span
+                  key={line.number}
+                  className={line.marked ? "excerpt__line excerpt__line--marked" : "excerpt__line"}
+                >
+                  <span className="excerpt__num">{line.number}</span>
+                  {line.text}
+                  {"\n"}
+                </span>
+              ))}
+            </pre>
+          </div>
+        ) : (
+          <p className="excerpt__note">{t.noSource}</p>
+        ))}
     </li>
   );
 }

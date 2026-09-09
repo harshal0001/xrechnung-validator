@@ -33,6 +33,9 @@ export interface ValidationReport {
   ruleset_sha256: string;
   findings: Finding[];
   duration_ms: number;
+  /** The XML that was validated. For a ZUGFeRD PDF this is the extracted
+   *  attachment — the only way the page can show what was actually checked. */
+  source_xml: string | null;
 }
 
 /** Findings at these severities mean the invoice would be rejected. */
@@ -69,7 +72,10 @@ export async function validate(
 
   let response: Response;
   try {
-    response = await fetch(`/validate?explain=${explain}&lang=${lang}`, { method: "POST", body });
+    response = await fetch(
+      `/validate?explain=${explain}&lang=${lang}&include_source=true`,
+      { method: "POST", body },
+    );
   } catch {
     throw new ApiError(0, "unreachable", unreachableMessage);
   }
@@ -89,4 +95,20 @@ export async function validate(
   }
 
   return (await response.json()) as ValidationReport;
+}
+
+
+/**
+ * Where a rule's official text lives, for a reader who wants to check it.
+ *
+ * The German CIUS rules and the European core rules are published in different
+ * repositories, and neither has a stable per-rule URL — so this links to the
+ * source a reader would search, not to a page that may not exist.
+ */
+export function ruleSourceUrl(ruleId: string): string | null {
+  if (ruleId.startsWith("XSD-")) return null;
+  if (ruleId.startsWith("BR-DE-")) return "https://github.com/itplr-kosit/xrechnung-schematron";
+  if (ruleId.startsWith("PEPPOL-")) return "https://github.com/OpenPEPPOL/peppol-bis-invoice-3";
+  if (ruleId.startsWith("BR-")) return "https://github.com/ConnectingEurope/eInvoicing-EN16931";
+  return null;
 }
