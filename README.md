@@ -99,7 +99,7 @@ without failing the document.
 | Mutation test suite | 25 rules proven — presence, calculation and code list, both syntaxes |
 | Typed bindings wired into parsing | not started |
 | Explanation layer: boundary, catalogue, review workflow | done — 25 German entries reviewed and serving |
-| English explanations | drafted from the reviewed German with the same sources; 0 of 25 reviewed, so withheld |
+| English explanations | 25 of 25 reviewed and serving; `?lang=en` |
 | HTTP API | done |
 | Frontend | done |
 | Deployment | not started |
@@ -120,7 +120,7 @@ Only the pair means anything.
 | False positives on the valid reference corpus | **0** across 66 KoSIT reference messages (33 UBL, 33 CII), structural and business rules |
 | Validation latency p50 / p95 | 27 ms/document mean, warm, XSD + both rule sets — not yet split by percentile |
 | Cold start to first response | — |
-| Explanations reviewed by a person | German **25 of 25** — every `what` traced to the official rule text, every `why` to a cited public source (§ 14 UStG, the federal e-invoicing portal, the EN 16931 model, or the ruleset itself); unsourceable claims were cut. English **0 of 25** — drafted, awaiting review |
+| Explanations reviewed by a person | German **25 of 25** — every `what` traced to the official rule text, every `why` to a cited public source (§ 14 UStG, the federal e-invoicing portal, the EN 16931 model, or the ruleset itself); unsourceable claims were cut. English **25 of 25** — each `what` checked against the English rule text, each `why` against the approved German and its citation |
 | Explanation accuracy on the eval set | — |
 
 ## Local development
