@@ -46,9 +46,16 @@ fi
 # Built for the target architecture explicitly. Building arm64 on an x86 laptop
 # goes through emulation and is slow, but it is the same image CI already builds
 # for arm64 on every push to main, so it is a proven path rather than a guess.
+# --provenance/--sbom off, and the docker media type forced. buildx defaults to
+# attaching attestations, which makes the push an OCI manifest list; Lambda
+# accepts only a Docker v2 manifest and rejects the image at CreateFunction with
+# "media type ... is not supported". The build succeeds and the push succeeds —
+# it fails one step later, which is why this is worth a comment.
 say "Building for linux/${ARCH}"
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$REGISTRY"
-docker buildx build --platform "linux/${ARCH}" -t "$IMAGE" --push .
+docker buildx build --platform "linux/${ARCH}" \
+  --provenance=false --sbom=false \
+  --output "type=image,name=${IMAGE},push=true,oci-mediatypes=false" .
 
 # ---- 3. Execution role -------------------------------------------------------
 if ! aws iam get-role --role-name "$ROLE_NAME" >/dev/null 2>&1; then
