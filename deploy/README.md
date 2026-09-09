@@ -48,6 +48,28 @@ rejects the image at `CreateFunction` with *"media type ... is not supported"* â
 the build and the push have both succeeded. The script passes `--provenance=false
 --sbom=false` and forces the Docker media type for exactly this reason.
 
+## New accounts cannot serve public traffic
+
+A newly created AWS account is restricted until AWS finishes vetting it, and one of
+the things held back is serving **public, unauthenticated** endpoints. The symptom is
+a function URL that returns 403 while everything about it is correct.
+
+`deploy/status.sh` reports the tell: `ConcurrentExecutions` is 10 on a restricted
+account and 1000 on a normal one. The two lift together.
+
+What the restriction does and does not cover, established by testing each path:
+
+| Path | Restricted account |
+|---|---|
+| `aws lambda invoke` | works |
+| Function URL, SigV4-signed | works |
+| Function URL, `AuthType: NONE` | **403** |
+| CloudFront in front of it | **403** â€” CloudFront is public traffic too |
+
+So CloudFront does **not** work around it, which is worth knowing before reaching for
+it. Nothing needs changing; the configuration is already correct and starts working
+when the account matures.
+
 ## Measure the cold start
 
 The README's results table has an empty "cold start to first response" row. It
