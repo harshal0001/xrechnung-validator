@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, isBlocking, isValid, ruleSourceUrl, validate } from "./api";
 import type { Finding, Severity, ValidationReport } from "./api";
 import {
@@ -28,18 +28,37 @@ function bySeverity(a: Finding, b: Finding): number {
 
 export default function App() {
   const [state, setState] = useState<State>({ status: "idle" });
-  const [explain, setExplain] = useState(true);
   const [lang, setLang] = useState<Lang>("de");
-  const [blockingOnly, setBlockingOnly] = useState(false);
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  // The last file checked, so changing a toggle re-runs against it. Without
+  // this, ticking "show explanations" after a result does nothing until the
+  // next upload — the value was read when the request was made — and switching
+  // language leaves the explanations in the language you switched away from.
+  const lastFile = useRef<File | null>(null);
   const t = UI[lang];
+
+  // The tab title and the document language are part of the page too. Leaving
+  // them in German while everything else switched would show in the browser tab
+  // and, more importantly, tell a screen reader to pronounce English as German.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = t.title ?? document.title;
+  }, [lang, t]);
+
+  // Re-check when the language changes, so the explanations come back in the
+  // language now selected rather than the one switched away from.
+  useEffect(() => {
+    if (lastFile.current) void check(lastFile.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const check = useCallback(
     async (file: File) => {
+      lastFile.current = file;
       setState({ status: "checking", filename: file.name });
       try {
-        const report = await validate(file, explain, lang, t.unreachable ?? "");
+        const report = await validate(file, true, lang, t.unreachable ?? "");
         setState({ status: "done", filename: file.name, report });
       } catch (caught) {
         const error =
@@ -47,7 +66,7 @@ export default function App() {
         setState({ status: "failed", filename: file.name, error });
       }
     },
-    [explain, lang, t],
+    [lang, t],
   );
 
   /** Fetch a bundled sample and run it through the same path as an upload. */
@@ -149,24 +168,6 @@ export default function App() {
         </div>
       </section>
 
-      <div className="options">
-        <label className="option">
-          <input type="checkbox" checked={explain} onChange={(e) => setExplain(e.target.checked)} />
-          <span>
-            {t.explainOption}
-            <em>{t.explainNote}</em>
-          </span>
-        </label>
-        <label className="option">
-          <input
-            type="checkbox"
-            checked={blockingOnly}
-            onChange={(e) => setBlockingOnly(e.target.checked)}
-          />
-          <span>{t.blockingOnly}</span>
-        </label>
-      </div>
-
       {state.status === "checking" && (
         <p className="status" role="status">
           {state.filename} {t.checking}
@@ -182,7 +183,6 @@ export default function App() {
           filename={state.filename}
           report={state.report}
           lang={lang}
-          blockingOnly={blockingOnly}
         />
       )}
     </div>
@@ -223,23 +223,17 @@ function Report({
   filename,
   report,
   lang,
-  blockingOnly,
 }: {
   filename: string;
   report: ValidationReport;
   lang: Lang;
-  blockingOnly: boolean;
 }) {
   const t = UI[lang];
   const [copied, setCopied] = useState(false);
   const blocking = report.findings.filter(isBlocking);
   const clean = isValid(report);
 
-  const shown = useMemo(() => {
-    const list = blockingOnly ? blocking : report.findings;
-    return [...list].sort(bySeverity);
-  }, [blockingOnly, blocking, report.findings]);
-  const hidden = report.findings.length - shown.length;
+  const shown = useMemo(() => [...report.findings].sort(bySeverity), [report.findings]);
 
   const copy = useCallback(() => {
     void navigator.clipboard?.writeText(summarise(report, filename, lang)).then(() => {
@@ -284,12 +278,6 @@ function Report({
             />
           ))}
         </ul>
-      )}
-
-      {hidden > 0 && (
-        <p className="hidden-note">
-          {hidden} {t.findingsHidden}
-        </p>
       )}
 
       <p className="provenance">
@@ -348,7 +336,15 @@ function FindingRow({
           the reader should be able to check it. Context is marked as editorial —
           it is useful and human-approved, but it is not in any rule text, and
           presenting it as though it were would be a quiet lie. */}
-      {finding.explanation && <p className="finding__explanation">{finding.explanation}</p>}
+      {finding.explanation ? (
+        <p className="finding__explanation">{finding.explanation}</p>
+      ) : (
+        // Only 25 of the rule set's 1646 rules have a reviewed explanation. Say
+        // so where a reader is owed a reason — on a finding that would get the
+        // invoice rejected — and stay quiet on an informational one, where the
+        // note would be noise rather than an answer.
+        isBlocking(finding) && <p className="finding__unexplained">{t.noExplanation}</p>
+      )}
       {finding.context && (
         <p className="finding__context">
           <span className="finding__context-label">{t.context}</span>
@@ -377,7 +373,11 @@ function FindingRow({
       {open &&
         (excerpt ? (
           <div className="excerpt">
-            {excerpt.isContext && <p className="excerpt__note">{t.contextNote}</p>}
+            {excerpt.isContext ? (
+              <p className="excerpt__note">{t.contextNote}</p>
+            ) : (
+              <p className="excerpt__caption">{t.where}</p>
+            )}
             <pre className="excerpt__code">
               {excerpt.lines.map((line) => (
                 <span

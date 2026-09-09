@@ -235,6 +235,61 @@ class TestLanguages:
         assert response.json()["error"] == "unknown_language"
         assert "de" in response.json()["detail"] and "en" in response.json()["detail"]
 
+    @pytest.mark.parametrize(
+        ("lang", "needle"),
+        [("de", "weder XML noch ein PDF"), ("en", "neither XML nor a PDF")],
+    )
+    def test_error_messages_are_returned_in_the_requested_language(
+        self, client: TestClient, lang: str, needle: str
+    ) -> None:
+        """German chrome beside an English error message reads as a half-built
+        page. The language the caller asked for applies to what went wrong too."""
+        response = upload(client, b"\x89PNG\r\n\x1a\n", name="scan.png", lang=lang)
+        assert response.status_code == 415
+        assert needle in response.json()["detail"]
+
+    def test_the_error_code_is_stable_across_languages(self, client: TestClient) -> None:
+        """An API consumer branches on the code, not on prose in a language it
+        did not choose."""
+        codes = {
+            upload(client, b"\x89PNG\r\n\x1a\n", name="s.png", lang=lang).json()["error"]
+            for lang in ("de", "en")
+        }
+        assert codes == {"unsupported_document"}
+
+    @pytest.mark.parametrize(
+        ("lang", "needle"),
+        [("de", "eingebettete Rechnung"), ("en", "no embedded invoice")],
+    )
+    def test_a_scanned_pdf_explains_itself_in_both_languages(
+        self, client: TestClient, make_zugferd_pdf, lang: str, needle: str
+    ) -> None:
+        """The commonest user mistake, so the one most worth translating."""
+        response = upload(client, make_zugferd_pdf(None), name="scan.pdf", lang=lang)
+        assert response.status_code == 422
+        assert needle in response.json()["detail"]
+
+    @pytest.mark.parametrize(
+        ("lang", "needle"),
+        [("de", "zu wenige Felder"), ("en", "too few fields")],
+    )
+    def test_the_thin_profile_finding_follows_the_language(
+        self, client: TestClient, make_zugferd_pdf, cii_invoice: bytes, lang: str, needle: str
+    ) -> None:
+        thin = cii_invoice.replace(
+            b"urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+            b"urn:factur-x.eu:1p0:minimum",
+        )
+        body = upload(client, make_zugferd_pdf(thin), name="invoice.pdf", lang=lang).json()
+        assert needle in body["findings"][0]["rule_text"]
+
+    def test_an_untranslated_error_still_reads(self, client: TestClient, corpus: Path) -> None:
+        """Not every internal error is worth translating. Those must degrade to
+        an English sentence, never to an empty message."""
+        response = upload(client, (corpus / UBL).read_bytes(), ruleset="1999-01-01", lang="de")
+        assert response.status_code == 404
+        assert response.json()["detail"].strip()
+
     def test_rulesets_advertise_their_explanation_languages(self, client: TestClient) -> None:
         entries = client.get("/rulesets").json()["rulesets"]
         loaded = next(e for e in entries if e["loaded"])

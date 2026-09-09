@@ -19,7 +19,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from xrv.core import Finding, Severity, ValidationReport
+from xrv.core import Finding, Severity, ValidationReport, render
 from xrv.explain import (
     DEFAULT_LANGUAGE,
     LANGUAGES,
@@ -128,7 +128,7 @@ class ValidationService:
 
         with self._lock:
             engine = self._engine_for(ruleset)
-            findings = self._findings(engine, document)
+            findings = self._findings(engine, document, language)
             if explain:
                 findings = self._explain(findings, ruleset.version, language)
 
@@ -144,7 +144,9 @@ class ValidationService:
             source_xml=_decoded(document.content) if include_source else None,
         )
 
-    def _findings(self, engine: ValidationEngine, document: Document) -> tuple[Finding, ...]:
+    def _findings(
+        self, engine: ValidationEngine, document: Document, language: str
+    ) -> tuple[Finding, ...]:
         """Validate, unless the profile says there is nothing to validate against.
 
         A ZUGFeRD MINIMUM document has no line items. Running the full rule set
@@ -157,11 +159,15 @@ class ValidationService:
                 Finding(
                     rule_id=PROFILE_TOO_THIN,
                     severity=Severity.WARNING,
-                    rule_text=(
-                        f"This document uses the {document.profile} profile, which carries "
-                        f"too few fields to satisfy the German e-invoicing mandate. Business "
-                        f"rules were not evaluated, because most would fail on data the "
-                        f"profile does not claim to contain."
+                    rule_text=render(
+                        "profile_not_mandate_ready",
+                        {"profile": document.profile},
+                        language,
+                        fallback=(
+                            f"This document uses the {document.profile} profile, which "
+                            f"carries too few fields to satisfy the German e-invoicing "
+                            f"mandate. Business rules were not evaluated."
+                        ),
                     ),
                     xpath=f"/{document.root}",
                 ),

@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from lxml import etree
 
-from xrv.core import Source, Syntax
+from xrv.core import LocalisedError, Source, Syntax
 from xrv.ingest.xml import parse
 from xrv.ingest.zugferd import Profile, detect_profile, extract_xml, read_guideline_id
 
@@ -36,7 +36,7 @@ class Media(StrEnum):
     UNKNOWN = "unknown"
 
 
-class UnsupportedDocumentError(ValueError):
+class UnsupportedDocumentError(LocalisedError):
     """Recognisable as something, but not something this service validates."""
 
 
@@ -100,7 +100,8 @@ def identify(payload: bytes) -> Document:
     if media is Media.UNKNOWN:
         raise UnsupportedDocumentError(
             "This is neither XML nor a PDF. Upload an XRechnung XML file "
-            "(UBL or UN/CEFACT CII) or a ZUGFeRD PDF."
+            "(UBL or UN/CEFACT CII) or a ZUGFeRD PDF.",
+            code="not_xml_or_pdf",
         )
 
     tree = parse(payload)
@@ -111,7 +112,10 @@ def identify(payload: bytes) -> Document:
         raise UnsupportedDocumentError(
             f"'{qname.localname}' in namespace '{qname.namespace or 'none'}' is not "
             f"an e-invoice this service validates. Expected a UBL Invoice or "
-            f"CreditNote, or a UN/CEFACT CrossIndustryInvoice."
+            f"CreditNote, or a UN/CEFACT CrossIndustryInvoice.",
+            code="not_an_einvoice",
+            local=qname.localname,
+            namespace=qname.namespace or "none",
         )
 
     return Document(
