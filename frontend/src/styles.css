@@ -5,6 +5,7 @@
 :root {
   --paper: #f4f6f3;
   --surface: #ffffff;
+  --surface-2: #eef1ec;
   --ink: #15191b;
   --ink-2: #4b5257;
   --ink-3: #78827f;
@@ -28,6 +29,7 @@
   :root {
     --paper: #0f1214;
     --surface: #171b1d;
+    --surface-2: #1e2426;
     --ink: #e7ebe9;
     --ink-2: #a6afac;
     --ink-3: #7c8683;
@@ -155,6 +157,62 @@ h1 {
   font-size: 0.875rem;
 }
 
+/* ---- samples ---- */
+.samples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.samples__label {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.samples__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sample {
+  font: inherit;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sample:hover {
+  border-color: var(--accent);
+}
+
+.sample:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sample__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sample__note {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+}
+
 .option {
   display: flex;
   gap: 0.6rem;
@@ -201,6 +259,40 @@ h1 {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--rule);
   border-left: 3px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.copy {
+  font: inherit;
+  font-size: 0.8125rem;
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hidden-note {
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
 }
 
 .verdict p {
@@ -374,6 +466,92 @@ h1 {
 .finding__value code {
   color: var(--ink-2);
   word-break: break-all;
+}
+
+.finding__source-link {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  margin-left: auto;
+}
+
+.finding__source-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.finding__toggle {
+  font: inherit;
+  font-size: 0.75rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  padding: 0 0 1px;
+  cursor: pointer;
+}
+
+.finding__toggle:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.finding__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- source excerpt ----
+   The point of the whole feature: a rule id names a problem, this shows it. The
+   marked line carries a colour AND a left rule AND a caret, so it survives a
+   monochrome print and a colour-blind reader. */
+.excerpt {
+  margin-top: 0.85rem;
+}
+
+.excerpt__note {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.excerpt__code {
+  margin: 0;
+  padding: 0.75rem 0;
+  background: var(--surface-2, var(--paper));
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.excerpt__line {
+  display: block;
+  padding-left: 0.5rem;
+  border-left: 3px solid transparent;
+  white-space: pre;
+}
+
+.excerpt__line--marked {
+  background: var(--error-bg);
+  border-left-color: var(--error);
+}
+
+.excerpt__num {
+  display: inline-block;
+  width: 2.5rem;
+  padding-right: 0.85rem;
+  text-align: right;
+  color: var(--ink-3);
+  user-select: none;
+}
+
+.excerpt__line--marked .excerpt__num {
+  color: var(--error);
+  font-weight: 600;
 }
 
 .provenance {

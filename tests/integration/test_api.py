@@ -155,6 +155,50 @@ class TestExplanations:
         assert all("context" in f for f in body["findings"])
 
 
+class TestReturningTheValidatedSource:
+    """`include_source` exists so a client can show what was actually checked."""
+
+    def test_it_is_omitted_by_default(self, client: TestClient, corpus: Path) -> None:
+        """It is the caller's own document coming back; most callers have it."""
+        assert upload(client, (corpus / UBL).read_bytes()).json()["source_xml"] is None
+
+    def test_it_returns_the_uploaded_xml(self, client: TestClient, corpus: Path) -> None:
+        body = upload(client, (corpus / UBL).read_bytes(), include_source="true").json()
+        assert body["source_xml"] is not None
+        assert "Invoice" in body["source_xml"]
+
+    def test_for_a_pdf_it_returns_the_extracted_xml_not_the_pdf(
+        self, client: TestClient, make_zugferd_pdf, cii_invoice: bytes
+    ) -> None:
+        """The whole reason the field exists: the invoice inside a ZUGFeRD PDF is
+        the thing that was validated, and the client has no other way to see it."""
+        pdf = make_zugferd_pdf(cii_invoice)
+        body = upload(client, pdf, name="invoice.pdf", include_source="true").json()
+        assert body["source_xml"] is not None
+        assert not body["source_xml"].startswith("%PDF")
+        assert "CrossIndustryInvoice" in body["source_xml"]
+
+    def test_the_findings_point_into_the_source_it_returns(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """A location that names an element absent from the returned source would
+        make the client's highlighting point at nothing."""
+        from lxml import etree
+
+        cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        tree = etree.parse(str(corpus / UBL))
+        tree.getroot().remove(tree.getroot().find(f"{{{cbc}}}BuyerReference"))
+        payload = etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+        body = upload(client, payload, include_source="true").json()
+        source = body["source_xml"]
+        for finding in body["findings"]:
+            if not finding["xpath"].startswith("/"):
+                continue
+            leaf = finding["xpath"].rstrip("]0123456789[").split("}")[-1].split(":")[-1]
+            assert leaf in source, f"{finding['rule_id']} points at {leaf}, absent from source"
+
+
 class TestLanguages:
     def _broken(self, corpus: Path) -> bytes:
         from lxml import etree

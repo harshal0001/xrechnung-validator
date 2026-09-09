@@ -124,9 +124,24 @@ async def validate(
         str,
         Query(description="Language for explanations: de or en"),
     ] = DEFAULT_LANGUAGE,
+    include_source: Annotated[
+        bool,
+        Query(
+            description=(
+                "Return the XML that was validated. For a ZUGFeRD PDF that is the "
+                "extracted attachment, which the caller has no other way to see."
+            )
+        ),
+    ] = False,
 ) -> ValidationReport:
     payload = await read_capped(file)
-    return service.validate(payload, explain=explain, version=ruleset, language=lang)
+    return service.validate(
+        payload,
+        explain=explain,
+        version=ruleset,
+        language=lang,
+        include_source=include_source,
+    )
 
 
 @app.get("/rulesets", summary="Rule set versions and their provenance")

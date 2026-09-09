@@ -153,6 +153,16 @@ class ValidationReport(BaseModel):
     ruleset_sha256: str
     findings: tuple[Finding, ...] = ()
     duration_ms: float = Field(ge=0)
+    source_xml: str | None = Field(
+        default=None,
+        description=(
+            "The XML that was validated, when the caller asked for it. For a "
+            "ZUGFeRD PDF this is the extracted attachment, not the PDF — so a "
+            "client can show what was actually checked rather than what was "
+            "uploaded. Omitted by default: it is the caller's own document coming "
+            "back, and most callers already have it."
+        ),
+    )
 
     @property
     def valid(self) -> bool:

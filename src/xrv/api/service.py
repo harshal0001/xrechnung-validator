@@ -30,7 +30,7 @@ from xrv.explain import (
     NullProvider,
 )
 from xrv.explain.port import ExplanationProvider
-from xrv.ingest import Document, identify
+from xrv.ingest import Document, identify, parse, to_text
 from xrv.rules import Ruleset, RulesetNotFoundError, RulesetRegistry, default_registry
 from xrv.validate import ValidationEngine
 
@@ -38,6 +38,16 @@ from xrv.validate import ValidationEngine
 #: validate. Not an error: the document is what it claims to be, it simply does
 #: not carry what the German mandate requires.
 PROFILE_TOO_THIN = "PROFILE-NOT-MANDATE-READY"
+
+
+def _decoded(content: bytes) -> str:
+    """The document as text, honouring its declared encoding.
+
+    Round-tripping through the parsed tree rather than decoding the raw bytes is
+    what makes a document declaring ISO-8859-1 survive. The result is the same
+    document, serialised as text a browser can display.
+    """
+    return to_text(parse(content))
 
 
 @dataclass
@@ -105,6 +115,7 @@ class ValidationService:
         explain: bool = False,
         version: str | None = None,
         language: str = DEFAULT_LANGUAGE,
+        include_source: bool = False,
     ) -> ValidationReport:
         """Identify, validate and describe one uploaded document."""
         if language not in LANGUAGES:
@@ -130,6 +141,7 @@ class ValidationService:
             ruleset_sha256=ruleset.sha256,
             findings=findings,
             duration_ms=round((time.perf_counter() - started) * 1000, 2),
+            source_xml=_decoded(document.content) if include_source else None,
         )
 
     def _findings(self, engine: ValidationEngine, document: Document) -> tuple[Finding, ...]:
