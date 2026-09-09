@@ -101,7 +101,7 @@ without failing the document.
 | Explanation layer: boundary, catalogue, review workflow | done — 25 German entries reviewed and serving |
 | English explanations | 25 of 25 reviewed and serving; `?lang=en` |
 | HTTP API | done |
-| Frontend | done |
+| Frontend | done — drag-and-drop, bundled samples, inline source highlighting, DE/EN |
 | Deployment | not started |
 | CI (lint, types, tests, multi-arch image build) | done |
 
@@ -145,6 +145,7 @@ cd frontend && npm install && npm run dev
 curl -F file=@invoice.xml http://127.0.0.1:8000/validate
 curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?explain=true"
 curl -F file=@invoice.xml "http://127.0.0.1:8000/validate?explain=true&lang=en"
+curl -F file=@invoice.pdf "http://127.0.0.1:8000/validate?include_source=true"   # the XML inside the PDF
 ```
 
 Or run both from one container, the way it deploys:
