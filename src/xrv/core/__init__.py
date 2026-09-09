@@ -5,6 +5,7 @@ deliberate — every other package depends on this one, so a dependency here wou
 propagate everywhere.
 """
 
+from xrv.core.messages import LocalisedError, render
 from xrv.core.models import (
     Finding,
     Severity,
@@ -16,9 +17,11 @@ from xrv.core.models import (
 
 __all__ = [
     "Finding",
+    "LocalisedError",
     "Severity",
     "Source",
     "Syntax",
     "ValidationReport",
+    "render",
     "severity_from_kosit_flag",
 ]

@@ -1,52 +1,59 @@
-/* A German administrative document rendered for a screen: plain, dense enough
-   to read quickly, with severity carried by a colour AND a label so it survives
-   both colour blindness and a monochrome print. */
+/* A German administrative document, set for a screen.
+ *
+ * The reference is a printed form, not a dashboard: hairline rules, hard edges,
+ * a strict left margin, and one signal colour. Two earlier passes drifted toward
+ * white cards with soft shadows and rounded corners — the house style of every
+ * generated interface — so this one deliberately removes all three. There is not
+ * a single border-radius or box-shadow below.
+ *
+ * Structure carries the hierarchy instead: a fixed label column, uppercase
+ * micro-labels with wide tracking, monospace for every technical identifier, and
+ * a lot of white space. Colour is spent only where it means something — red for
+ * a failure, and nothing else competes with it.
+ */
 
 :root {
-  --paper: #f4f6f3;
-  --surface: #ffffff;
-  --surface-2: #eef1ec;
-  --ink: #15191b;
-  --ink-2: #4b5257;
-  --ink-3: #78827f;
-  --rule: #d9ded7;
-  --accent: #0e5a6b;
+  color-scheme: light;
 
-  --fatal: #7d2a20;
-  --error: #9e3226;
-  --warning: #8a6109;
-  --info: #0e5a6b;
-  --ok: #2c6e49;
+  --paper: #fbfaf7;
+  --sheet: #ffffff;
+  --wash: #f3f2ed;
+  --rule: #ded9cf;
+  --rule-firm: #211f1c;
 
-  --fatal-bg: #f7e9e7;
-  --error-bg: #f9ece9;
-  --warning-bg: #f7f0de;
-  --info-bg: #e4eff1;
-  --ok-bg: #e3efe8;
+  --ink: #131211;
+  --ink-2: #55524b;
+  --ink-3: #8d887e;
+
+  /* One signal colour. Everything else is ink on paper. */
+  --signal: #b5121b;
+  --signal-wash: #fbf0ef;
+  --caution: #7a5c12;
+  --caution-wash: #f9f4e6;
+  --pass: #2c5f45;
+
+  --label-col: 6.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f1214;
-    --surface: #171b1d;
-    --surface-2: #1e2426;
-    --ink: #e7ebe9;
-    --ink-2: #a6afac;
-    --ink-3: #7c8683;
-    --rule: #2a3134;
-    --accent: #5cbacd;
+    color-scheme: dark;
 
-    --fatal: #e79a90;
-    --error: #e08a80;
-    --warning: #d6a544;
-    --info: #5cbacd;
-    --ok: #6fc190;
+    --paper: #12110f;
+    --sheet: #191816;
+    --wash: #201e1b;
+    --rule: #33302b;
+    --rule-firm: #d9d4c9;
 
-    --fatal-bg: #2c1512;
-    --error-bg: #2a1512;
-    --warning-bg: #2a2210;
-    --info-bg: #12292f;
-    --ok-bg: #11251a;
+    --ink: #f4f1ea;
+    --ink-2: #b0aa9e;
+    --ink-3: #7d786e;
+
+    --signal: #f2685f;
+    --signal-wash: #2a1614;
+    --caution: #d9ae4a;
+    --caution-wash: #241d10;
+    --pass: #6fbc90;
   }
 }
 
@@ -58,29 +65,32 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 16px/1.6 "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: "Public Sans", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.62;
   -webkit-font-smoothing: antialiased;
 }
 
-code {
-  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  font-size: 0.875em;
+code,
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  font-feature-settings: "zero" 1;
 }
 
 .page {
-  max-width: 52rem;
+  max-width: 46rem;
   margin: 0 auto;
-  padding: 3rem 1.25rem 6rem;
+  padding: 5rem 1.75rem 8rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.75rem;
 }
 
-h1 {
-  font-size: 1.875rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin: 0 0 0.5rem;
+/* ---- masthead: a heavy rule under the title, like a form header ---- */
+header {
+  border-bottom: 2px solid var(--rule-firm);
+  padding-bottom: 1.25rem;
 }
 
 .masthead {
@@ -91,59 +101,62 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* Two flat buttons, the active one filled. A switch, not a dropdown: there are
-   exactly two options and both should be visible at once. */
-.lang {
-  display: inline-flex;
-  border: 1px solid var(--rule);
-}
-
-.lang__btn {
-  font: inherit;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  padding: 0.3rem 0.7rem;
-  background: var(--surface);
-  color: var(--ink-2);
-  border: 0;
-  cursor: pointer;
-}
-
-.lang__btn--on {
-  background: var(--accent);
-  color: var(--surface);
-}
-
-.lang__btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.014em;
+  margin: 0;
 }
 
 .lede {
   color: var(--ink-2);
-  margin: 0;
-  max-width: 46rem;
+  margin: 0.7rem 0 0;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+}
+
+.lang {
+  display: inline-flex;
+  gap: 1.1rem;
+}
+
+.lang__btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0 0 3px;
+  background: none;
+  color: var(--ink-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.lang__btn:hover {
+  color: var(--ink-2);
+}
+
+.lang__btn--on {
+  color: var(--ink);
+  border-bottom-color: var(--signal);
 }
 
 /* ---- upload ---- */
 .dropzone {
-  border: 1.5px dashed var(--rule);
-  background: var(--surface);
-  padding: 2.75rem 1.5rem;
+  border: 1px dashed var(--rule);
+  background: var(--sheet);
+  padding: 3rem 1.5rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.12s, background 0.12s;
 }
 
 .dropzone:hover,
 .dropzone--active {
-  border-color: var(--accent);
+  border-color: var(--rule-firm);
   border-style: solid;
-}
-
-.dropzone:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  background: var(--wash);
 }
 
 .dropzone__main {
@@ -154,111 +167,105 @@ h1 {
 .dropzone__hint {
   margin: 0;
   color: var(--ink-3);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
-/* ---- samples ---- */
+/* ---- samples: numbered, like items on a form ---- */
 .samples {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
+  margin-top: -1.75rem;
 }
 
-.samples__label {
-  margin: 0;
-  font-size: 0.8125rem;
+.samples__label,
+.fact dt,
+.finding__context-label,
+.excerpt__caption {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
   color: var(--ink-3);
+  margin: 0;
 }
 
 .samples__row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  border-top: 1px solid var(--rule);
 }
 
 .sample {
   font: inherit;
   text-align: left;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  padding: 0.6rem 0.85rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  padding: 0.75rem 0;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: baseline;
+  gap: 1rem;
+  color: var(--ink);
+  transition: padding-left 0.12s, color 0.12s;
 }
 
 .sample:hover {
-  border-color: var(--accent);
-}
-
-.sample:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  padding-left: 0.5rem;
+  color: var(--signal);
 }
 
 .sample__label {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .sample__note {
+  font-family: "IBM Plex Mono", monospace;
   font-size: 0.75rem;
   color: var(--ink-3);
-}
-
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 2rem;
-}
-
-.option {
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
-  font-size: 0.9375rem;
-  color: var(--ink-2);
-  cursor: pointer;
-}
-
-.option em {
-  display: block;
-  font-style: normal;
-  font-size: 0.8125rem;
-  color: var(--ink-3);
+  margin-left: auto;
 }
 
 .status {
   color: var(--ink-2);
   margin: 0;
+  font-size: 0.9375rem;
 }
 
-/* ---- result ---- */
+/* ---- result sheet ---- */
 .panel {
-  background: var(--surface);
+  background: var(--sheet);
   border: 1px solid var(--rule);
 }
 
 .panel h2 {
-  font-size: 1.125rem;
-  margin: 0 0 0.35rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25rem;
 }
 
 .panel--problem {
-  padding: 1.25rem 1.5rem;
-  border-left: 3px solid var(--error);
+  padding: 1.4rem 1.5rem;
+  border-left: 3px solid var(--signal);
+}
+
+.panel--problem h2 {
+  color: var(--signal);
 }
 
 .panel--problem p {
   margin: 0;
   color: var(--ink-2);
+  font-size: 0.9375rem;
 }
 
 .verdict {
-  padding: 1.25rem 1.5rem;
+  padding: 1.4rem 1.5rem;
   border-bottom: 1px solid var(--rule);
-  border-left: 3px solid transparent;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -266,91 +273,72 @@ h1 {
   flex-wrap: wrap;
 }
 
-.copy {
-  font: inherit;
-  font-size: 0.8125rem;
-  background: var(--surface);
+.verdict p {
+  margin: 0;
   color: var(--ink-2);
-  border: 1px solid var(--rule);
-  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.verdict--ok h2 {
+  color: var(--pass);
+}
+
+.verdict--bad h2 {
+  color: var(--signal);
+}
+
+.copy {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: none;
+  color: var(--ink-3);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  padding: 0 0 3px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .copy:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.copy:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.hidden-note {
-  margin: 0;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.8125rem;
-  color: var(--ink-3);
-  border-bottom: 1px solid var(--rule);
-}
-
-.verdict p {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 0.9375rem;
-}
-
-.verdict--ok {
-  border-left-color: var(--ok);
-  background: var(--ok-bg);
-}
-
-.verdict--ok h2 {
-  color: var(--ok);
-}
-
-.verdict--bad {
-  border-left-color: var(--error);
-  background: var(--error-bg);
-}
-
-.verdict--bad h2 {
-  color: var(--error);
+  color: var(--ink);
+  border-bottom-color: var(--rule-firm);
 }
 
 .notice {
   margin: 0;
-  padding: 0.875rem 1.5rem;
-  background: var(--warning-bg);
-  color: var(--warning);
-  font-size: 0.9375rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--caution-wash);
+  color: var(--caution);
+  font-size: 0.875rem;
   border-bottom: 1px solid var(--rule);
 }
 
+/* Facts as a label column, the way a form sets them. */
 .facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 2rem;
   margin: 0;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--rule);
+  background: var(--wash);
+  display: grid;
+  grid-template-columns: var(--label-col) 1fr;
+  gap: 0.3rem 1rem;
 }
 
 .fact {
-  padding: 0.35rem 0;
+  display: contents;
 }
 
 .fact dt {
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  padding-top: 0.18rem;
 }
 
 .fact dd {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- findings ---- */
@@ -361,105 +349,119 @@ h1 {
 }
 
 .finding {
-  padding: 1.125rem 1.5rem;
+  padding: 1.4rem 1.5rem;
   border-bottom: 1px solid var(--rule);
-  border-left: 3px solid var(--rule);
 }
 
 .finding:last-child {
   border-bottom: none;
 }
 
-.finding--fatal {
-  border-left-color: var(--fatal);
-}
-.finding--error {
-  border-left-color: var(--error);
-}
-.finding--warning {
-  border-left-color: var(--warning);
-}
-.finding--info {
-  border-left-color: var(--info);
-}
-
 .finding__head {
   display: flex;
-  gap: 0.75rem;
-  align-items: baseline;
+  gap: 0.7rem;
+  align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.7rem;
 }
 
 .finding__rule {
   font-weight: 600;
+  font-size: 0.875rem;
   color: var(--ink);
 }
 
+/* A bar, not a pill: a 3px stroke of the severity colour and the word beside it. */
 .finding__severity {
+  font-family: "IBM Plex Mono", monospace;
   font-size: 0.6875rem;
+  font-weight: 500;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  padding: 0.15rem 0.45rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid currentColor;
   cursor: help;
 }
 
-.finding--fatal .finding__severity {
-  color: var(--fatal);
-  background: var(--fatal-bg);
-}
+.finding--fatal .finding__severity,
 .finding--error .finding__severity {
-  color: var(--error);
-  background: var(--error-bg);
+  color: var(--signal);
 }
+
 .finding--warning .finding__severity {
-  color: var(--warning);
-  background: var(--warning-bg);
+  color: var(--caution);
 }
+
 .finding--info .finding__severity {
-  color: var(--info);
-  background: var(--info-bg);
+  color: var(--ink-3);
+}
+
+.finding__source-link {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  margin-left: auto;
+}
+
+.finding__source-link:hover {
+  color: var(--ink);
+  border-bottom-color: var(--rule-firm);
 }
 
 .finding__explanation {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
   color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.55;
 }
 
-/* Editorial context. Visually subordinate to the grounded restatement above it,
-   and labelled, so a reader can tell which half is checkable against the rule. */
-.finding__context {
+.finding__unexplained {
   margin: 0 0 0.6rem;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--rule);
+  color: var(--ink-3);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.finding__context {
+  margin: 0 0 0.75rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--rule);
   color: var(--ink-2);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
 .finding__context-label {
   display: block;
-  font-size: 0.625rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
 }
 
 .finding__rule-text {
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.85rem;
   color: var(--ink-2);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  font-style: italic;
 }
 
 .finding__where,
 .finding__value {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   color: var(--ink-3);
-  display: flex;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: var(--label-col) 1fr;
+  gap: 1rem;
   align-items: baseline;
-  flex-wrap: wrap;
+}
+
+.finding__where > span,
+.finding__value > span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
 .finding__where code,
@@ -468,102 +470,112 @@ h1 {
   word-break: break-all;
 }
 
-.finding__source-link {
-  font-size: 0.75rem;
-  color: var(--ink-3);
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule);
-  margin-left: auto;
-}
-
-.finding__source-link:hover {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
 .finding__toggle {
-  font: inherit;
-  font-size: 0.75rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
   background: none;
   border: 0;
   border-bottom: 1px solid var(--rule);
   color: var(--ink-2);
-  padding: 0 0 1px;
+  padding: 0 0 2px;
   cursor: pointer;
+  justify-self: start;
+  grid-column: 2;
 }
 
 .finding__toggle:hover {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
-.finding__toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  color: var(--signal);
+  border-bottom-color: var(--signal);
 }
 
 /* ---- source excerpt ----
-   The point of the whole feature: a rule id names a problem, this shows it. The
-   marked line carries a colour AND a left rule AND a caret, so it survives a
-   monochrome print and a colour-blind reader. */
+   The point of the feature: a rule id names a problem, this shows it. The marked
+   line carries a wash AND a heavy left rule AND a red line number, so it reads
+   in monochrome and to a colour-blind reader. */
 .excerpt {
-  margin-top: 0.85rem;
+  margin-top: 1rem;
+}
+
+.excerpt__caption,
+.excerpt__note {
+  margin: 0 0 0.5rem;
 }
 
 .excerpt__note {
-  margin: 0 0 0.5rem;
   font-size: 0.8125rem;
   color: var(--ink-3);
 }
 
 .excerpt__code {
   margin: 0;
-  padding: 0.75rem 0;
-  background: var(--surface-2, var(--paper));
+  padding: 0.85rem 0;
+  background: var(--wash);
   border: 1px solid var(--rule);
+  border-left: 2px solid var(--rule-firm);
   overflow-x: auto;
-  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  font-size: 0.8125rem;
-  line-height: 1.55;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.78125rem;
+  line-height: 1.7;
   tab-size: 2;
 }
 
 .excerpt__line {
   display: block;
-  padding-left: 0.5rem;
+  padding-left: 0.6rem;
   border-left: 3px solid transparent;
   white-space: pre;
 }
 
 .excerpt__line--marked {
-  background: var(--error-bg);
-  border-left-color: var(--error);
+  background: var(--signal-wash);
+  border-left-color: var(--signal);
 }
 
 .excerpt__num {
   display: inline-block;
-  width: 2.5rem;
-  padding-right: 0.85rem;
+  width: 2.6rem;
+  padding-right: 1.1rem;
   text-align: right;
   color: var(--ink-3);
   user-select: none;
+  font-variant-numeric: tabular-nums;
 }
 
 .excerpt__line--marked .excerpt__num {
-  color: var(--error);
+  color: var(--signal);
   font-weight: 600;
 }
 
 .provenance {
   margin: 0;
-  padding: 0.875rem 1.5rem;
-  font-size: 0.8125rem;
+  padding: 0.9rem 1.5rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
   color: var(--ink-3);
   border-top: 1px solid var(--rule);
+  background: var(--wash);
+}
+
+/* ---- focus, motion ---- */
+:where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+  }
+}
+
+@media (max-width: 34rem) {
+  :root {
+    --label-col: 5rem;
+  }
+
+  .page {
+    padding: 3rem 1.1rem 5rem;
   }
 }

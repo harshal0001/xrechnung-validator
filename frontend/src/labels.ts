@@ -48,8 +48,6 @@ export const UI: Record<Lang, Record<string, string>> = {
     dropMain: "Datei hierher ziehen oder klicken",
     dropHint: "XML oder PDF · maximal 16 MB",
     dropAria: "Rechnung auswählen oder hierher ziehen",
-    explainOption: "Erklärungen anzeigen",
-    explainNote: "Nur geprüfte Erklärungen werden ausgeliefert.",
     checking: "wird geprüft …",
     failedTitle: "konnte nicht geprüft werden",
     clean: "Keine blockierenden Fehler",
@@ -71,9 +69,8 @@ export const UI: Record<Lang, Record<string, string>> = {
     noSource: "Die Stelle konnte im Dokument nicht aufgelöst werden.",
     copySummary: "Zusammenfassung kopieren",
     copied: "Kopiert",
-    blockingOnly: "Nur blockierende",
     ruleSource: "Regeltext nachschlagen",
-    findingsHidden: "ausgeblendet",
+    noExplanation: "Für diese Regel liegt noch keine geprüfte Erklärung vor.",
   },
   en: {
     title: "Check an XRechnung",
@@ -81,8 +78,6 @@ export const UI: Record<Lang, Record<string, string>> = {
     dropMain: "Drop a file here or click",
     dropHint: "XML or PDF · 16 MB maximum",
     dropAria: "Choose an invoice or drop it here",
-    explainOption: "Show explanations",
-    explainNote: "Only reviewed explanations are served.",
     checking: "is being checked …",
     failedTitle: "could not be checked",
     clean: "No blocking errors",
@@ -104,9 +99,8 @@ export const UI: Record<Lang, Record<string, string>> = {
     noSource: "The location could not be resolved in the document.",
     copySummary: "Copy summary",
     copied: "Copied",
-    blockingOnly: "Blocking only",
     ruleSource: "Look up the rule text",
-    findingsHidden: "hidden",
+    noExplanation: "No reviewed explanation has been written for this rule yet.",
   },
 };
 
@@ -136,11 +130,11 @@ export const SAMPLES: readonly Sample[] = [
   {
     file: "missing-buyer-reference.xml",
     label: { de: "Käuferreferenz fehlt", en: "Buyer reference missing" },
-    note: { de: "verletzt BR-DE-15", en: "breaks BR-DE-15" },
+    note: { de: "Verstoß gegen BR-DE-15", en: "breaks BR-DE-15" },
   },
   {
     file: "totals-mismatch.xml",
     label: { de: "Summe stimmt nicht", en: "Totals do not add up" },
-    note: { de: "verletzt BR-CO-10 und BR-CO-13", en: "breaks BR-CO-10 and BR-CO-13" },
+    note: { de: "Verstoß gegen BR-CO-10 und BR-CO-13", en: "breaks BR-CO-10 and BR-CO-13" },
   },
 ];

@@ -19,6 +19,7 @@ from enum import StrEnum
 
 import pikepdf
 
+from xrv.core import LocalisedError
 from xrv.ingest.xml import MAX_BYTES, parse
 
 RSM = "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
@@ -41,7 +42,7 @@ KNOWN_ATTACHMENTS = (
 )
 
 
-class ZugferdError(ValueError):
+class ZugferdError(LocalisedError):
     """The PDF carries no invoice this service can read."""
 
 
@@ -123,9 +124,14 @@ def extract_xml(payload: bytes) -> tuple[bytes, str]:
     try:
         pdf = pikepdf.open(io.BytesIO(payload))
     except pikepdf.PasswordError as exc:
-        raise ZugferdError("this PDF is password-protected, so its invoice cannot be read") from exc
+        raise ZugferdError(
+            "this PDF is password-protected, so its invoice cannot be read",
+            code="pdf_encrypted",
+        ) from exc
     except pikepdf.PdfError as exc:
-        raise ZugferdError(f"this file is not a readable PDF: {exc}") from exc
+        raise ZugferdError(
+            f"this file is not a readable PDF: {exc}", code="pdf_unreadable"
+        ) from exc
 
     with pdf:
         attachments = dict(pdf.attachments)
@@ -133,21 +139,31 @@ def extract_xml(payload: bytes) -> tuple[bytes, str]:
             raise ZugferdError(
                 "this PDF carries no embedded invoice. A ZUGFeRD or Factur-X PDF "
                 "has the invoice XML attached to it; a scanned or printed-to-PDF "
-                "invoice does not."
+                "invoice does not.",
+                code="pdf_no_attachment",
             )
 
         name = _pick_attachment(attachments)
         try:
             data = bytes(attachments[name].get_file().read_bytes())
         except Exception as exc:  # pikepdf raises assorted low-level errors
-            raise ZugferdError(f"the embedded file '{name}' could not be read: {exc}") from exc
+            raise ZugferdError(
+                f"the embedded file '{name}' could not be read: {exc}",
+                code="pdf_attachment_unreadable",
+                attachment=name,
+            ) from exc
 
     if len(data) > MAX_BYTES:
         raise ZugferdError(
-            f"the embedded invoice is {len(data):,} bytes; the limit is {MAX_BYTES:,}"
+            f"the embedded invoice is {len(data):,} bytes; the limit is {MAX_BYTES:,}",
+            code="payload_too_large",
+            size=f"{len(data):,}",
+            limit=f"{MAX_BYTES:,}",
         )
     if not data.strip():
-        raise ZugferdError(f"the embedded file '{name}' is empty")
+        raise ZugferdError(
+            f"the embedded file '{name}' is empty", code="xml_empty", attachment=name
+        )
     return data, name
 
 
@@ -175,5 +191,7 @@ def _pick_attachment(attachments: Mapping[str, object]) -> str:
     raise ZugferdError(
         f"this PDF has {len(xml_named)} embedded XML files and none uses a standard "
         f"invoice name, so which one is the invoice is ambiguous "
-        f"(found: {', '.join(sorted(xml_named))})"
+        f"(found: {', '.join(sorted(xml_named))})",
+        code="pdf_ambiguous",
+        count=len(xml_named),
     )

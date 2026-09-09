@@ -21,8 +21,8 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from xrv.api.service import ValidationService
-from xrv.core import ValidationReport
-from xrv.explain import DEFAULT_LANGUAGE, LanguageNotAvailableError
+from xrv.core import ValidationReport, render
+from xrv.explain import DEFAULT_LANGUAGE, LANGUAGES, LanguageNotAvailableError
 from xrv.ingest import MAX_BYTES, MalformedXmlError, PayloadTooLargeError, UnsupportedDocumentError
 from xrv.ingest.zugferd import ZugferdError
 from xrv.rules import RulesetNotFoundError
@@ -164,41 +164,82 @@ def healthz(request: Request) -> dict[str, object]:
     }
 
 
-def _problem(status: int, kind: str, detail: str) -> JSONResponse:
+def _requested_language(request: Request) -> str:
+    """The language this request asked for, for rendering its error.
+
+    Read from the query rather than Accept-Language: the caller already states
+    it there for explanations, and an error in one language beside explanations
+    in another would be worse than either alone.
+    """
+    asked = request.query_params.get("lang", DEFAULT_LANGUAGE)
+    return asked if asked in LANGUAGES else DEFAULT_LANGUAGE
+
+
+def _problem(request: Request, status: int, kind: str, exc: Exception) -> JSONResponse:
+    """Render a domain error as a problem the caller can act on.
+
+    `error` is the stable code — an API consumer branches on that rather than
+    parsing prose. `detail` is the sentence, in the requested language where a
+    translation exists and in English where it does not.
+    """
+    code = getattr(exc, "code", "") or kind
+    params = getattr(exc, "params", {}) or {}
+    detail = render(code, params, _requested_language(request), fallback=str(exc))
     return JSONResponse(status_code=status, content={"error": kind, "detail": detail})
 
 
 @app.exception_handler(UnsupportedDocumentError)
 async def _unsupported(request: Request, exc: UnsupportedDocumentError) -> JSONResponse:
-    return _problem(415, "unsupported_document", str(exc))
+    return _problem(request, 415, "unsupported_document", exc)
 
 
 @app.exception_handler(MalformedXmlError)
 async def _malformed(request: Request, exc: MalformedXmlError) -> JSONResponse:
-    return _problem(422, "malformed_xml", str(exc))
+    return _problem(request, 422, "malformed_xml", exc)
 
 
 @app.exception_handler(ZugferdError)
 async def _zugferd(request: Request, exc: ZugferdError) -> JSONResponse:
-    return _problem(422, "unreadable_pdf", str(exc))
+    return _problem(request, 422, "unreadable_pdf", exc)
 
 
 @app.exception_handler(PayloadTooLargeError)
 async def _too_large(request: Request, exc: PayloadTooLargeError) -> JSONResponse:
-    return _problem(413, "payload_too_large", str(exc))
+    return _problem(request, 413, "payload_too_large", exc)
 
 
 @app.exception_handler(RulesetNotFoundError)
 async def _no_ruleset(request: Request, exc: RulesetNotFoundError) -> JSONResponse:
-    return _problem(404, "ruleset_not_found", str(exc))
+    return _problem(request, 404, "ruleset_not_found", exc)
 
 
 @app.exception_handler(LanguageNotAvailableError)
 async def _no_language(request: Request, exc: LanguageNotAvailableError) -> JSONResponse:
-    return _problem(400, "unknown_language", str(exc))
+    return _problem(request, 400, "unknown_language", exc)
+
+
+class _CachedStatics(StaticFiles):
+    """Static files with cache headers that match how the build names them.
+
+    Vite fingerprints every asset, so `assets/index-BiE98Yrt.js` can be cached
+    forever — the name changes when the content does. `index.html` cannot: it is
+    the file that *names* the current bundle, and a browser holding an old copy
+    keeps loading an old app no matter how many times the server is rebuilt.
+
+    That is not hypothetical. Without this, a rebuilt UI kept serving the
+    previous bundle from cache and looked like the fixes had not been made.
+    """
+
+    async def get_response(self, path: str, scope):  # type: ignore[no-untyped-def]
+        response = await super().get_response(path, scope)
+        fingerprinted = path.startswith("assets/")
+        response.headers["Cache-Control"] = (
+            "public, max-age=31536000, immutable" if fingerprinted else "no-cache"
+        )
+        return response
 
 
 # Mounted last so every API route above wins the path it owns. html=True serves
 # index.html for unknown paths, which is what a single-page app needs.
 if FRONTEND_DIST.is_dir():
-    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
+    app.mount("/", _CachedStatics(directory=FRONTEND_DIST, html=True), name="frontend")
