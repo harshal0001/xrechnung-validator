@@ -73,9 +73,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 5; BG-25 is the rule's own term. Not yet reviewed in English."
       ],
       "rule_text_digest": "a5ece4a512a32aae",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "a5ece4a512a32aae",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CL-01": {
       "what": "The document type code is not a permitted code from code list UNTDID 1001.",
@@ -84,9 +84,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-3 via BR-04; [CL] 380, 381. Not yet reviewed in English."
       ],
       "rule_text_digest": "6ea9a6dc141bfeda",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6ea9a6dc141bfeda",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CL-04": {
       "what": "The invoice currency code is not a valid ISO 4217 code.",
@@ -95,9 +95,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CL-04 says alpha-3; [CL] EUR, CHF. Not yet reviewed in English."
       ],
       "rule_text_digest": "5e03f8523a485ced",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "5e03f8523a485ced",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CL-14": {
       "what": "The country code is not a valid ISO 3166-1 code.",
@@ -106,9 +106,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CO-09 names alpha-2; [CL] DE, AT. Not yet reviewed in English."
       ],
       "rule_text_digest": "31b964956bfc4b25",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "31b964956bfc4b25",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CL-17": {
       "what": "The VAT category code is not a permitted code from code list UNCL 5305.",
@@ -117,9 +117,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [CL] S, AE, Z — codes only, per the German reviewer decision. Not yet reviewed in English."
       ],
       "rule_text_digest": "eb45453974dcb143",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "eb45453974dcb143",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-09": {
       "what": "The seller VAT identifier (BT-31), the seller tax representative VAT identifier (BT-63) or the buyer VAT identifier (BT-48) does not start with the ISO 3166-1 alpha-2 country prefix.",
@@ -128,9 +128,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-CO-09. Not yet reviewed in English."
       ],
       "rule_text_digest": "9079bdbbd75ef74d",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "9079bdbbd75ef74d",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-10": {
       "what": "The sum of invoice line net amounts (BT-106) does not match the net amounts of the individual lines (BT-131).",
@@ -139,9 +139,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
       ],
       "rule_text_digest": "3a5fddaf3578e501",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "3a5fddaf3578e501",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-13": {
       "what": "The invoice total amount without VAT (BT-109) does not equal the sum of line net amounts minus document-level allowances plus document-level charges.",
@@ -150,9 +150,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-107, BT-108. Not yet reviewed in English."
       ],
       "rule_text_digest": "95893e686b3786b2",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "95893e686b3786b2",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-14": {
       "what": "The invoice total VAT amount (BT-110) does not equal the sum of the VAT category tax amounts (BT-117).",
@@ -161,9 +161,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
       ],
       "rule_text_digest": "0e668b178cad4877",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "0e668b178cad4877",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-15": {
       "what": "The invoice total amount with VAT (BT-112) does not equal the total without VAT plus the VAT amount.",
@@ -172,9 +172,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: —. Not yet reviewed in English."
       ],
       "rule_text_digest": "6bdbeae81d6a4405",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "6bdbeae81d6a4405",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-CO-16": {
       "what": "The amount due for payment (BT-115) does not equal the total with VAT minus the paid amount plus the rounding amount.",
@@ -183,9 +183,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [MODEL] BT-113, BT-114. Not yet reviewed in English."
       ],
       "rule_text_digest": "059100aa0c453cd4",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "059100aa0c453cd4",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-1": {
       "what": "Payment instructions (BG-16) are missing.",
@@ -194,9 +194,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-23-a, BR-DE-24-a, BR-DE-19. Not yet reviewed in English."
       ],
       "rule_text_digest": "924c951d935f64fd",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "924c951d935f64fd",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-15": {
       "what": "The buyer reference (BT-10) is missing.",
@@ -205,20 +205,21 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [BUND] — narrowed to the federal level, as in the German entry. Not yet reviewed in English."
       ],
       "rule_text_digest": "45fdc2d795a75062",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "45fdc2d795a75062",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-2": {
-      "what": "The seller contact (BG-6) is missing.",
+      "what": "The seller contact details (BG-6) are missing.",
       "why": "The group comprises the contact point (BT-41), its telephone number (BT-42) and its email address (BT-43); XRechnung requires each of these fields individually (BR-DE-5, BR-DE-6, BR-DE-7).",
       "review_notes": [
-        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-5/6/7. Not yet reviewed in English."
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-5/6/7. Not yet reviewed in English.",
+        "Reviewer decision 2026-09-09: 'The seller contact is missing' read as though a person were absent; 'contact details' matches the German Kontaktdaten and the group's content."
       ],
       "rule_text_digest": "2d54658cceb72936",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "2d54658cceb72936",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-3": {
       "what": "The seller city (BT-37) is missing.",
@@ -227,9 +228,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-3/4. Not yet reviewed in English."
       ],
       "rule_text_digest": "4d2cfdddd00945e1",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "4d2cfdddd00945e1",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-4": {
       "what": "The seller post code (BT-38) is missing.",
@@ -238,9 +239,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-3/4. Not yet reviewed in English."
       ],
       "rule_text_digest": "97fa6bb625657b81",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "97fa6bb625657b81",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-6": {
       "what": "The seller contact telephone number (BT-42) is missing.",
@@ -249,9 +250,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-2, BR-DE-5/6/7. Not yet reviewed in English."
       ],
       "rule_text_digest": "1063eb7739fc9ff8",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "1063eb7739fc9ff8",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-7": {
       "what": "The seller contact email address (BT-43) is missing.",
@@ -260,9 +261,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [L1] BR-DE-2, BR-DE-5/6/7. Not yet reviewed in English."
       ],
       "rule_text_digest": "8c3cd38b3b2b3cf3",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "8c3cd38b3b2b3cf3",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-8": {
       "what": "The buyer city (BT-52) is missing.",
@@ -271,9 +272,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-8/9. Not yet reviewed in English."
       ],
       "rule_text_digest": "0850855b6afa3df4",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "0850855b6afa3df4",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     },
     "BR-DE-9": {
       "what": "The buyer post code (BT-53) is missing.",
@@ -282,9 +283,9 @@
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1; [L1] BR-DE-8/9. Not yet reviewed in English."
       ],
       "rule_text_digest": "2a8dc0f18e7475ae",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "2a8dc0f18e7475ae",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-09"
     }
   }
 }
