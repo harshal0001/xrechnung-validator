@@ -46,6 +46,11 @@ frontend/*.tsbuildinfo
 # image CI builds while a local build picked them up off disk.
 /samples/
 
+# Per-batch review sheets. Working artifacts for one review round, regenerated
+# by review_sheet.py --only in one command. The full sheet is committed; forty
+# batch sheets beside it would be noise.
+docs/review/*.batch-*.md
+
 # Agent handoff notes. Kept local: it names the private planning doc and
 # carries internal links that do not belong in a repo destined to be public.
 CLAUDE.md

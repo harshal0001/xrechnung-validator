@@ -207,6 +207,48 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
     },
+    "BR-DE-10": {
+      "what": "Die Stadt der Lieferanschrift (BT-77) fehlt, obwohl die Gruppe Lieferanschrift (BG-15) übermittelt wird.",
+      "why": "Die Gruppe BG-15 ist optional; eine Rechnung ohne abweichende Lieferanschrift löst diese Regel nicht aus. Wird sie übermittelt, verlangt XRechnung sie vollständig: BR-DE-11 fordert zusätzlich die Postleitzahl (BT-78).",
+      "review_notes": [
+        "Conditional rendered as fact (`obwohl`), not as condition (`wenn`): the rule fires only when BG-15 is present, so at the moment the reader sees this it is a fact about their invoice. Reviewer decision.",
+        "[L1] BR-DE-11 verified present in this ruleset requiring BT-78 under the same condition.",
+        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'",
+        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), not as condition ('wenn'). The sentence describes the reader's invoice, not the rule."
+      ],
+      "rule_text_digest": "c4d922248fbce6f6",
+      "reviewed_digest": "c4d922248fbce6f6",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-11": {
+      "what": "Die Postleitzahl der Lieferanschrift (BT-78) fehlt, obwohl die Gruppe Lieferanschrift (BG-15) übermittelt wird.",
+      "why": "Die Gruppe BG-15 ist optional; eine Rechnung ohne abweichende Lieferanschrift löst diese Regel nicht aus. Wird sie übermittelt, verlangt XRechnung sie vollständig: BR-DE-10 fordert zusätzlich die Stadt (BT-77).",
+      "review_notes": [
+        "Mirror of BR-DE-10; same conditional-as-fact decision applies.",
+        "[L1] BR-DE-10 verified present in this ruleset requiring BT-77 under the same condition.",
+        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'",
+        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), as for BR-DE-10."
+      ],
+      "rule_text_digest": "12b771aef366699d",
+      "reviewed_digest": "12b771aef366699d",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-14": {
+      "what": "Der Umsatzsteuersatz (BT-119) fehlt.",
+      "why": "EN 16931 lässt das Feld weg, wenn die Rechnung nicht der Umsatzsteuer unterliegt (BR-48). XRechnung streicht diese Ausnahme und verlangt BT-119 ohne Einschränkung. Der Wert geht in die Steuerberechnung ein: BR-CO-17 verlangt Steuerbetrag (BT-117) = Bemessungsgrundlage (BT-116) × BT-119 / 100.",
+      "review_notes": [
+        "[L1] BR-48 in this ruleset: 'Each VAT breakdown (BG-23) shall have a VAT category rate (BT-119), except if the Invoice is not subject to VAT.' BR-DE-14 carries no exception — the German CIUS tightens the EN rule. This is the substance of the entry and is checkable against both texts.",
+        "[L1] BR-CO-17 verified present with exactly the quoted formula.",
+        "Cut: 'auch bei Steuersatz 0' — an inference about what value to supply, which neither rule states.",
+        "[SEM] BT-119 is 'Der Umsatzsteuersatz, angegeben als für die betreffende Umsatzsteuerkategorie geltender Prozentsatz'. Dropped 'der Steuerkategorie' from the draft: KoSIT says 'Umsatzsteuerkategorie', and the qualifier adds nothing the BT number does not."
+      ],
+      "rule_text_digest": "a4c36b853564e582",
+      "reviewed_digest": "a4c36b853564e582",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
     "BR-DE-15": {
       "what": "Die Käuferreferenz (BT-10) fehlt.",
       "why": "Die Bundesverwaltung nutzt dieses Feld für die Leitweg-ID, über die die zentrale Rechnungseingangsplattform des Bundes die Rechnung an die zuständige Stelle weiterleitet. Der Auftraggeber teilt die Leitweg-ID bei der Bestellung mit.",
@@ -220,6 +262,36 @@
       "reviewed_digest": "45fdc2d795a75062",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-16": {
+      "what": "Die Rechnung verwendet einen der Steuercodes S, Z, E, AE, K, G, L oder M, aber keines der Elemente Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), steuerrechtliche Kennung des Verkäufers (BT-32) oder Steuervertreter des Verkäufers (BG-11) ist vorhanden.",
+      "why": "§ 14 Abs. 4 UStG verlangt in einer Rechnung die Steuernummer oder die Umsatzsteuer-Identifikationsnummer des leistenden Unternehmers.",
+      "review_notes": [
+        "[UStG] § 14 Abs. 4 Nr. 2 UStG names the Steuernummer or the USt-IdNr of the leistender Unternehmer.",
+        "The statute does not mention a Steuervertreter, so `why` does not claim it does; BG-11 is the third option the rule adds beyond the statute and is named only in `what`.",
+        "`what` keeps the code letters as the rule gives them rather than glossing them.",
+        "[SEM] BT-32 corrected: KoSIT calls it 'eine örtliche steuerrechtliche Kennung des Verkäufers', not 'Steuernummer'. A Steuernummer is one thing that may go there, so the earlier draft narrowed the field to one of its possible contents. `why` still says Steuernummer because § 14 Abs. 4 Nr. 2 UStG does."
+      ],
+      "rule_text_digest": "e7b60d550e57b9d3",
+      "reviewed_digest": "e7b60d550e57b9d3",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-17": {
+      "what": "Der Code für die Rechnungsart (BT-3) sollte einer der Codes 326, 380, 381, 384, 389, 875, 876 oder 877 aus der Codeliste UNTDID 1001 sein.",
+      "why": "380 (Rechnung) und 381 (Gutschrift) decken den Regelfall ab. Unabhängig von dieser Einschränkung verlangt BR-CL-01, dass BT-3 überhaupt aus UNTDID 1001 stammt.",
+      "review_notes": [
+        "Severity is `warning` and the rule says 'sollen', so `what` says 'sollte' and not 'muss'.",
+        "Codes reordered into numeric order; the rule text lists 381 after 389.",
+        "REVIEWER DECISION NEEDED: German glosses for all eight codes were drafted and then cut. The rule text glosses them in English only, no German name appears anywhere in this ruleset, and the three construction codes (875/876/877) carry industry-specific terms. Only 380 and 381 are kept, as the two whose German names are unambiguous. Reinstate the rest only if a reviewer confirms them.",
+        "[L1] BR-CL-01 verified present: 'The document type code MUST be coded by the invoice and credit note related code lists of UNTDID 1001.'",
+        "[SEM] Confirms the gloss decision: KoSIT's own German description of BT-3 lists the codes with their English glosses only — '326 (Partial invoice) 380 (Commercial invoice) …'. No German name exists in the specification either, so any would have been ours.",
+        "Reviewer decision 2026-09-11: bare code numbers kept, German glosses stay cut. Severity confirmed: rule says 'sollen' and is flagged warning, so `what` says 'sollte'."
+      ],
+      "rule_text_digest": "a4288c379c8a902f",
+      "reviewed_digest": "a4288c379c8a902f",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-2": {
       "what": "Die Kontaktdaten des Verkäufers (BG-6) fehlen.",
@@ -257,6 +329,18 @@
       "reviewed_digest": "97fa6bb625657b81",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-5": {
+      "what": "Die Kontaktstelle des Verkäufers (BT-41) fehlt.",
+      "why": "BR-DE-2 verlangt die Gruppe SELLER CONTACT (BG-6); BR-DE-5, BR-DE-6 und BR-DE-7 verlangen ihre drei Felder einzeln: Kontaktstelle (BT-41), Telefonnummer (BT-42) und E-Mail-Adresse (BT-43).",
+      "review_notes": [
+        "[L1] BR-DE-2, BR-DE-6 and BR-DE-7 verified present in this ruleset with exactly the cited content.",
+        "`what` is a translation of the element name plus the negation. Nothing added."
+      ],
+      "rule_text_digest": "bc5fdcf5c862ada4",
+      "reviewed_digest": "bc5fdcf5c862ada4",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-6": {
       "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) fehlt.",
@@ -314,6 +398,7 @@
     "BUND": "e-rechnung-bund.de/faq/leitweg-id — federal e-invoicing portal, Leitweg-ID FAQ",
     "L1": "the rule text of the named rule in this ruleset (rulesets/2026-08-31)",
     "MODEL": "EN 16931 abstract model, github.com/ConnectingEurope/eInvoicing-EN16931 ubl/schematron/abstract/EN16931-model.sch — BT names",
-    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it"
+    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it",
+    "SEM": "KoSIT semantic model, semantic-model/2026-08-31/xrechnung-semantic-model.xsd (itplr-kosit/xrechnung-visualization) — official German name and description per BT/BG"
   }
 }
