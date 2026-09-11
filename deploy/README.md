@@ -14,12 +14,15 @@ You authenticate; the script never handles credentials.
 
 ```bash
 aws configure sso        # or: aws configure
-bash deploy/aws.sh
+bash deploy/aws.sh          # image, role, function, Function URL
+bash deploy/apigateway.sh   # the public front door
+bash deploy/status.sh       # what is live, and what is not
 ```
 
-It creates one ECR repository, one IAM role, one Lambda function and one Function
-URL, and it is safe to re-run — every step updates rather than fails if the thing
-already exists.
+The first creates one ECR repository, one IAM role, one Lambda function and one
+Function URL. The second puts an HTTP API in front of it, which is the door that
+actually answers on this account — see below. Both are safe to re-run: every step
+updates, or adopts what exists, rather than failing.
 
 | Setting | Value | Why |
 |---|---|---|
@@ -27,7 +30,7 @@ already exists.
 | Architecture | `arm64` | Graviton, ~20% cheaper. CI builds arm64 on every push to main |
 | Memory | 1024 MB | Measured peak is ~220 MB; this is headroom, not a guess |
 | Timeout | 30 s | 27 ms per document warm |
-| Front door | Function URL | Free, one call. API Gateway would add cost and routing this service does not need |
+| Front door | HTTP API | A Function URL is free and would be enough, but returns 403 on this account. See below |
 | IAM | logs only | The rule set is baked into the image and there is no database, so the function reads no AWS resource |
 
 ### Why Lambda suits this workload
@@ -48,27 +51,35 @@ rejects the image at `CreateFunction` with *"media type ... is not supported"* �
 the build and the push have both succeeded. The script passes `--provenance=false
 --sbom=false` and forces the Docker media type for exactly this reason.
 
-## New accounts cannot serve public traffic
+## The Function URL returns 403, and an HTTP API does not
 
-A newly created AWS account is restricted until AWS finishes vetting it, and one of
-the things held back is serving **public, unauthenticated** endpoints. The symptom is
-a function URL that returns 403 while everything about it is correct.
+A Lambda Function URL with `AuthType: NONE` is the cheapest front door there is:
+no extra service, one API call, no per-request charge. On this account it returns
+403 to everyone, including a plain `curl` of `/healthz`, while the function itself
+is healthy.
 
-`deploy/status.sh` reports the tell: `ConcurrentExecutions` is 10 on a restricted
-account and 1000 on a normal one. The two lift together.
+It is not a misconfiguration. Each path was tested against the same unchanged
+function:
 
-What the restriction does and does not cover, established by testing each path:
-
-| Path | Restricted account |
+| Path | Result |
 |---|---|
-| `aws lambda invoke` | works |
-| Function URL, SigV4-signed | works |
+| `aws lambda invoke` | 200 |
+| Function URL, SigV4-signed | 200 |
 | Function URL, `AuthType: NONE` | **403** |
-| CloudFront in front of it | **403** — CloudFront is public traffic too |
+| CloudFront with Origin Access Control in front of the Function URL | **403** |
+| **API Gateway HTTP API in front of the function** | **200** |
 
-So CloudFront does **not** work around it, which is worth knowing before reaching for
-it. Nothing needs changing; the configuration is already correct and starts working
-when the account matures.
+The last row is the one that matters, and it corrects an obvious reading of the
+first four. A signed request working while an unsigned one fails looks like a
+block on public unauthenticated traffic, and CloudFront returning 403 too looks
+like confirmation. It is not: the HTTP API serves exactly that traffic, to the
+same function, publicly and unauthenticated. What is restricted is the Function
+URL, not the audience — so CloudFront cannot work around it, because CloudFront
+reaches the function *through* the Function URL, and API Gateway does not.
+
+A newly created account is also capped at 10 concurrent executions against a
+normal 1000. `deploy/status.sh` reports that figure as a proxy for account
+maturity; expect the Function URL to start answering when it rises.
 
 ## Measure the cold start
 
@@ -76,11 +87,13 @@ The README's results table has an empty "cold start to first response" row. It
 stays empty until measured — never estimated.
 
 ```bash
-bash deploy/measure.sh https://xxxx.lambda-url.eu-central-1.on.aws/
+bash deploy/measure.sh https://xxxx.execute-api.eu-central-1.amazonaws.com/
 ```
 
 It forces a cold start by updating the function configuration, which discards
 warm execution environments, then times the first request against the next five.
+Measured here: 3.6–4.7 s to first response over three runs. Lambda does not bill
+the init phase, so the schema and stylesheet compilation inside that figure is free.
 
 ## Running it anywhere else
 
@@ -99,6 +112,8 @@ let the platform start another instance.
 ## Teardown
 
 ```bash
+aws apigatewayv2 delete-api --api-id "$(aws apigatewayv2 get-apis --region eu-central-1 \
+  --query "Items[?Name=='xrechnung-validator'].ApiId | [0]" --output text)" --region eu-central-1
 aws lambda delete-function-url-config --function-name xrechnung-validator --region eu-central-1
 aws lambda delete-function          --function-name xrechnung-validator --region eu-central-1
 aws ecr    delete-repository        --repository-name xrechnung-validator --region eu-central-1 --force

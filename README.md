@@ -10,6 +10,9 @@ Validators for this already exist. What is missing is the layer between
 platform routes on that field, and the ordering authority gives it to you with the
 purchase order."* **That layer is the point of this project.**
 
+**Live:** <https://cbb6tgp2x1.execute-api.eu-central-1.amazonaws.com> — three sample
+invoices ship with the page, so it can be tried without having an XRechnung file.
+
 > Validates against the published KoSIT rule set. Not a legal compliance
 > certification, and does not claim to be.
 
@@ -73,7 +76,7 @@ measured.
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
 | Tests | 493 backend, 21 frontend |
-| Cold start | — |
+| Cold start | **3.6–4.7 s** to first response, three runs — unbilled |
 
 ---
 
@@ -128,14 +131,12 @@ same bytes run on Lambda, Cloud Run, Render or a laptop. There is no Lambda hand
 and no second Dockerfile.
 
 Frankfurt, so German invoices are processed in Germany. The frontend is served by the
-same process: one origin, no CORS, one thing to deploy.
+same process: one origin, no CORS, one thing to deploy. An HTTP API is the front door
+rather than a Function URL, for a reason worth reading: `deploy/README.md`.
 
 ```bash
 docker build -t xrv . && docker run --rm -p 8080:8080 xrv
 ```
-
-Three sample invoices ship with the page, so it can be tried without having an
-XRechnung file to hand.
 
 ---
 

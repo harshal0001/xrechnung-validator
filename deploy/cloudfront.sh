@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 # Put CloudFront in front of the Lambda function URL.
 #
-# Two reasons, and the second is the durable one.
+# This was written to work around the 403 a public Function URL returns on a new
+# account, on the theory that Origin Access Control would sign each request with
+# SigV4 and sidestep it. That does not work — CloudFront still returns 403 — and
+# `deploy/apigateway.sh` is what actually opened the door. See deploy/README.md.
 #
-# 1. A new AWS account cannot serve public unauthenticated function URLs. With
-#    CloudFront the URL stops being public: it switches to AWS_IAM auth and
-#    CloudFront signs each request with SigV4 through Origin Access Control, so
-#    the restriction no longer applies.
-# 2. It is the better end state anyway. The function is never reachable except
-#    through CloudFront, the hostname is presentable, and responses can be
-#    cached at the edge.
+# The script stays because the second reason still holds: the function reachable
+# only through CloudFront, a presentable hostname and static assets cached at the
+# edge is the better end state. It is not part of the live path today.
 #
 #   AWS_PROFILE=xrv bash deploy/cloudfront.sh
 #
