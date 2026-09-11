@@ -51,6 +51,17 @@ else
   echo "  permission already granted"
 fi
 
+# ---- bound what a stranger can cost ------------------------------------------
+# The stage inherits the account default of 10,000 requests/second otherwise.
+# Reserved concurrency would be the real hard cap, but a new account cannot set
+# one: AWS refuses any reservation that drops unreserved concurrency below 10,
+# and 10 is the whole account limit. So the throttle is the lever there is.
+# 5/second is a hundred times more than this service will ever legitimately see,
+# and caps a month-long flood at roughly $30 rather than $137.
+$AWS apigatewayv2 update-stage --api-id "$API" --stage-name '$default' \
+  --default-route-settings "ThrottlingRateLimit=${XRV_RPS:-5},ThrottlingBurstLimit=${XRV_BURST:-10}" >/dev/null
+echo "  throttle   ${XRV_RPS:-5}/s, burst ${XRV_BURST:-10}"
+
 ENDPOINT=$($AWS apigatewayv2 get-api --api-id "$API" --query ApiEndpoint --output text)
 
 # ---- prove it ---------------------------------------------------------------
