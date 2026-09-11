@@ -18,6 +18,10 @@ REGION="${AWS_REGION:-eu-central-1}"          # Frankfurt: German data stays in 
 NAME="${XRV_NAME:-xrechnung-validator}"
 MEMORY="${XRV_MEMORY:-1024}"                  # measured peak ~220 MB; 1 GiB is headroom
 TIMEOUT="${XRV_TIMEOUT:-30}"                  # 27 ms/document warm; 30 s is generous
+# API Gateway base64-encodes the body into Lambda's 6 MB invocation payload, so
+# uploads die at ~4.4 MB measured. Refuse just under that and the caller gets our
+# localised message rather than a bare "Request Entity Too Large" from the edge.
+UPLOAD="${XRV_MAX_UPLOAD_BYTES:-4194304}"
 ARCH="${XRV_ARCH:-arm64}"                     # Graviton: ~20% cheaper, proven in CI
 ROLE_NAME="${NAME}-role"
 
@@ -83,12 +87,14 @@ if aws lambda get-function --function-name "$NAME" --region "$REGION" >/dev/null
     --image-uri "$IMAGE" >/dev/null
   aws lambda wait function-updated --function-name "$NAME" --region "$REGION"
   aws lambda update-function-configuration --function-name "$NAME" --region "$REGION" \
-    --memory-size "$MEMORY" --timeout "$TIMEOUT" >/dev/null
+    --memory-size "$MEMORY" --timeout "$TIMEOUT" \
+    --environment "Variables={XRV_MAX_UPLOAD_BYTES=$UPLOAD}" >/dev/null
 else
   say "Creating function ${NAME}"
   aws lambda create-function --function-name "$NAME" --region "$REGION" \
     --package-type Image --code "ImageUri=${IMAGE}" --role "$ROLE_ARN" \
-    --architectures "$ARCH" --memory-size "$MEMORY" --timeout "$TIMEOUT" >/dev/null
+    --architectures "$ARCH" --memory-size "$MEMORY" --timeout "$TIMEOUT" \
+    --environment "Variables={XRV_MAX_UPLOAD_BYTES=$UPLOAD}" >/dev/null
 fi
 aws lambda wait function-active-v2 --function-name "$NAME" --region "$REGION"
 
