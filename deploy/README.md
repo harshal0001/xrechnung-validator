@@ -107,6 +107,36 @@ A newly created account is also capped at 10 concurrent executions against a
 normal 1000. `deploy/status.sh` reports that figure as a proxy for account
 maturity; expect the Function URL to start answering when it rises.
 
+## Keeping it warm
+
+A cold start is 3.4-4.7 s: the container starts, then three XSD schemas and four
+Schematron stylesheets compile. `deploy/keepwarm.sh` installs an EventBridge rule
+that pings `/healthz` every five minutes, which is inside the window Lambda holds
+an idle environment, so a visitor arriving at any moment lands on a warm one.
+
+A scheduled CI job would have done the same thing and is worse: scheduled
+workflows are delayed under load, dropped silently, and disabled outright after
+sixty days without a commit. None of that is visible until the demo is slow
+again. Scheduled rules that target an AWS service cost nothing, and 8,640
+invocations a month against a 1,000,000 always-free allowance is noise.
+
+## What a stranger can cost
+
+The URL is public and a budget alert reports spending rather than stopping it.
+Reserved concurrency is the real hard cap and a new account cannot set one: AWS
+refuses any reservation that would drop unreserved concurrency below 10, which is
+the entire account limit. Two levers remain, and both are set by the scripts.
+
+| Lever | Value | Effect |
+|---|---|---|
+| Stage throttle | 5/second, burst 10 | Caps requests at 13M/month rather than 51.8M |
+| Function timeout | 20 s | Twice the slowest invocation ever recorded |
+| Upload limit | 4 MB | Below the ~4.4 MB the platform accepts at all |
+
+Together those bound a sustained month-long flood at roughly \$30 instead of
+\$137 — the difference between an unpleasant surprise and one that consumes an
+entire credit balance.
+
 ## Measure the cold start
 
 The README's results table has an empty "cold start to first response" row. It

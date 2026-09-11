@@ -76,7 +76,7 @@ measured.
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
 | Tests | 493 backend, 21 frontend |
-| Cold start | **3.6–4.7 s** to first response, three runs — unbilled |
+| Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
 
@@ -132,7 +132,9 @@ and no second Dockerfile.
 
 Frankfurt, so German invoices are processed in Germany. The frontend is served by the
 same process: one origin, no CORS, one thing to deploy. An HTTP API is the front door
-rather than a Function URL, for a reason worth reading: `deploy/README.md`.
+rather than a Function URL, and a scheduled ping keeps an execution environment warm so
+the cold start is never a visitor's problem. Both have reasons worth reading:
+`deploy/README.md`.
 
 ```bash
 docker build -t xrv . && docker run --rm -p 8080:8080 xrv
