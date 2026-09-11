@@ -213,12 +213,13 @@
       "review_notes": [
         "Conditional rendered as fact (`obwohl`), not as condition (`wenn`): the rule fires only when BG-15 is present, so at the moment the reader sees this it is a fact about their invoice. Reviewer decision.",
         "[L1] BR-DE-11 verified present in this ruleset requiring BT-78 under the same condition.",
-        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'"
+        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'",
+        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), not as condition ('wenn'). The sentence describes the reader's invoice, not the rule."
       ],
       "rule_text_digest": "c4d922248fbce6f6",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "c4d922248fbce6f6",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-11": {
       "what": "Die Postleitzahl der Lieferanschrift (BT-78) fehlt, obwohl die Gruppe Lieferanschrift (BG-15) übermittelt wird.",
@@ -226,12 +227,13 @@
       "review_notes": [
         "Mirror of BR-DE-10; same conditional-as-fact decision applies.",
         "[L1] BR-DE-10 verified present in this ruleset requiring BT-77 under the same condition.",
-        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'"
+        "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'",
+        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), as for BR-DE-10."
       ],
       "rule_text_digest": "12b771aef366699d",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "12b771aef366699d",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-14": {
       "what": "Der Umsatzsteuersatz (BT-119) fehlt.",
@@ -243,9 +245,9 @@
         "[SEM] BT-119 is 'Der Umsatzsteuersatz, angegeben als für die betreffende Umsatzsteuerkategorie geltender Prozentsatz'. Dropped 'der Steuerkategorie' from the draft: KoSIT says 'Umsatzsteuerkategorie', and the qualifier adds nothing the BT number does not."
       ],
       "rule_text_digest": "a4c36b853564e582",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "a4c36b853564e582",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-15": {
       "what": "Die Käuferreferenz (BT-10) fehlt.",
@@ -271,9 +273,9 @@
         "[SEM] BT-32 corrected: KoSIT calls it 'eine örtliche steuerrechtliche Kennung des Verkäufers', not 'Steuernummer'. A Steuernummer is one thing that may go there, so the earlier draft narrowed the field to one of its possible contents. `why` still says Steuernummer because § 14 Abs. 4 Nr. 2 UStG does."
       ],
       "rule_text_digest": "e7b60d550e57b9d3",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "e7b60d550e57b9d3",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-17": {
       "what": "Der Code für die Rechnungsart (BT-3) sollte einer der Codes 326, 380, 381, 384, 389, 875, 876 oder 877 aus der Codeliste UNTDID 1001 sein.",
@@ -283,12 +285,13 @@
         "Codes reordered into numeric order; the rule text lists 381 after 389.",
         "REVIEWER DECISION NEEDED: German glosses for all eight codes were drafted and then cut. The rule text glosses them in English only, no German name appears anywhere in this ruleset, and the three construction codes (875/876/877) carry industry-specific terms. Only 380 and 381 are kept, as the two whose German names are unambiguous. Reinstate the rest only if a reviewer confirms them.",
         "[L1] BR-CL-01 verified present: 'The document type code MUST be coded by the invoice and credit note related code lists of UNTDID 1001.'",
-        "[SEM] Confirms the gloss decision: KoSIT's own German description of BT-3 lists the codes with their English glosses only — '326 (Partial invoice) 380 (Commercial invoice) …'. No German name exists in the specification either, so any would have been ours."
+        "[SEM] Confirms the gloss decision: KoSIT's own German description of BT-3 lists the codes with their English glosses only — '326 (Partial invoice) 380 (Commercial invoice) …'. No German name exists in the specification either, so any would have been ours.",
+        "Reviewer decision 2026-09-11: bare code numbers kept, German glosses stay cut. Severity confirmed: rule says 'sollen' and is flagged warning, so `what` says 'sollte'."
       ],
       "rule_text_digest": "a4288c379c8a902f",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "a4288c379c8a902f",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-2": {
       "what": "Die Kontaktdaten des Verkäufers (BG-6) fehlen.",
@@ -335,9 +338,9 @@
         "`what` is a translation of the element name plus the negation. Nothing added."
       ],
       "rule_text_digest": "bc5fdcf5c862ada4",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "bc5fdcf5c862ada4",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-6": {
       "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) fehlt.",
