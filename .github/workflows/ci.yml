@@ -159,6 +159,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Same as the image job: the Dockerfile bakes the ruleset in and verifies
+      # it, so the build cannot run without one in the context.
+      - name: Fetch KoSIT ruleset
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
