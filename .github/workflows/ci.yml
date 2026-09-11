@@ -135,3 +135,73 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Deploying happens here rather than from a laptop, so what is live is always
+  # a commit that passed everything above. No AWS key is stored: GitHub signs a
+  # short-lived OIDC token and AWS exchanges it for temporary credentials, and
+  # the role it assumes may push one image and update one function, nothing else.
+  # Set it up with deploy/github-oidc.sh.
+  deploy:
+    name: deploy
+    needs: [check, frontend, image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write        # required to mint the OIDC token
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false   # never abandon a half-finished rollout
+    env:
+      AWS_REGION: eu-central-1
+      NAME: xrechnung-validator
+      ENDPOINT: https://cbb6tgp2x1.execute-api.eu-central-1.amazonaws.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      # provenance and sbom off, oci-mediatypes off: with them on, buildx pushes
+      # an OCI manifest list and Lambda rejects the image with "media type ... is
+      # not supported" — after the build and the push have both succeeded.
+      - name: Build and push arm64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          provenance: false
+          sbom: false
+          outputs: type=image,name=${{ steps.ecr.outputs.registry }}/xrechnung-validator:${{ github.sha }},push=true,oci-mediatypes=false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Addressed by commit sha, not :latest, so the function records which
+      # commit is live and a rollback is one call with an older sha.
+      - name: Point the function at it
+        run: |
+          aws lambda update-function-code --function-name "$NAME" \
+            --image-uri "${{ steps.ecr.outputs.registry }}/xrechnung-validator:${{ github.sha }}" >/dev/null
+          aws lambda wait function-updated --function-name "$NAME"
+
+      # A deploy that reports success without the service answering is worse
+      # than a failed one, because nobody looks again.
+      - name: Prove it is serving
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            body=$(curl -fsS --max-time 30 "$ENDPOINT/healthz") && break
+            echo "attempt $attempt: not answering yet"; sleep 10
+          done
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"'
+          curl -fsS --max-time 60 -F file=@frontend/public/samples/missing-buyer-reference.xml \
+            "$ENDPOINT/validate?explain=true&lang=de" | grep -q 'BR-DE-15'
+          echo "live: $ENDPOINT"
