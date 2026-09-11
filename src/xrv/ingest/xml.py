@@ -74,7 +74,12 @@ def parse(payload: bytes) -> etree._ElementTree:
     throw away that declaration.
     """
     if len(payload) > MAX_BYTES:
-        raise PayloadTooLargeError(f"payload is {len(payload):,} bytes; the limit is {MAX_BYTES:,}")
+        raise PayloadTooLargeError(
+            f"payload is {len(payload):,} bytes; the limit is {MAX_BYTES:,}",
+            code="payload_too_large",
+            size=f"{len(payload):,}",
+            limit=f"{MAX_BYTES:,}",
+        )
     if not payload.strip():
         raise MalformedXmlError("payload is empty", code="xml_empty")
 

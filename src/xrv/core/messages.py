@@ -73,6 +73,13 @@ MESSAGES: dict[str, dict[str, str]] = {
         "de": "Die Datei ist {size} Bytes groß; das Limit liegt bei {limit} Bytes.",
         "en": "The file is {size} bytes; the limit is {limit} bytes.",
     },
+    # The upload is refused mid-stream, so its full size was never read. Naming a
+    # size here would mean naming the bytes read before the cap tripped, which is
+    # not the file's size.
+    "upload_too_large": {
+        "de": "Die hochgeladene Datei überschreitet das Limit von {limit} Bytes.",
+        "en": "The uploaded file exceeds the limit of {limit} bytes.",
+    },
     "unknown_language": {
         "de": "Für '{language}' gibt es keine Erklärungen. Verfügbar: {available}.",
         "en": "No explanations in '{language}'. Available: {available}.",

@@ -320,6 +320,20 @@ class TestErrorMapping:
         response = upload(client, b"<a/>" + b"\0" * (MAX_BYTES + 1))
         assert response.status_code == 413
 
+    @pytest.mark.parametrize("language", ["de", "en"])
+    def test_an_oversized_upload_is_refused_in_the_requested_language(
+        self, client: TestClient, language: str
+    ) -> None:
+        """This is the most reachable error there is — drag in the wrong file and
+        you get it. It answered in English whatever was asked, because the raise
+        site carried no code and `render` falls back silently."""
+        expected = {
+            "de": f"Die hochgeladene Datei überschreitet das Limit von {MAX_BYTES:,} Bytes.",
+            "en": f"The uploaded file exceeds the limit of {MAX_BYTES:,} bytes.",
+        }
+        response = upload(client, b"<a/>" + b"\0" * (MAX_BYTES + 1), lang=language)
+        assert response.json()["detail"] == expected[language]
+
     def test_an_unknown_ruleset_version(self, client: TestClient, corpus: Path) -> None:
         response = upload(client, (corpus / UBL).read_bytes(), ruleset="1999-01-01")
         assert response.status_code == 404
