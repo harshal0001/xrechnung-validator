@@ -71,7 +71,7 @@ measured.
 | False positives on 66 reference invoices | **0** — structural and business rules |
 | Business rules proven to fire | **25** across 38 mutations, both syntaxes |
 | Rules firing that should not | **0** |
-| Explanations reviewed by a person | **62 of 62** (31 DE, 31 EN) |
+| Explanations reviewed by a person | **78 of 78** (39 DE, 39 EN) |
 | Validation latency | 27 ms/document warm |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |

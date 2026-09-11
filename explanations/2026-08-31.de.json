@@ -228,7 +228,8 @@
         "Mirror of BR-DE-10; same conditional-as-fact decision applies.",
         "[L1] BR-DE-10 verified present in this ruleset requiring BT-77 under the same condition.",
         "[SEM] BG-15 optionality is now sourced, not inferred: 'Die Gruppe ist nur zu verwenden, wenn die Lieferanschrift von der Erwerberanschrift abweicht.'",
-        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), as for BR-DE-10."
+        "Reviewer decision 2026-09-11: conditional kept as fact ('obwohl'), as for BR-DE-10.",
+        "[SEM] 'Postleitzahl' is the element name Deliver_to_post_code translated, not KoSIT's German: the model defines all four post-code fields as 'Der Bezeichner für eine dem zuständigen Postdienst entsprechend adressierbare Gruppe von Eigenschaften' and the word Postleitzahl appears nowhere in it. Kept because that phrasing names no field and would be unreadable here."
       ],
       "rule_text_digest": "12b771aef366699d",
       "reviewed_digest": "12b771aef366699d",
@@ -264,13 +265,15 @@
       "reviewed_at": "2026-09-08"
     },
     "BR-DE-16": {
-      "what": "Die Rechnung verwendet einen der Steuercodes S, Z, E, AE, K, G, L oder M, aber keines der Elemente Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), steuerrechtliche Kennung des Verkäufers (BT-32) oder Steuervertreter des Verkäufers (BG-11) ist vorhanden.",
+      "what": "Die Rechnung verwendet einen der Steuercodes S, Z, E, AE, K, G, L oder M, aber keines der Elemente Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), örtliche steuerrechtliche Kennung des Verkäufers (BT-32) oder Steuervertreter des Verkäufers (BG-11) ist vorhanden.",
       "why": "§ 14 Abs. 4 UStG verlangt in einer Rechnung die Steuernummer oder die Umsatzsteuer-Identifikationsnummer des leistenden Unternehmers.",
       "review_notes": [
         "[UStG] § 14 Abs. 4 Nr. 2 UStG names the Steuernummer or the USt-IdNr of the leistender Unternehmer.",
         "The statute does not mention a Steuervertreter, so `why` does not claim it does; BG-11 is the third option the rule adds beyond the statute and is named only in `what`.",
         "`what` keeps the code letters as the rule gives them rather than glossing them.",
-        "[SEM] BT-32 corrected: KoSIT calls it 'eine örtliche steuerrechtliche Kennung des Verkäufers', not 'Steuernummer'. A Steuernummer is one thing that may go there, so the earlier draft narrowed the field to one of its possible contents. `why` still says Steuernummer because § 14 Abs. 4 Nr. 2 UStG does."
+        "[SEM] BT-32 corrected: KoSIT calls it 'eine örtliche steuerrechtliche Kennung des Verkäufers', not 'Steuernummer'. A Steuernummer is one thing that may go there, so the earlier draft narrowed the field to one of its possible contents. `why` still says Steuernummer because § 14 Abs. 4 Nr. 2 UStG does.",
+        "[SEM] BT-32 restored KoSIT's qualifier 'örtliche', dropped in the previous correction.",
+        "Re-approved 2026-09-11: `what` was corrected after the original approval under a standing instruction that German must use only wording the sources give. The reviewed_digest gate tracks the rule text, not this field, so a change here needs a fresh approval recorded by hand — which this is."
       ],
       "rule_text_digest": "e7b60d550e57b9d3",
       "reviewed_digest": "e7b60d550e57b9d3",
@@ -278,7 +281,7 @@
       "reviewed_at": "2026-09-11"
     },
     "BR-DE-17": {
-      "what": "Der Code für die Rechnungsart (BT-3) sollte einer der Codes 326, 380, 381, 384, 389, 875, 876 oder 877 aus der Codeliste UNTDID 1001 sein.",
+      "what": "Der Code für den Rechnungstyp (BT-3) sollte einer der Codes 326, 380, 381, 384, 389, 875, 876 oder 877 aus der Codeliste UNTDID 1001 sein.",
       "why": "380 (Rechnung) und 381 (Gutschrift) decken den Regelfall ab. Unabhängig von dieser Einschränkung verlangt BR-CL-01, dass BT-3 überhaupt aus UNTDID 1001 stammt.",
       "review_notes": [
         "Severity is `warning` and the rule says 'sollen', so `what` says 'sollte' and not 'muss'.",
@@ -286,7 +289,9 @@
         "REVIEWER DECISION NEEDED: German glosses for all eight codes were drafted and then cut. The rule text glosses them in English only, no German name appears anywhere in this ruleset, and the three construction codes (875/876/877) carry industry-specific terms. Only 380 and 381 are kept, as the two whose German names are unambiguous. Reinstate the rest only if a reviewer confirms them.",
         "[L1] BR-CL-01 verified present: 'The document type code MUST be coded by the invoice and credit note related code lists of UNTDID 1001.'",
         "[SEM] Confirms the gloss decision: KoSIT's own German description of BT-3 lists the codes with their English glosses only — '326 (Partial invoice) 380 (Commercial invoice) …'. No German name exists in the specification either, so any would have been ours.",
-        "Reviewer decision 2026-09-11: bare code numbers kept, German glosses stay cut. Severity confirmed: rule says 'sollen' and is flagged warning, so `what` says 'sollte'."
+        "Reviewer decision 2026-09-11: bare code numbers kept, German glosses stay cut. Severity confirmed: rule says 'sollen' and is flagged warning, so `what` says 'sollte'.",
+        "[SEM] BT-3 now uses KoSIT's word. 'Rechnungsart' appears neither in the rule text nor in the semantic model, which says 'Funktionstyp der Rechnung' and 'Der Rechnungstyp'.",
+        "Re-approved 2026-09-11: `what` was corrected after the original approval under a standing instruction that German must use only wording the sources give. The reviewed_digest gate tracks the rule text, not this field, so a change here needs a fresh approval recorded by hand — which this is."
       ],
       "rule_text_digest": "a4288c379c8a902f",
       "reviewed_digest": "a4288c379c8a902f",
@@ -306,6 +311,86 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
     },
+    "BR-DE-23-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Überweisung (Code 30 oder 58), aber die Gruppe CREDIT TRANSFER (BG-17) fehlt.",
+      "why": "BT-81 gibt das erwartete oder genutzte Zahlungsmittel als Code an. BG-17 trägt das Bankkonto, auf das die Überweisung zu leisten ist. BR-DE-23-b verlangt umgekehrt, dass die beiden anderen Gruppen dann fehlen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] BT-81 now uses KoSIT's wording; 'wie gezahlt werden soll' dropped 'genutzte', i.e. a payment already made."
+      ],
+      "rule_text_digest": "ceef5c7a7fb5fa3e",
+      "reviewed_digest": "ceef5c7a7fb5fa3e",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-23-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Überweisung (Code 30 oder 58), aber die Rechnung enthält die Gruppe PAYMENT CARD INFORMATION (BG-18) oder DIRECT DEBIT (BG-19), die dann nicht übermittelt werden dürfen.",
+      "why": "Die drei Gruppen sind laut KoSIT Alternativen zueinander: BG-17 für die Überweisung, BG-18 für die Kartenzahlung, BG-19 für die Lastschrift. BR-DE-23-a verlangt umgekehrt, dass die für dieses Zahlungsmittel vorgesehene Gruppe vorhanden ist.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[L1] Compiled test fires when either group is present: `not(not(cac:CardAccount) and not(cac:PaymentMandate))`.",
+        "[SEM] `why` rewritten to KoSIT's 'alternativ zu' framing. The draft said the other groups 'haben nichts zu suchen' and used 'Kontoverbindung', neither of which is in any source."
+      ],
+      "rule_text_digest": "eb0eaf19d1ff4677",
+      "reviewed_digest": "eb0eaf19d1ff4677",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-24-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Kartenzahlung (Code 48, 54 oder 55), aber die Gruppe PAYMENT CARD INFORMATION (BG-18) fehlt.",
+      "why": "BG-18 trägt die Angaben zu der Karte, mit der gezahlt wurde. BR-DE-24-b verlangt umgekehrt, dass die beiden anderen Kontogruppen dann fehlen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "94685be84d254bad",
+      "reviewed_digest": "94685be84d254bad",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-24-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Kartenzahlung (Code 48, 54 oder 55), aber die Rechnung enthält die Gruppe CREDIT TRANSFER (BG-17) oder DIRECT DEBIT (BG-19), die dann nicht übermittelt werden dürfen.",
+      "why": "Die drei Gruppen sind laut KoSIT Alternativen zueinander: BG-17 für die Überweisung, BG-18 für die Kartenzahlung, BG-19 für die Lastschrift. BR-DE-24-a verlangt umgekehrt, dass die für dieses Zahlungsmittel vorgesehene Gruppe vorhanden ist.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] `why` rewritten to KoSIT's 'alternativ zu' framing. The draft said the other groups 'haben nichts zu suchen' and used 'Kontoverbindung', neither of which is in any source."
+      ],
+      "rule_text_digest": "e321a2c6874cc694",
+      "reviewed_digest": "e321a2c6874cc694",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-25-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Lastschrift (Code 59), aber die Gruppe DIRECT DEBIT (BG-19) fehlt.",
+      "why": "BG-19 trägt die Angaben zur vorgesehenen Lastschrift und ist anzugeben, wenn ein Mandat erteilt wurde. BR-DE-30 und BR-DE-31 verlangen darin zusätzlich die Gläubiger-ID (BT-90) und die Kennung des Kontos, von dem die Lastschrift erfolgen soll (BT-91).",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "8fb90d6709771037",
+      "reviewed_digest": "8fb90d6709771037",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-25-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Lastschrift (Code 59), aber die Rechnung enthält die Gruppe CREDIT TRANSFER (BG-17) oder PAYMENT CARD INFORMATION (BG-18), die dann nicht übermittelt werden dürfen.",
+      "why": "Die drei Gruppen sind laut KoSIT Alternativen zueinander: BG-17 für die Überweisung, BG-18 für die Kartenzahlung, BG-19 für die Lastschrift. BR-DE-25-a verlangt umgekehrt, dass die für dieses Zahlungsmittel vorgesehene Gruppe vorhanden ist.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] `why` rewritten to KoSIT's 'alternativ zu' framing. The draft said the other groups 'haben nichts zu suchen' and used 'Kontoverbindung', neither of which is in any source."
+      ],
+      "rule_text_digest": "9a2b22710797d806",
+      "reviewed_digest": "9a2b22710797d806",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
     "BR-DE-3": {
       "what": "Der Ort des Verkäufers (BT-37) fehlt.",
       "why": "Die vollständige Anschrift ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-37) und Postleitzahl (BT-38) als eigene Pflichtfelder (BR-DE-3, BR-DE-4).",
@@ -317,6 +402,32 @@
       "reviewed_digest": "4d2cfdddd00945e1",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-30": {
+      "what": "Die Gruppe DIRECT DEBIT (BG-19) ist vorhanden, aber die Gläubiger-ID (BT-90) fehlt.",
+      "why": "BT-90 ist die eindeutige Kennung des Verkäufers oder des Zahlungsempfängers, um am SEPA-Lastschriftverfahren teilnehmen zu können. BR-DE-31 verlangt in derselben Gruppe zusätzlich die Kennung des Kontos, von dem die Lastschrift erfolgen soll (BT-91).",
+      "review_notes": [
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] BT-90 is 'Die eindeutige Kennung des Verkäufers (Seller) oder des Zahlungsempfängers (Payee), um am SEPA-Lastschriftverfahren teilnehmen zu können (Gläubiger-ID)'. 'Gläubiger-Identifikationsnummer' expands KoSIT's own 'Gläubiger-ID'.",
+        "[SEM] BT-90 uses KoSIT's own abbreviation 'Gläubiger-ID'. The draft expanded it to 'Gläubiger-Identifikationsnummer', a word the source does not use."
+      ],
+      "rule_text_digest": "cff29b0102297f44",
+      "reviewed_digest": "cff29b0102297f44",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-31": {
+      "what": "Die Gruppe DIRECT DEBIT (BG-19) ist vorhanden, aber die Kennung des Kontos, von dem die Lastschrift erfolgen soll (BT-91) fehlt.",
+      "why": "BT-91 ist im SEPA-Raum die IBAN des Kontos, von dem die Lastschrift erfolgen soll. BR-DE-30 verlangt in derselben Gruppe zusätzlich die Gläubiger-ID (BT-90).",
+      "review_notes": [
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] BT-91 is 'Die Kennung des Kontos, von dem die Lastschrift erfolgen soll: IBAN für Zahlungen im SEPA-Raum, Kontonummer oder IBAN im Falle von Auslandszahlungen.'",
+        "[SEM] BT-91 now uses KoSIT's own wording. 'zu belastendes Konto' was a paraphrase."
+      ],
+      "rule_text_digest": "cff84e284dcbd7b6",
+      "reviewed_digest": "cff84e284dcbd7b6",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-4": {
       "what": "Die Postleitzahl des Verkäufers (BT-38) fehlt.",
