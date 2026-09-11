@@ -92,7 +92,10 @@ async def read_capped(upload: UploadFile) -> bytes:
         total += len(chunk)
         if total > MAX_BYTES:
             raise PayloadTooLargeError(
-                f"the upload exceeds {MAX_BYTES:,} bytes, which is far larger than any real invoice"
+                f"the upload exceeds {MAX_BYTES:,} bytes, "
+                "which is far larger than any real invoice",
+                code="upload_too_large",
+                limit=f"{MAX_BYTES:,}",
             )
         chunks.append(chunk)
     return b"".join(chunks)
