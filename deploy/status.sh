@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # What is deployed, and what of it is actually working.
 #
-# The distinction matters: a function can be deployed, healthy and returning 200
-# to an authenticated caller while its public URL refuses everyone. That is not
-# a hypothetical — it is the state this deployment was in on day one, because a
-# new AWS account cannot serve public unauthenticated endpoints until AWS lifts
-# the restriction. So this checks the pieces separately and says which is which.
+# The distinction matters: a function can be deployed, healthy and answering an
+# authenticated caller with 200 while one of its public front doors refuses
+# everyone. That is the state this deployment is in — the Function URL returns
+# 403 on this account and the HTTP API in front of the same function returns
+# 200 — so this checks the pieces separately and says which is which.
 #
 #   AWS_PROFILE=xrv bash deploy/status.sh
 
@@ -13,6 +13,7 @@ set -uo pipefail   # not -e: a failing check is a result, not a reason to stop
 
 REGION="${AWS_REGION:-eu-central-1}"
 NAME="${XRV_NAME:-xrechnung-validator}"
+API_NAME="${XRV_API_NAME:-$NAME}"
 AWS="aws --region $REGION"
 
 ok()   { printf '  \033[32m✓\033[0m %-30s %s\n' "$1" "${2:-}"; }
@@ -24,16 +25,16 @@ ACCOUNT=$($AWS sts get-caller-identity --query Account --output text 2>/dev/null
   && ok "AWS credentials" "account $ACCOUNT, $REGION" \
   || { bad "AWS credentials" "not authenticated — run: aws configure --profile xrv"; exit 1; }
 
-# ---- account restrictions ----------------------------------------------------
-# A new account is capped at 10 concurrent executions and cannot serve public
-# function URLs. Both lift together when AWS finishes vetting, so the concurrency
-# figure is a usable proxy for "has the restriction gone".
+# ---- account maturity --------------------------------------------------------
+# A new account is capped at 10 concurrent executions instead of 1000. That cap
+# is not itself the reason the Function URL is blocked, but it lifts at the same
+# time, so it is a usable proxy for "has this account been vetted yet".
 CONC=$($AWS lambda get-account-settings --query 'AccountLimit.ConcurrentExecutions' --output text 2>/dev/null)
 if [ "${CONC:-0}" -ge 100 ] 2>/dev/null; then
   ok "account limits" "concurrency $CONC — account is out of new-account restriction"
 else
-  bad "account limits" "concurrency $CONC — new-account restriction still applied"
-  info "" "public function URLs stay blocked until this rises"
+  bad "account limits" "concurrency $CONC — still a new account"
+  info "" "expect the Function URL to stay blocked until this rises"
 fi
 
 # ---- what exists -------------------------------------------------------------
@@ -50,7 +51,7 @@ fi
 
 # ---- does the application work? ---------------------------------------------
 # Authenticated invoke, so this answers "is the software healthy" without being
-# confounded by whether the front door is open.
+# confounded by whether any front door is open.
 TMP=$(mktemp -d)
 printf '{"version":"2.0","rawPath":"/healthz","requestContext":{"http":{"method":"GET","path":"/healthz"}},"headers":{"host":"x"},"isBase64Encoded":false}' > "$TMP/ev.json"
 if $AWS lambda invoke --function-name "$NAME" --payload "fileb://$TMP/ev.json" "$TMP/out.json" >/dev/null 2>&1; then
@@ -64,19 +65,33 @@ else
 fi
 rm -rf "$TMP"
 
-# ---- is it reachable by the public? -----------------------------------------
+# ---- the front doors ---------------------------------------------------------
+probe() {  # label, url
+  local code
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$2/healthz" 2>/dev/null)
+  [ "$code" = "200" ] && ok "$1" "$2" || bad "$1" "HTTP $code — $2"
+  [ "$code" = "200" ]
+}
+
+LIVE=""
+API=$($AWS apigatewayv2 get-apis --query "Items[?Name=='${API_NAME}'].ApiId | [0]" --output text 2>/dev/null)
+if [ -n "$API" ] && [ "$API" != "None" ]; then
+  ENDPOINT=$($AWS apigatewayv2 get-api --api-id "$API" --query ApiEndpoint --output text)
+  probe "http api (public)" "$ENDPOINT" && LIVE="$ENDPOINT/"
+else
+  bad "http api (public)" "no API named $API_NAME — run: bash deploy/apigateway.sh"
+fi
+
 URL=$($AWS lambda get-function-url-config --function-name "$NAME" --query FunctionUrl --output text 2>/dev/null)
 if [ -n "$URL" ] && [ "$URL" != "None" ]; then
-  CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "${URL}healthz" 2>/dev/null)
-  if [ "$CODE" = "200" ]; then
-    ok "public url" "$URL"
-    echo; echo "  Everything is live. Measure the cold start:"
-    echo "    bash deploy/measure.sh $URL"
-  else
-    bad "public url" "HTTP $CODE — $URL"
-    info "" "the application is fine; the door is shut"
-  fi
+  probe "function url (public)" "${URL%/}" && LIVE="${LIVE:-$URL}" \
+    || info "" "expected on a new account; the HTTP API is the working door"
 else
-  bad "public url" "no function URL configured"
+  info "function url" "none configured"
+fi
+
+if [ -n "$LIVE" ]; then
+  echo; echo "  Live. Measure the cold start:"
+  echo "    bash deploy/measure.sh $LIVE"
 fi
 echo

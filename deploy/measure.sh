@@ -6,7 +6,7 @@
 # by updating the function's configuration — which discards running execution
 # environments — then times the first request against the ones that follow.
 #
-#   bash deploy/measure.sh https://xxxx.lambda-url.eu-central-1.on.aws/
+#   bash deploy/measure.sh https://xxxx.execute-api.eu-central-1.amazonaws.com/
 
 set -euo pipefail
 URL="${1:?usage: measure.sh <function-url>}"
