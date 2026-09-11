@@ -14,6 +14,7 @@ from lxml import etree
 
 from xrv.core import Source, Syntax
 from xrv.ingest import (
+    DEFAULT_MAX_BYTES,
     MAX_BYTES,
     Document,
     MalformedXmlError,
@@ -21,6 +22,7 @@ from xrv.ingest import (
     PayloadTooLargeError,
     UnsupportedDocumentError,
     ZugferdError,
+    configured_max_bytes,
     detect_media,
     identify,
     parse,
@@ -185,6 +187,25 @@ class TestUntrustedInput:
     def test_oversized_payloads_are_refused_before_parsing(self) -> None:
         with pytest.raises(PayloadTooLargeError, match="limit is"):
             parse(b"<a/>" + b" " * (MAX_BYTES + 1))
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("1024", 1024),
+            ("", DEFAULT_MAX_BYTES),
+            ("0", DEFAULT_MAX_BYTES),
+            ("lots", DEFAULT_MAX_BYTES),
+        ],
+    )
+    def test_a_host_can_lower_the_limit(
+        self, monkeypatch: pytest.MonkeyPatch, value: str, expected: int
+    ) -> None:
+        """Behind a host that caps uploads lower than we do, the refusal has to
+        come from here — otherwise the caller gets the platform's untranslated
+        error instead of ours. A nonsense value falls back rather than crashing
+        the process at import."""
+        monkeypatch.setenv("XRV_MAX_UPLOAD_BYTES", value)
+        assert configured_max_bytes() == expected
 
     def test_an_empty_payload(self) -> None:
         with pytest.raises(MalformedXmlError, match="empty"):

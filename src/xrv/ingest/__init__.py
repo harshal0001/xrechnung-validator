@@ -13,9 +13,11 @@ from xrv.ingest.detect import (
     identify,
 )
 from xrv.ingest.xml import (
+    DEFAULT_MAX_BYTES,
     MAX_BYTES,
     MalformedXmlError,
     PayloadTooLargeError,
+    configured_max_bytes,
     parse,
     safe_parser,
     to_text,
@@ -30,6 +32,7 @@ from xrv.ingest.zugferd import (
 )
 
 __all__ = [
+    "DEFAULT_MAX_BYTES",
     "KNOWN_ATTACHMENTS",
     "MAX_BYTES",
     "ROOT_NAMESPACES",
@@ -40,6 +43,7 @@ __all__ = [
     "Profile",
     "UnsupportedDocumentError",
     "ZugferdError",
+    "configured_max_bytes",
     "detect_media",
     "detect_profile",
     "extract_xml",

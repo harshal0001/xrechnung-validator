@@ -8,6 +8,8 @@ and the configuration is asserted by tests rather than trusted.
 
 from __future__ import annotations
 
+import os
+
 from lxml import etree
 
 from xrv.core import LocalisedError
@@ -15,7 +17,23 @@ from xrv.core import LocalisedError
 #: Larger than any real invoice by a wide margin, small enough that a malicious
 #: upload cannot exhaust memory before parsing even begins. A ZUGFeRD PDF is the
 #: bulky case and still sits far below this.
-MAX_BYTES = 16 * 1024 * 1024
+#:
+#: A host may refuse uploads before they reach us, and then the caller gets the
+#: platform's error instead of ours. Behind API Gateway and Lambda the ceiling is
+#: ~4.4 MB measured, because the body is base64-encoded into Lambda's 6 MB
+#: invocation payload. Setting ``XRV_MAX_UPLOAD_BYTES`` below a host's ceiling
+#: keeps the refusal here, in the caller's language and with a code the frontend
+#: can render.
+DEFAULT_MAX_BYTES = 16 * 1024 * 1024
+
+
+def configured_max_bytes(default: int = DEFAULT_MAX_BYTES) -> int:
+    """The upload ceiling, lowered by the host if it has a tighter one."""
+    raw = os.environ.get("XRV_MAX_UPLOAD_BYTES", "").strip()
+    return int(raw) if raw.isdigit() and int(raw) > 0 else default
+
+
+MAX_BYTES = configured_max_bytes()
 
 
 class PayloadTooLargeError(LocalisedError):
