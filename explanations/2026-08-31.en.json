@@ -284,9 +284,9 @@
         "Mirrors the German entry for BR-DE-23-a; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "ceef5c7a7fb5fa3e",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "ceef5c7a7fb5fa3e",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-23-b": {
       "what": "The payment means (BT-81) is a credit transfer (code 30 or 58), but the invoice contains the PAYMENT CARD INFORMATION group (BG-18) or the DIRECT DEBIT group (BG-19), neither of which may then be present.",
@@ -295,9 +295,9 @@
         "Mirrors the German entry for BR-DE-23-b; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "eb0eaf19d1ff4677",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "eb0eaf19d1ff4677",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-24-a": {
       "what": "The payment means (BT-81) is a card payment (code 48, 54 or 55), but the PAYMENT CARD INFORMATION group (BG-18) is missing.",
@@ -306,9 +306,9 @@
         "Mirrors the German entry for BR-DE-24-a; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "94685be84d254bad",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "94685be84d254bad",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-24-b": {
       "what": "The payment means (BT-81) is a card payment (code 48, 54 or 55), but the invoice contains the CREDIT TRANSFER group (BG-17) or the DIRECT DEBIT group (BG-19), neither of which may then be present.",
@@ -317,9 +317,9 @@
         "Mirrors the German entry for BR-DE-24-b; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "e321a2c6874cc694",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "e321a2c6874cc694",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-25-a": {
       "what": "The payment means (BT-81) is a direct debit (code 59), but the DIRECT DEBIT group (BG-19) is missing.",
@@ -328,9 +328,9 @@
         "Mirrors the German entry for BR-DE-25-a; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "8fb90d6709771037",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "8fb90d6709771037",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-25-b": {
       "what": "The payment means (BT-81) is a direct debit (code 59), but the invoice contains the CREDIT TRANSFER group (BG-17) or the PAYMENT CARD INFORMATION group (BG-18), neither of which may then be present.",
@@ -339,9 +339,9 @@
         "Mirrors the German entry for BR-DE-25-b; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "9a2b22710797d806",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "9a2b22710797d806",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-3": {
       "what": "The seller city (BT-37) is missing.",
@@ -361,9 +361,9 @@
         "Mirrors the German entry for BR-DE-30; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "cff29b0102297f44",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "cff29b0102297f44",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-31": {
       "what": "The DIRECT DEBIT group (BG-19) is present, but the debited account identifier (BT-91) is missing.",
@@ -372,9 +372,9 @@
         "Mirrors the German entry for BR-DE-31; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "cff84e284dcbd7b6",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "cff84e284dcbd7b6",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-09-11"
     },
     "BR-DE-4": {
       "what": "The seller post code (BT-38) is missing.",
