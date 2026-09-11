@@ -40,8 +40,11 @@ frontend/*.tsbuildinfo
 .env.*
 !.env.example
 
-# Locally generated sample invoices, derived from the fetched corpus.
-samples/
+# Locally generated sample invoices, derived from the fetched corpus. Anchored to
+# the root: the three demo files under frontend/public/samples/ are shipped assets
+# that the page loads, and an unanchored pattern silently excluded them from the
+# image CI builds while a local build picked them up off disk.
+/samples/
 
 # Agent handoff notes. Kept local: it names the private planning doc and
 # carries internal links that do not belong in a repo destined to be public.
