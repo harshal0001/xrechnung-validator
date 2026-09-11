@@ -12,6 +12,9 @@
 # assume it. Widen that condition and a stranger's pull request gains push access
 # to production.
 #
+# Needs `gh` authenticated: the trust policy pins the numeric owner and repository
+# ids, which the GitHub API supplies.
+#
 #   AWS_PROFILE=xrv bash deploy/github-oidc.sh
 #
 # Idempotent. Prints the role ARN to store as the AWS_DEPLOY_ROLE_ARN secret.
@@ -40,6 +43,25 @@ else
 fi
 
 # ---- the role ----------------------------------------------------------------
+# Two accepted subjects, both exact, both pinned to one branch.
+#
+# GitHub is migrating to an *immutable* subject claim that carries the numeric
+# owner and repository ids — `repo:owner@86665758/name@1357239540:ref:...` rather
+# than `repo:owner/name:ref:...`. Which form a repository gets is GitHub's call
+# and can change under you; a policy written for the documented form alone fails
+# with a bare "Not authorized to perform sts:AssumeRoleWithWebIdentity" that says
+# nothing about why. CloudTrail's `userIdentity.userName` is where the subject
+# actually sent is visible.
+#
+# The id-bearing form is the stronger of the two: ids survive a rename and cannot
+# be claimed by someone who registers the name after you delete the repository.
+OWNER_ID=$(gh api "repos/${REPO}" --jq .owner.id)
+REPO_ID=$(gh api "repos/${REPO}" --jq .id)
+OWNER=${REPO%%/*}
+NAME_ONLY=${REPO##*/}
+SUB_IMMUTABLE="repo:${OWNER}@${OWNER_ID}/${NAME_ONLY}@${REPO_ID}:ref:refs/heads/${BRANCH}"
+SUB_LEGACY="repo:${REPO}:ref:refs/heads/${BRANCH}"
+
 TRUST=$(cat <<JSON
 {"Version":"2012-10-17","Statement":[{
   "Effect":"Allow",
@@ -48,10 +70,12 @@ TRUST=$(cat <<JSON
   "Condition":{
     "StringEquals":{
       "${HOST}:aud":"sts.amazonaws.com",
-      "${HOST}:sub":"repo:${REPO}:ref:refs/heads/${BRANCH}"
+      "${HOST}:sub":["${SUB_IMMUTABLE}","${SUB_LEGACY}"]
     }}}]}
 JSON
 )
+echo "  subject    ${SUB_IMMUTABLE}"
+echo "             ${SUB_LEGACY}"
 
 if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
   aws iam update-assume-role-policy --role-name "$ROLE" --policy-document "$TRUST"
