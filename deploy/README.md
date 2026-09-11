@@ -8,9 +8,35 @@ The Lambda Web Adapter in the image is an extension the Lambda runtime loads fro
 
 AWS is the deployment that exists. The others would work; they are not set up.
 
-## Deploy to AWS
+## Deploying
 
-You authenticate; the script never handles credentials.
+**Merging to main deploys.** The `deploy` job in CI runs only after the tests,
+the frontend and the image build have passed, pushes an arm64 image tagged with
+the commit sha, points the function at it, and then proves the live endpoint
+answers — a deploy that reports success while the service is down is worse than
+a failed one, because nobody looks again.
+
+No AWS key is stored anywhere. GitHub signs a short-lived OIDC token per run and
+AWS exchanges it for temporary credentials. The role is created by
+`deploy/github-oidc.sh`, may push one image and update one function, and trusts
+only pushes to main of this repository — this repo is public, so a trust policy
+any wider would hand push-to-production access to a stranger's pull request.
+
+```bash
+bash deploy/github-oidc.sh          # once: identity provider, role, policy
+gh secret set AWS_DEPLOY_ROLE_ARN --body '<the ARN it prints>'
+```
+
+The image is tagged by commit sha rather than `:latest`, so the function records
+which commit is live and a rollback is one call with an older sha. ECR keeps the
+live image and one previous: each is ~214 MB against a 500 MB free tier, so a
+third would start costing money.
+
+## First deploy, or deploying by hand
+
+`deploy/aws.sh` creates everything from nothing and is what the CI job would
+have to repeat otherwise. It needs Docker locally. You authenticate; the script
+never handles credentials.
 
 ```bash
 aws configure sso        # or: aws configure
