@@ -198,6 +198,39 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
     },
+    "BR-DE-10": {
+      "what": "The city of the delivery address (BT-77) is missing, although the DELIVER TO ADDRESS group (BG-15) is present.",
+      "why": "BG-15 is optional; an invoice with no separate delivery address does not trigger this rule. Once it is given, XRechnung requires it complete: BR-DE-11 additionally requires the post code (BT-78).",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-10; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "c4d922248fbce6f6",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-11": {
+      "what": "The post code of the delivery address (BT-78) is missing, although the DELIVER TO ADDRESS group (BG-15) is present.",
+      "why": "BG-15 is optional; an invoice with no separate delivery address does not trigger this rule. Once it is given, XRechnung requires it complete: BR-DE-10 additionally requires the city (BT-77).",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-11; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "12b771aef366699d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-14": {
+      "what": "The VAT category rate (BT-119) is missing.",
+      "why": "EN 16931 allows this field to be omitted when the invoice is not subject to VAT (BR-48). XRechnung removes that exception and requires BT-119 without one. The value feeds the tax calculation: BR-CO-17 requires VAT category tax amount (BT-117) = VAT category taxable amount (BT-116) × BT-119 / 100.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-14; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "a4c36b853564e582",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-15": {
       "what": "The buyer reference (BT-10) is missing.",
       "why": "The German federal administration uses this field for the Leitweg-ID, by which the federal central invoice intake platform routes the invoice to the responsible office. The contracting authority communicates the Leitweg-ID when placing the order.",
@@ -208,6 +241,28 @@
       "reviewed_digest": "45fdc2d795a75062",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
+    },
+    "BR-DE-16": {
+      "what": "The invoice uses one of the VAT category codes S, Z, E, AE, K, G, L or M, but none of the seller's VAT identifier (BT-31), the seller's tax registration identifier (BT-32) or the SELLER TAX REPRESENTATIVE PARTY group (BG-11) is present.",
+      "why": "§ 14 (4) of the German VAT Act requires an invoice to carry the supplying trader's tax number or VAT identification number.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-16; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "e7b60d550e57b9d3",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-17": {
+      "what": "The invoice type code (BT-3) should be one of the codes 326, 380, 381, 384, 389, 875, 876 or 877 from code list UNTDID 1001.",
+      "why": "380 (commercial invoice) and 381 (credit note) cover the ordinary cases. Independently of this restriction, BR-CL-01 requires BT-3 to come from UNTDID 1001 at all.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-17; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "a4288c379c8a902f",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-2": {
       "what": "The seller contact details (BG-6) are missing.",
@@ -242,6 +297,17 @@
       "reviewed_digest": "97fa6bb625657b81",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
+    },
+    "BR-DE-5": {
+      "what": "The seller's contact point (BT-41) is missing.",
+      "why": "BR-DE-2 requires the SELLER CONTACT group (BG-6); BR-DE-5, BR-DE-6 and BR-DE-7 require its three fields individually: the contact point (BT-41), the telephone number (BT-42) and the email address (BT-43).",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-5; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "bc5fdcf5c862ada4",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-6": {
       "what": "The seller contact telephone number (BT-42) is missing.",

@@ -226,9 +226,16 @@ def as_v2(entry: dict) -> dict:
 # --------------------------------------------------------------------------- #
 
 
-def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -> tuple[str, int]:
+def render(
+    ruleset: dict[str, list[Assertion]],
+    data: dict,
+    ruleset_dir: Path,
+    only: set[str] | None = None,
+) -> tuple[str, int]:
     version = data.get("ruleset_version", "?")
     entries: dict = data["entries"]
+    if only:
+        entries = {k: v for k, v in entries.items() if k in only}
     problems = 0
     lines: list[str] = []
     w = lines.append
@@ -293,10 +300,28 @@ def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -
                 w(f"- {n}")
             w("")
 
+        cited = cited_rules(entry, rule_id)
+        if cited:
+            w("**every rule this entry cites, verbatim — check the claim against these**\n")
+            for other in cited:
+                found = ruleset.get(other, [])
+                if found:
+                    w(f"- `{other}` [{found[0].flag or '?'}] — {found[0].text}")
+                else:
+                    problems += 1
+                    w(
+                        f"- `{other}` — ⚠️ **not in this ruleset.** "
+                        "The claim citing it is unsupported."
+                    )
+            w("")
+
         w(
             "**Reviewer:** ☐ what traces to text  ☐ BT/BG correct  ☐ terminology  "
             "☐ why is true (native read)  → set `reviewed_digest`\n"
         )
+
+    if only:
+        return "\n".join(lines), problems
 
     missing = sorted(set(ruleset) - set(entries), key=_rule_sort_key)
     w("---\n\n## Rules in the ruleset without an explanation\n")
@@ -305,6 +330,25 @@ def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -
         w("```\n" + "\n".join(missing) + "\n```\n")
 
     return "\n".join(lines), problems
+
+
+#: A rule id anywhere in prose: BR-48, BR-DE-2, BR-CO-17, BR-DE-CVD-05.
+RULE_REF = re.compile(r"\bBR(?:-[A-Z]{1,4})*-\d+(?:-[a-z])?\b")
+
+
+def cited_rules(entry: dict, own_id: str) -> list[str]:
+    """Rule ids an entry leans on, in the order they first appear.
+
+    An editorial claim of the form "BR-48 allows an exception" is only worth
+    anything to a reviewer if BR-48 is in front of them. Resolving these turns
+    a claim the reviewer has to trust into one they can read.
+    """
+    prose = " ".join([entry.get("why") or "", *entry.get("review_notes", [])])
+    seen: dict[str, None] = {}
+    for match in RULE_REF.finditer(prose):
+        if match.group() != own_id:
+            seen.setdefault(match.group(), None)
+    return list(seen)
 
 
 def _rule_sort_key(rule_id: str):
@@ -329,6 +373,10 @@ def main() -> None:
     )
     ap.add_argument("--explanations", required=True, type=Path, help="explanations JSON (v1 or v2)")
     ap.add_argument("--out", type=Path, default=Path("review.md"))
+    ap.add_argument(
+        "--only",
+        help="comma-separated rule ids — review one batch without rereading the reviewed ones",
+    )
     ap.add_argument("--migrate", type=Path, help="also write a v2 JSON to this path")
     ap.add_argument(
         "--check",
@@ -341,7 +389,8 @@ def main() -> None:
     # utf-8-sig: tolerate the BOM that Windows editors add to UTF-8 files.
     data = json.loads(args.explanations.read_text(encoding="utf-8-sig"))
 
-    sheet, problems = render(ruleset, data, args.ruleset)
+    only = {r.strip() for r in args.only.split(",")} if args.only else None
+    sheet, problems = render(ruleset, data, args.ruleset, only)
     args.out.write_text(sheet, encoding="utf-8")
     print(
         f"wrote {args.out}  ({len(ruleset)} rule ids in ruleset, "
