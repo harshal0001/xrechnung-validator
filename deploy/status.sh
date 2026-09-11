@@ -41,10 +41,16 @@ fi
 STATE=$($AWS lambda get-function --function-name "$NAME" --query 'Configuration.State' --output text 2>/dev/null)
 [ "$STATE" = "Active" ] && ok "lambda function" "$NAME, $STATE" || bad "lambda function" "${STATE:-missing}"
 
+# Per-image size, and how many are kept — deliberately not their sum. Images
+# built from the same Dockerfile share most of their layers, and ECR stores and
+# bills a layer once however many images reference it. Summing the per-image
+# figures double-counts every shared layer: four images of 214 MB read as 857 MB
+# when the registry actually holds about 230.
+COUNT=$($AWS ecr describe-images --repository-name "$NAME" --query 'length(imageDetails)' --output text 2>/dev/null)
 IMG=$($AWS ecr describe-images --repository-name "$NAME" \
-       --query 'sum(imageDetails[].imageSizeInBytes)' --output text 2>/dev/null)
+       --query 'max(imageDetails[].imageSizeInBytes)' --output text 2>/dev/null)
 if [ -n "$IMG" ] && [ "$IMG" != "None" ]; then
-  ok "ecr image" "$(awk -v b="$IMG" 'BEGIN{printf "%.0f MB", b/1e6}') (free tier: 500 MB)"
+  ok "ecr image" "$(awk -v b="$IMG" 'BEGIN{printf "%.0f MB", b/1e6}') compressed, $COUNT kept"
 else
   bad "ecr image" "none"
 fi

@@ -29,8 +29,15 @@ gh secret set AWS_DEPLOY_ROLE_ARN --body '<the ARN it prints>'
 
 The image is tagged by commit sha rather than `:latest`, so the function records
 which commit is live and a rollback is one call with an older sha. ECR keeps the
-live image and one previous: each is ~214 MB against a 500 MB free tier, so a
-third would start costing money.
+live image and one previous.
+
+Do not read the registry's total as the sum of its images. An image is 214 MB
+compressed across 18 layers, and two consecutive builds share 11 of them, so the
+registry holds 217 MB rather than 429. ECR stores and bills each layer once
+however many images point at it. `sum(imageDetails[].imageSizeInBytes)` looks
+like the answer and is not; `deploy/status.sh` reports the per-image size and a
+count instead. One layer is 146 MB on its own — Saxon's native library, which is
+also why a container is the deployment unit at all.
 
 ## First deploy, or deploying by hand
 
