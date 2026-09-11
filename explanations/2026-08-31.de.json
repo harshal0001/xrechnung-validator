@@ -306,6 +306,82 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
     },
+    "BR-DE-23-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Überweisung (Code 30 oder 58), aber die Gruppe CREDIT TRANSFER (BG-17) fehlt.",
+      "why": "BT-81 gibt an, wie gezahlt werden soll. BG-17 trägt das Bankkonto, auf das die Überweisung zu leisten ist. BR-DE-23-b verlangt umgekehrt, dass die beiden anderen Kontogruppen dann fehlen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "ceef5c7a7fb5fa3e",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-23-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Überweisung (Code 30 oder 58), aber die Rechnung enthält die Gruppe PAYMENT CARD INFORMATION (BG-18) oder DIRECT DEBIT (BG-19), die dann nicht übermittelt werden dürfen.",
+      "why": "Die Gegenrichtung zu BR-DE-23-a: bei einer Überweisung gehört die Kontoverbindung in BG-17, und die Gruppen für Kartenzahlung und Lastschrift haben in derselben Rechnung nichts zu suchen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[L1] Compiled test fires when either group is present: `not(not(cac:CardAccount) and not(cac:PaymentMandate))`."
+      ],
+      "rule_text_digest": "eb0eaf19d1ff4677",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-24-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Kartenzahlung (Code 48, 54 oder 55), aber die Gruppe PAYMENT CARD INFORMATION (BG-18) fehlt.",
+      "why": "BG-18 trägt die Angaben zu der Karte, mit der gezahlt wurde. BR-DE-24-b verlangt umgekehrt, dass die beiden anderen Kontogruppen dann fehlen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "94685be84d254bad",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-24-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Kartenzahlung (Code 48, 54 oder 55), aber die Rechnung enthält die Gruppe CREDIT TRANSFER (BG-17) oder DIRECT DEBIT (BG-19), die dann nicht übermittelt werden dürfen.",
+      "why": "Die Gegenrichtung zu BR-DE-24-a: bei einer Kartenzahlung gehören die Angaben in BG-18, und die Gruppen für Überweisung und Lastschrift haben in derselben Rechnung nichts zu suchen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "e321a2c6874cc694",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-25-a": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Lastschrift (Code 59), aber die Gruppe DIRECT DEBIT (BG-19) fehlt.",
+      "why": "BG-19 trägt die Angaben zur vorgesehenen Lastschrift und ist anzugeben, wenn ein Mandat erteilt wurde. BR-DE-30 und BR-DE-31 verlangen darin zusätzlich die Gläubiger-Identifikationsnummer (BT-90) und die Kennung des zu belastenden Kontos (BT-91).",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "[L1] 'muss genau BG-18 übermittelt werden' resolved against the compiled test, which is a bare existence check (`cac:CardAccount`, fired as `not(cac:CardAccount)`). 'genau' means that group rather than another, not exactly one occurrence, so `what` says 'fehlt' and claims no cardinality.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "8fb90d6709771037",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-25-b": {
+      "what": "Das Zahlungsmittel (BT-81) ist eine Lastschrift (Code 59), aber die Rechnung enthält die Gruppe CREDIT TRANSFER (BG-17) oder PAYMENT CARD INFORMATION (BG-18), die dann nicht übermittelt werden dürfen.",
+      "why": "Die Gegenrichtung zu BR-DE-25-a: bei einer Lastschrift gehören die Angaben in BG-19, und die Gruppen für Überweisung und Kartenzahlung haben in derselben Rechnung nichts zu suchen.",
+      "review_notes": [
+        "[SEM] KoSIT describes BG-17, BG-18 and BG-19 as alternatives to one another — each says 'Die Gruppe ist alternativ zu …anzugeben'. The whole cluster is that one idea: BT-81 says how the invoice is paid, and exactly one of the three account groups may accompany it.",
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`."
+      ],
+      "rule_text_digest": "9a2b22710797d806",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-3": {
       "what": "Der Ort des Verkäufers (BT-37) fehlt.",
       "why": "Die vollständige Anschrift ist gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 1 UStG); XRechnung konkretisiert Ort (BT-37) und Postleitzahl (BT-38) als eigene Pflichtfelder (BR-DE-3, BR-DE-4).",
@@ -317,6 +393,30 @@
       "reviewed_digest": "4d2cfdddd00945e1",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-30": {
+      "what": "Die Gruppe DIRECT DEBIT (BG-19) ist vorhanden, aber die Gläubiger-Identifikationsnummer (BT-90) fehlt.",
+      "why": "BT-90 ist die Gläubiger-ID, mit der der Verkäufer oder der Zahlungsempfänger am SEPA-Lastschriftverfahren teilnimmt. BR-DE-31 verlangt in derselben Gruppe zusätzlich die Kennung des zu belastenden Kontos (BT-91).",
+      "review_notes": [
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] BT-90 is 'Die eindeutige Kennung des Verkäufers (Seller) oder des Zahlungsempfängers (Payee), um am SEPA-Lastschriftverfahren teilnehmen zu können (Gläubiger-ID)'. 'Gläubiger-Identifikationsnummer' expands KoSIT's own 'Gläubiger-ID'."
+      ],
+      "rule_text_digest": "cff29b0102297f44",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-31": {
+      "what": "Die Gruppe DIRECT DEBIT (BG-19) ist vorhanden, aber die Kennung des zu belastenden Kontos (BT-91) fehlt.",
+      "why": "BT-91 ist im SEPA-Raum die IBAN des Kontos, von dem die Lastschrift erfolgen soll. BR-DE-30 verlangt in derselben Gruppe zusätzlich die Gläubiger-Identifikationsnummer (BT-90).",
+      "review_notes": [
+        "Reviewer decision: the group names CREDIT TRANSFER, PAYMENT CARD INFORMATION and DIRECT DEBIT are kept as the rule text writes them. KoSIT's German describes each group but gives no short German label, so any would have been ours. The German meaning goes in `why`.",
+        "[SEM] BT-91 is 'Die Kennung des Kontos, von dem die Lastschrift erfolgen soll: IBAN für Zahlungen im SEPA-Raum, Kontonummer oder IBAN im Falle von Auslandszahlungen.'"
+      ],
+      "rule_text_digest": "cff84e284dcbd7b6",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-4": {
       "what": "Die Postleitzahl des Verkäufers (BT-38) fehlt.",

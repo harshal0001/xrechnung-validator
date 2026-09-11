@@ -277,6 +277,72 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
     },
+    "BR-DE-23-a": {
+      "what": "The payment means (BT-81) is a credit transfer (code 30 or 58), but the CREDIT TRANSFER group (BG-17) is missing.",
+      "why": "BT-81 states how the invoice is to be paid. BG-17 carries the bank account the transfer is to be made to. BR-DE-23-b conversely requires the other two account groups to be absent.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-23-a; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "ceef5c7a7fb5fa3e",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-23-b": {
+      "what": "The payment means (BT-81) is a credit transfer (code 30 or 58), but the invoice contains the PAYMENT CARD INFORMATION group (BG-18) or the DIRECT DEBIT group (BG-19), neither of which may then be present.",
+      "why": "The other half of BR-DE-23-a: for a credit transfer the account details belong in BG-17, and the card and direct debit groups have no place in the same invoice.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-23-b; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "eb0eaf19d1ff4677",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-24-a": {
+      "what": "The payment means (BT-81) is a card payment (code 48, 54 or 55), but the PAYMENT CARD INFORMATION group (BG-18) is missing.",
+      "why": "BG-18 carries the details of the card used. BR-DE-24-b conversely requires the other two account groups to be absent.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-24-a; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "94685be84d254bad",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-24-b": {
+      "what": "The payment means (BT-81) is a card payment (code 48, 54 or 55), but the invoice contains the CREDIT TRANSFER group (BG-17) or the DIRECT DEBIT group (BG-19), neither of which may then be present.",
+      "why": "The other half of BR-DE-24-a: for a card payment the details belong in BG-18, and the credit transfer and direct debit groups have no place in the same invoice.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-24-b; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "e321a2c6874cc694",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-25-a": {
+      "what": "The payment means (BT-81) is a direct debit (code 59), but the DIRECT DEBIT group (BG-19) is missing.",
+      "why": "BG-19 carries the details of the intended direct debit and is given when a mandate has been granted. BR-DE-30 and BR-DE-31 additionally require the bank assigned creditor identifier (BT-90) and the debited account identifier (BT-91) within it.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-25-a; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "8fb90d6709771037",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-25-b": {
+      "what": "The payment means (BT-81) is a direct debit (code 59), but the invoice contains the CREDIT TRANSFER group (BG-17) or the PAYMENT CARD INFORMATION group (BG-18), neither of which may then be present.",
+      "why": "The other half of BR-DE-25-a: for a direct debit the details belong in BG-19, and the credit transfer and card groups have no place in the same invoice.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-25-b; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "9a2b22710797d806",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-3": {
       "what": "The seller city (BT-37) is missing.",
       "why": "The full address is a statutory mandatory item (§ 14 Abs. 4 Nr. 1 UStG); XRechnung makes city (BT-37) and post code (BT-38) separate mandatory fields (BR-DE-3, BR-DE-4).",
@@ -287,6 +353,28 @@
       "reviewed_digest": "4d2cfdddd00945e1",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
+    },
+    "BR-DE-30": {
+      "what": "The DIRECT DEBIT group (BG-19) is present, but the bank assigned creditor identifier (BT-90) is missing.",
+      "why": "BT-90 is the creditor identifier with which the seller or payee takes part in the SEPA direct debit scheme. BR-DE-31 additionally requires the debited account identifier (BT-91) in the same group.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-30; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "cff29b0102297f44",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-31": {
+      "what": "The DIRECT DEBIT group (BG-19) is present, but the debited account identifier (BT-91) is missing.",
+      "why": "BT-91 is, within SEPA, the IBAN of the account the direct debit is to be taken from. BR-DE-30 additionally requires the bank assigned creditor identifier (BT-90) in the same group.",
+      "review_notes": [
+        "Mirrors the German entry for BR-DE-31; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "cff84e284dcbd7b6",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-4": {
       "what": "The seller post code (BT-38) is missing.",
