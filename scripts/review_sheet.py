@@ -31,6 +31,9 @@ from pathlib import Path
 
 from lxml import etree
 
+#: XML Schema namespace — the semantic model's annotations live in it.
+XSD = "{http://www.w3.org/2001/XMLSchema}"
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -226,9 +229,18 @@ def as_v2(entry: dict) -> dict:
 # --------------------------------------------------------------------------- #
 
 
-def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -> tuple[str, int]:
+def render(
+    ruleset: dict[str, list[Assertion]],
+    data: dict,
+    ruleset_dir: Path,
+    only: set[str] | None = None,
+    semantic: dict[str, tuple[str, str]] | None = None,
+) -> tuple[str, int]:
+    semantic = semantic or {}
     version = data.get("ruleset_version", "?")
     entries: dict = data["entries"]
+    if only:
+        entries = {k: v for k, v in entries.items() if k in only}
     problems = 0
     lines: list[str] = []
     w = lines.append
@@ -293,10 +305,40 @@ def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -
                 w(f"- {n}")
             w("")
 
+        fields = list(dict.fromkeys(FIELD_REF.findall(entry["what"])))
+        if fields and semantic:
+            w("**what KoSIT calls each field named above — check the German against these**\n")
+            for field in fields:
+                name, german = semantic.get(field, ("", ""))
+                if german:
+                    w(f"- `{field}` *{name}* — {german}")
+                else:
+                    problems += 1
+                    w(f"- `{field}` — ⚠️ **not in the semantic model.** Check the number.")
+            w("")
+
+        cited = cited_rules(entry, rule_id)
+        if cited:
+            w("**every rule this entry cites, verbatim — check the claim against these**\n")
+            for other in cited:
+                found = ruleset.get(other, [])
+                if found:
+                    w(f"- `{other}` [{found[0].flag or '?'}] — {found[0].text}")
+                else:
+                    problems += 1
+                    w(
+                        f"- `{other}` — ⚠️ **not in this ruleset.** "
+                        "The claim citing it is unsupported."
+                    )
+            w("")
+
         w(
             "**Reviewer:** ☐ what traces to text  ☐ BT/BG correct  ☐ terminology  "
             "☐ why is true (native read)  → set `reviewed_digest`\n"
         )
+
+    if only:
+        return "\n".join(lines), problems
 
     missing = sorted(set(ruleset) - set(entries), key=_rule_sort_key)
     w("---\n\n## Rules in the ruleset without an explanation\n")
@@ -305,6 +347,54 @@ def render(ruleset: dict[str, list[Assertion]], data: dict, ruleset_dir: Path) -
         w("```\n" + "\n".join(missing) + "\n```\n")
 
     return "\n".join(lines), problems
+
+
+#: A BT or BG number anywhere in prose: BT-119, BG-15.
+FIELD_REF = re.compile(r"\b(?:BT|BG)-\d+(?:-\d+)?\b")
+
+
+def load_semantic_model(root: Path) -> dict[str, tuple[str, str]]:
+    """BT/BG number -> (element name, official German description).
+
+    The ruleset quotes rules but never says what a field is called in German, so
+    without this every German field name in an explanation is a translation with
+    nothing behind it. KoSIT publishes one; `fetch_semantic_model.py` vendors it.
+    Absent, the sheet still renders — one check fewer, not a broken run.
+    """
+    found = sorted(root.glob("*/xrechnung-semantic-model.xsd"))
+    if not found:
+        return {}
+    model: dict[str, tuple[str, str]] = {}
+    for annotation in etree.parse(str(found[-1])).iter(f"{XSD}annotation"):
+        appinfo = annotation.find(f"{XSD}appinfo")
+        if appinfo is None or not (appinfo.text or "").strip():
+            continue
+        documentation = annotation.find(f"{XSD}documentation")
+        parent = annotation.getparent()
+        model[appinfo.text.strip()] = (
+            parent.get("name", "") if parent is not None else "",
+            " ".join((documentation.text or "").split()) if documentation is not None else "",
+        )
+    return model
+
+
+#: A rule id anywhere in prose: BR-48, BR-DE-2, BR-CO-17, BR-DE-CVD-05.
+RULE_REF = re.compile(r"\bBR(?:-[A-Z]{1,4})*-\d+(?:-[a-z])?\b")
+
+
+def cited_rules(entry: dict, own_id: str) -> list[str]:
+    """Rule ids an entry leans on, in the order they first appear.
+
+    An editorial claim of the form "BR-48 allows an exception" is only worth
+    anything to a reviewer if BR-48 is in front of them. Resolving these turns
+    a claim the reviewer has to trust into one they can read.
+    """
+    prose = " ".join([entry.get("why") or "", *entry.get("review_notes", [])])
+    seen: dict[str, None] = {}
+    for match in RULE_REF.finditer(prose):
+        if match.group() != own_id:
+            seen.setdefault(match.group(), None)
+    return list(seen)
 
 
 def _rule_sort_key(rule_id: str):
@@ -329,6 +419,16 @@ def main() -> None:
     )
     ap.add_argument("--explanations", required=True, type=Path, help="explanations JSON (v1 or v2)")
     ap.add_argument("--out", type=Path, default=Path("review.md"))
+    ap.add_argument(
+        "--semantic-model",
+        type=Path,
+        default=Path("semantic-model"),
+        help="vendored KoSIT semantic model, for official German field names",
+    )
+    ap.add_argument(
+        "--only",
+        help="comma-separated rule ids — review one batch without rereading the reviewed ones",
+    )
     ap.add_argument("--migrate", type=Path, help="also write a v2 JSON to this path")
     ap.add_argument(
         "--check",
@@ -341,7 +441,9 @@ def main() -> None:
     # utf-8-sig: tolerate the BOM that Windows editors add to UTF-8 files.
     data = json.loads(args.explanations.read_text(encoding="utf-8-sig"))
 
-    sheet, problems = render(ruleset, data, args.ruleset)
+    only = {r.strip() for r in args.only.split(",")} if args.only else None
+    semantic = load_semantic_model(args.semantic_model)
+    sheet, problems = render(ruleset, data, args.ruleset, only, semantic)
     args.out.write_text(sheet, encoding="utf-8")
     print(
         f"wrote {args.out}  ({len(ruleset)} rule ids in ruleset, "

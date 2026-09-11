@@ -1,0 +1,8 @@
+{
+  "version": "2026-08-31",
+  "source": "https://raw.githubusercontent.com/itplr-kosit/xrechnung-visualization/master/src/xsd/xrechnung-semantic-model.xsd",
+  "ref": "master",
+  "sha256": "dc2193877adf0f5b31dcf0e86a24f38773bb748b0f0ec001341e4a2892121aef",
+  "bytes": 115753,
+  "fields": 201
+}
