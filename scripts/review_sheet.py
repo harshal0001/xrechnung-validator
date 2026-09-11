@@ -31,6 +31,9 @@ from pathlib import Path
 
 from lxml import etree
 
+#: XML Schema namespace — the semantic model's annotations live in it.
+XSD = "{http://www.w3.org/2001/XMLSchema}"
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -231,7 +234,9 @@ def render(
     data: dict,
     ruleset_dir: Path,
     only: set[str] | None = None,
+    semantic: dict[str, tuple[str, str]] | None = None,
 ) -> tuple[str, int]:
+    semantic = semantic or {}
     version = data.get("ruleset_version", "?")
     entries: dict = data["entries"]
     if only:
@@ -300,6 +305,18 @@ def render(
                 w(f"- {n}")
             w("")
 
+        fields = list(dict.fromkeys(FIELD_REF.findall(entry["what"])))
+        if fields and semantic:
+            w("**what KoSIT calls each field named above — check the German against these**\n")
+            for field in fields:
+                name, german = semantic.get(field, ("", ""))
+                if german:
+                    w(f"- `{field}` *{name}* — {german}")
+                else:
+                    problems += 1
+                    w(f"- `{field}` — ⚠️ **not in the semantic model.** Check the number.")
+            w("")
+
         cited = cited_rules(entry, rule_id)
         if cited:
             w("**every rule this entry cites, verbatim — check the claim against these**\n")
@@ -330,6 +347,35 @@ def render(
         w("```\n" + "\n".join(missing) + "\n```\n")
 
     return "\n".join(lines), problems
+
+
+#: A BT or BG number anywhere in prose: BT-119, BG-15.
+FIELD_REF = re.compile(r"\b(?:BT|BG)-\d+(?:-\d+)?\b")
+
+
+def load_semantic_model(root: Path) -> dict[str, tuple[str, str]]:
+    """BT/BG number -> (element name, official German description).
+
+    The ruleset quotes rules but never says what a field is called in German, so
+    without this every German field name in an explanation is a translation with
+    nothing behind it. KoSIT publishes one; `fetch_semantic_model.py` vendors it.
+    Absent, the sheet still renders — one check fewer, not a broken run.
+    """
+    found = sorted(root.glob("*/xrechnung-semantic-model.xsd"))
+    if not found:
+        return {}
+    model: dict[str, tuple[str, str]] = {}
+    for annotation in etree.parse(str(found[-1])).iter(f"{XSD}annotation"):
+        appinfo = annotation.find(f"{XSD}appinfo")
+        if appinfo is None or not (appinfo.text or "").strip():
+            continue
+        documentation = annotation.find(f"{XSD}documentation")
+        parent = annotation.getparent()
+        model[appinfo.text.strip()] = (
+            parent.get("name", "") if parent is not None else "",
+            " ".join((documentation.text or "").split()) if documentation is not None else "",
+        )
+    return model
 
 
 #: A rule id anywhere in prose: BR-48, BR-DE-2, BR-CO-17, BR-DE-CVD-05.
@@ -374,6 +420,12 @@ def main() -> None:
     ap.add_argument("--explanations", required=True, type=Path, help="explanations JSON (v1 or v2)")
     ap.add_argument("--out", type=Path, default=Path("review.md"))
     ap.add_argument(
+        "--semantic-model",
+        type=Path,
+        default=Path("semantic-model"),
+        help="vendored KoSIT semantic model, for official German field names",
+    )
+    ap.add_argument(
         "--only",
         help="comma-separated rule ids — review one batch without rereading the reviewed ones",
     )
@@ -390,7 +442,8 @@ def main() -> None:
     data = json.loads(args.explanations.read_text(encoding="utf-8-sig"))
 
     only = {r.strip() for r in args.only.split(",")} if args.only else None
-    sheet, problems = render(ruleset, data, args.ruleset, only)
+    semantic = load_semantic_model(args.semantic_model)
+    sheet, problems = render(ruleset, data, args.ruleset, only, semantic)
     args.out.write_text(sheet, encoding="utf-8")
     print(
         f"wrote {args.out}  ({len(ruleset)} rule ids in ruleset, "

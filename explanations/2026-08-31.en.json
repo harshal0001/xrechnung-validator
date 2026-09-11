@@ -8,7 +8,8 @@
     "BUND": "e-rechnung-bund.de/faq/leitweg-id — federal e-invoicing portal, Leitweg-ID FAQ",
     "L1": "the rule text of the named rule in this ruleset (rulesets/2026-08-31)",
     "MODEL": "EN 16931 abstract model, github.com/ConnectingEurope/eInvoicing-EN16931 ubl/schematron/abstract/EN16931-model.sch — BT names",
-    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it"
+    "CL": "code list compiled into this ruleset's EN16931-UBL-validation.xsl — the listed example codes are present in it",
+    "SEM": "KoSIT semantic model, semantic-model/2026-08-31/xrechnung-semantic-model.xsd (itplr-kosit/xrechnung-visualization) — official German name and description per BT/BG"
   },
   "entries": {
     "BR-02": {
