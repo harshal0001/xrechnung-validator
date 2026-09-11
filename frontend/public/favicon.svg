@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- A document with one line flagged. At 16px the red line is the only thing
+       that reads, which is the right thing to read: this service tells you which
+       line is wrong. No border-radius and no gradient, for the same reason the
+       page has none. -->
+  <rect width="32" height="32" fill="#211f1c"/>
+  <g fill="#fbfaf7">
+    <rect x="7" y="8"  width="18" height="2.5"/>
+    <rect x="7" y="14" width="18" height="2.5"/>
+    <rect x="7" y="26" width="12" height="2.5"/>
+  </g>
+  <rect x="7" y="20" width="18" height="2.5" fill="#b5121b"/>
+</svg>
