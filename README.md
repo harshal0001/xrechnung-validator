@@ -10,7 +10,7 @@ Validators for this already exist. What is missing is the layer between
 platform routes on that field, and the ordering authority gives it to you with the
 purchase order."* **That layer is the point of this project.**
 
-**Live:** <https://cbb6tgp2x1.execute-api.eu-central-1.amazonaws.com> — three sample
+**Live:** <https://xrechnung.harshalkothari.tech> — three sample
 invoices ship with the page, so it can be tried without having an XRechnung file.
 
 > Validates against the published KoSIT rule set. Not a legal compliance

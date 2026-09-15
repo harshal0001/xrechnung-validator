@@ -155,7 +155,7 @@ jobs:
     env:
       AWS_REGION: eu-central-1
       NAME: xrechnung-validator
-      ENDPOINT: https://cbb6tgp2x1.execute-api.eu-central-1.amazonaws.com
+      ENDPOINT: https://xrechnung.harshalkothari.tech
     steps:
       - uses: actions/checkout@v4
 
