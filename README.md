@@ -81,7 +81,7 @@ measured.
 | Business rules no single edit reaches | 35, each listed with why |
 | Rules firing that should not | **0** |
 | Explanations reviewed by a person | **78 of 78** (39 DE, 39 EN) |
-| Validation latency | 27 ms/document warm |
+| Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
 | Tests | 2,573 backend, 21 frontend |
