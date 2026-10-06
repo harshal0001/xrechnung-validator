@@ -53,6 +53,10 @@ and nothing else** — no document, no reference to one, no way to ask for it.
 - **A model never sees the invoice.** Enforced by the type signature, and *tested* —
   a real invoice is validated and its IBAN, party names and line items are checked
   absent from every finding. Verified non-vacuous by injecting one.
+- **Nor do the logs.** One JSON line per request: rule ids, counts, the scenario,
+  timings, a request id that is also on the response. No document content, no
+  filename, no exception text — a cast error quotes the value it could not cast.
+  Tested the same way: every value in a real invoice is searched for in every line.
 - **Review expires.** Each entry stores the digest of the rule text it was written
   against and serves only while that matches. Reword a rule upstream and the entry
   un-reviews itself.
@@ -80,7 +84,7 @@ measured.
 | Validation latency | 27 ms/document warm |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,548 backend, 21 frontend |
+| Tests | 2,573 backend, 21 frontend |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
@@ -96,7 +100,7 @@ Ports and adapters. The third column is the one that matters.
 | `rules/` | Fetching, hashing, version-addressing KoSIT configs | Execute anything |
 | `validate/` | XSD and Saxon execution; SVRL → findings | Format text for humans |
 | `explain/` | Grounded explanation, review state, language | **See the invoice** |
-| `api/` | Routes, uploads, error translation | Contain validation logic |
+| `api/` | Routes, uploads, error translation, request ids, logs | Contain validation logic, or log the document |
 
 **SaxonC-HE decides the shape of everything.** KoSIT ships Schematron compiled to
 XSLT 2.0 and lxml only does 1.0, so Saxon is not negotiable — and it bundles a native
