@@ -37,6 +37,10 @@ class Scenario:
     namespaces: Mapping[str, str]
     #: Severities this scenario assigns in place of the stylesheet's own flag.
     levels: Mapping[str, Severity]
+    #: The Schematron stylesheets this scenario validates with, as paths inside
+    #: the configuration. A plain EN 16931 invoice names one; an XRechnung names
+    #: two, because the German CIUS applies only to a document that claims it.
+    stylesheets: tuple[str, ...] = ()
 
     def severity(self, rule_id: str, default: Severity) -> Severity:
         return self.levels.get(rule_id, default)
@@ -67,6 +71,12 @@ def read_scenarios(path: Path) -> tuple[Scenario, ...]:
                     for level in element.iter(f"{_NS}customLevel")
                     if (level.text or "").strip()
                 },
+                stylesheets=tuple(
+                    location
+                    for step in element.iter(f"{_NS}validateWithSchematron")
+                    for resource in step.iter(f"{_NS}location")
+                    if (location := (resource.text or "").strip())
+                ),
             )
         )
     return tuple(scenarios)

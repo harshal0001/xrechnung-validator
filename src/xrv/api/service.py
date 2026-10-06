@@ -39,6 +39,12 @@ from xrv.validate import ValidationEngine
 #: not carry what the German mandate requires.
 PROFILE_TOO_THIN = "PROFILE-NOT-MANDATE-READY"
 
+#: Reported alongside the findings when the document's scenario does not call
+#: for every rule set held — in practice, a plain EN 16931 invoice, which is not
+#: held to the German CIUS. Informational: the document is not worse for it, but
+#: "no XRechnung findings" must not be read as "passes XRechnung".
+NATIONAL_RULES_NOT_APPLIED = "NATIONAL-RULES-NOT-APPLIED"
+
 
 def _decoded(content: bytes) -> str:
     """The document as text, honouring its declared encoding.
@@ -176,7 +182,29 @@ class ValidationService:
                 ),
             ), None
         evaluation = engine.evaluate(document.content, document.syntax)
-        return evaluation.findings, evaluation.scenario.name if evaluation.scenario else None
+        if evaluation.scenario is None:
+            return evaluation.findings, None
+
+        findings = evaluation.findings
+        if evaluation.skipped:
+            name = evaluation.scenario.name
+            notice = Finding(
+                rule_id=NATIONAL_RULES_NOT_APPLIED,
+                severity=Severity.INFO,
+                rule_text=render(
+                    "national_rules_not_applied",
+                    {"scenario": name},
+                    language,
+                    fallback=(
+                        f"This document identifies itself as “{name}”, not as XRechnung. "
+                        f"It was checked against the EN 16931 rules; the additional "
+                        f"XRechnung rules were not applied."
+                    ),
+                ),
+                xpath=f"/{document.root}",
+            )
+            findings = (notice, *findings)
+        return findings, evaluation.scenario.name
 
     def _explain(
         self, findings: tuple[Finding, ...], version: str, language: str

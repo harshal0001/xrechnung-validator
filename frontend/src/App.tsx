@@ -205,7 +205,7 @@ function Failure({ error, filename, lang }: { error: ApiError; filename: string;
 function summarise(report: ValidationReport, filename: string, lang: Lang): string {
   const t = UI[lang];
   const lines = [
-    `${filename} — ${report.syntax}, ${report.ruleset_version}`,
+    `${filename} — ${report.scenario ?? report.syntax}, ${report.ruleset_version}`,
     "",
     ...report.findings.flatMap((finding) => [
       `[${finding.rule_id}] ${SEVERITY_LABEL[lang][finding.severity]}`,
@@ -264,6 +264,7 @@ function Report({
         <Fact label={t.source ?? ""} value={SOURCE_LABEL[lang][report.source] ?? report.source} />
         {report.profile && <Fact label={t.profile ?? ""} value={report.profile} />}
         <Fact label={t.ruleset ?? ""} value={report.ruleset_version} />
+        {report.scenario && <Fact label={t.checkedAs ?? ""} value={report.scenario} />}
         <Fact label={t.duration ?? ""} value={`${Math.round(report.duration_ms)} ms`} />
       </dl>
 

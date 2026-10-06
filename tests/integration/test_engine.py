@@ -12,6 +12,7 @@ fixtures, which do not exist yet.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -24,8 +25,12 @@ from xrv.validate import ValidationEngine, ValidationError
 
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
 CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+RSM = "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
+RAM = "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
 #: A specification identifier no scenario claims.
 UNRECOGNISED = b"urn:example:not-a-cius"
+#: The standard's own identifier: an invoice that claims EN 16931 and no CIUS.
+EN16931 = b"urn:cen.eu:en16931:2017"
 
 
 def invoices(corpus: Path, syntax: Syntax) -> list[Path]:
@@ -70,7 +75,24 @@ def every_reference_message(corpus: Path) -> list[Path]:
 
 def customization_id(document: bytes) -> str:
     """BT-24 as the document carries it — read, never spelled here."""
-    return etree.fromstring(document).findtext(f"{{{CBC}}}CustomizationID") or ""
+    root = etree.fromstring(document)
+    found = root.findtext(f"{{{CBC}}}CustomizationID") or root.findtext(
+        f"{{{RSM}}}ExchangedDocumentContext/"
+        f"{{{RAM}}}GuidelineSpecifiedDocumentContextParameter/{{{RAM}}}ID"
+    )
+    assert found, "the document carries no specification identifier"
+    return found
+
+
+def relabelled(document: bytes, identifier: bytes) -> bytes:
+    """The same document, claiming to be something else."""
+    return document.replace(customization_id(document).encode(), identifier)
+
+
+def without_buyer_reference(document: bytes) -> bytes:
+    stripped = re.sub(rb"<(\w+:)?BuyerReference>[^<]*</(\w+:)?BuyerReference>", b"", document)
+    assert stripped != document
+    return stripped
 
 
 class TestScenarios:
@@ -145,6 +167,67 @@ class TestScenarios:
             warned = {f.rule_id for f in ungraded if not f.blocking}
             upgraded |= warned & {f.rule_id for f in as_standard if f.blocking}
         assert upgraded
+
+    def test_every_stylesheet_a_scenario_names_is_one_the_rule_set_declares(
+        self, real_ruleset: Ruleset
+    ) -> None:
+        """The engine refuses a document whose scenario names a stylesheet it
+        does not hold. This is what keeps that refusal from reaching a user: a
+        release that adds one fails here, when the rule set is adopted."""
+        declared = {sheet for syntax in Syntax for sheet in real_ruleset.stylesheets(syntax)}
+        for scenario in real_ruleset.scenarios:
+            assert scenario.stylesheets, scenario.name
+            assert {real_ruleset.root / s for s in scenario.stylesheets} <= declared, scenario.name
+
+    @pytest.mark.parametrize("syntax", list(Syntax))
+    def test_an_invoice_claiming_only_en16931_is_not_held_to_the_german_rules(
+        self, engine: ValidationEngine, corpus: Path, syntax: Syntax
+    ) -> None:
+        """The same document, minus its buyer reference, under two claims. As an
+        XRechnung it breaches the CIUS. As a plain EN 16931 invoice it breaches
+        nothing, because the core does not ask for one."""
+        document = without_buyer_reference(invoices(corpus, syntax)[0].read_bytes())
+        as_xrechnung = engine.evaluate(document, syntax)
+        as_core = engine.evaluate(relabelled(document, EN16931), syntax)
+
+        assert [f.rule_id for f in as_xrechnung.findings if f.blocking] == ["BR-DE-15"]
+        assert not as_xrechnung.skipped
+
+        assert as_core.scenario is not None
+        assert as_core.scenario.name != as_xrechnung.scenario.name
+        assert not [f for f in as_core.findings if f.blocking]
+        assert len(as_core.skipped) == 1
+
+    @pytest.mark.parametrize("syntax", list(Syntax))
+    def test_it_is_still_held_to_the_core(
+        self, engine: ValidationEngine, corpus: Path, syntax: Syntax
+    ) -> None:
+        """Skipping the CIUS must not mean skipping validation."""
+        document = relabelled(invoices(corpus, syntax)[0].read_bytes(), EN16931)
+        currency = b"DocumentCurrencyCode>" if syntax is Syntax.UBL else b"InvoiceCurrencyCode>"
+        assert currency + b"EUR<" in document
+        broken = document.replace(currency + b"EUR<", currency + b"ZZZ<")
+        fired = {f.rule_id for f in engine.evaluate(broken, syntax).findings if f.blocking}
+        assert "BR-CL-04" in fired or "BR-CL-03" in fired
+
+    def test_one_report_comes_back_per_stylesheet_that_ran(
+        self, engine: ValidationEngine, real_ruleset: Ruleset, corpus: Path
+    ) -> None:
+        document = (corpus / "01.01a-INVOICE_ubl.xml").read_bytes()
+        held = len(real_ruleset.stylesheets(Syntax.UBL))
+        assert len(engine.reports(document, Syntax.UBL)) == held
+        assert len(engine.reports(relabelled(document, EN16931), Syntax.UBL)) == held - 1
+        assert all("schematron-output" in report for report in engine.reports(document, Syntax.UBL))
+
+    def test_a_document_no_scenario_recognises_is_held_to_everything(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        """It has not said what it is, so nothing is assumed in its favour."""
+        document = without_buyer_reference((corpus / "01.01a-INVOICE_ubl.xml").read_bytes())
+        evaluation = engine.evaluate(relabelled(document, UNRECOGNISED), Syntax.UBL)
+        assert evaluation.scenario is None
+        assert not evaluation.skipped
+        assert "BR-DE-15" in {f.rule_id for f in evaluation.findings if f.blocking}
 
     def test_a_document_no_scenario_recognises_keeps_the_stylesheets_grades(
         self, engine: ValidationEngine, corpus: Path
