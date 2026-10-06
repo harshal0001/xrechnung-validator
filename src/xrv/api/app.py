@@ -3,23 +3,28 @@
 Deliberately thin. It reads the upload, hands it to the service, and translates
 domain errors into status codes — no validation logic lives here.
 
-Two things it does own, because they are properties of being on the network
+Three things it does own, because they are properties of being on the network
 rather than of validating an invoice: refusing an oversized body before reading
-all of it, and keeping the liveness check off the Saxon path so a health probe
-cannot be blocked behind a document being validated.
+all of it, keeping the liveness check off the Saxon path so a health probe
+cannot be blocked behind a document being validated, and giving every request
+an id and a log line.
 """
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+import logging
+import time
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
+from xrv.api import logs
 from xrv.api.service import ValidationService
 from xrv.core import ValidationReport, render
 from xrv.explain import DEFAULT_LANGUAGE, LANGUAGES, LanguageNotAvailableError
@@ -57,9 +62,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     ~2.4s of work that is unbilled during Lambda's init phase and would
     otherwise land on whoever arrives first.
     """
+    logs.configure()
+    started = time.perf_counter()
     service = build_service()
     app.state.service = service
     app.state.warm_version = service.warm()
+    logs.log(
+        "started",
+        ruleset=app.state.warm_version,
+        duration_ms=round((time.perf_counter() - started) * 1000, 1),
+    )
     try:
         yield
     finally:
@@ -72,6 +84,56 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def _observe(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """Give the request an id, time it, and write one line about it.
+
+    Also the last line of defence: an exception no handler claimed is logged
+    here and answered with the id, so "it returned a 500" is something a person
+    can report and an operator can find.
+    """
+    request.state.request_id = logs.request_id(request.headers.get(logs.HEADER))
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        logs.log(
+            "error",
+            level=logging.ERROR,
+            request_id=request.state.request_id,
+            path=request.url.path,
+            exception=type(exc).__name__,
+            trace=logs.frames(exc.__traceback__),
+        )
+        response = _problem(request, 500, "internal_error", _Unexpected(request.state.request_id))
+
+    response.headers[logs.HEADER] = request.state.request_id
+    # Static files are the page loading, not the service being used. An API
+    # route is logged always; anything else only when it went wrong.
+    if isinstance(request.scope.get("route"), APIRoute) or response.status_code >= 400:
+        logs.log(
+            "request",
+            request_id=request.state.request_id,
+            method=request.method,
+            path=request.url.path,
+            status=response.status_code,
+            duration_ms=round((time.perf_counter() - started) * 1000, 1),
+        )
+    return response
+
+
+class _Unexpected(Exception):
+    """Stands in for an exception whose own message must not reach the caller."""
+
+    code = "internal_error"
+
+    def __init__(self, request_id: str) -> None:
+        super().__init__(f"The check failed unexpectedly. Quote {request_id} if you report it.")
+        self.params = {"request_id": request_id}
 
 
 def get_service(request: Request) -> ValidationService:
@@ -113,6 +175,7 @@ async def read_capped(upload: UploadFile) -> bytes:
     },
 )
 async def validate(
+    request: Request,
     file: Annotated[UploadFile, File(description="An XRechnung XML file or a ZUGFeRD PDF")],
     service: Service,
     explain: Annotated[
@@ -138,13 +201,31 @@ async def validate(
     ] = False,
 ) -> ValidationReport:
     payload = await read_capped(file)
-    return service.validate(
+    report = service.validate(
         payload,
         explain=explain,
         version=ruleset,
         language=lang,
         include_source=include_source,
     )
+    # What was decided about the document, and nothing from inside it.
+    logs.log(
+        "validation",
+        request_id=request.state.request_id,
+        bytes=len(payload),
+        syntax=report.syntax,
+        source=report.source,
+        profile=report.profile,
+        scenario=report.scenario,
+        ruleset=report.ruleset_version,
+        valid=report.valid,
+        findings={str(severity): count for severity, count in report.counts.items() if count},
+        rules=sorted({finding.rule_id for finding in report.findings}),
+        explain=explain,
+        lang=lang,
+        duration_ms=report.duration_ms,
+    )
+    return report
 
 
 @app.get("/rulesets", summary="Rule set versions and their provenance")
@@ -188,7 +269,19 @@ def _problem(request: Request, status: int, kind: str, exc: Exception) -> JSONRe
     code = getattr(exc, "code", "") or kind
     params = getattr(exc, "params", {}) or {}
     detail = render(code, params, _requested_language(request), fallback=str(exc))
-    return JSONResponse(status_code=status, content={"error": kind, "detail": detail})
+    # The code, not the sentence: the sentence can quote the document — a root
+    # element, an attachment name — and the code says which refusal it was.
+    content = {"error": kind, "detail": detail}
+    if status >= 500:
+        content["request_id"] = request.state.request_id
+    else:
+        logs.log(
+            "refused",
+            request_id=getattr(request.state, "request_id", None),
+            status=status,
+            error=code,
+        )
+    return JSONResponse(status_code=status, content=content)
 
 
 @app.exception_handler(UnsupportedDocumentError)

@@ -97,6 +97,11 @@ MESSAGES: dict[str, dict[str, str]] = {
         "satisfy the German e-invoicing mandate. Business rules were not evaluated, "
         "because most would fail on data the profile does not claim to contain.",
     },
+    "internal_error": {
+        "de": "Die Prüfung ist unerwartet fehlgeschlagen. Nennen Sie bei einer Meldung "
+        "bitte die Kennung {request_id}.",
+        "en": "The check failed unexpectedly. Quote {request_id} if you report it.",
+    },
     # Not an error. Findings that are absent because a rule set did not apply
     # read exactly like findings that are absent because the document passed it,
     # so the report says which it was.
