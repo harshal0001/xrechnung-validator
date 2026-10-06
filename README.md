@@ -94,7 +94,8 @@ measured.
 | Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,585 backend, 21 frontend |
+| Tests | 2,589 backend, 21 frontend |
+| Coverage | **97.8%** of lines and branches in `src/xrv`; CI fails below 95% |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
@@ -147,7 +148,7 @@ reference invoices are rejected. Every report names the scenario it used.
 | **Interface** | React, TypeScript, Vite | Static build, served from the same container |
 | **Package** | Docker — one image | Required: Saxon ships a native library |
 | **Run** | AWS Lambda, arm64 Graviton, `eu-central-1` | Init phase unbilled — the 2.4 s compile is free |
-| **Verify** | pytest, vitest, GitHub Actions | Lint, types, tests, multi-arch build on every change |
+| **Verify** | pytest, vitest, GitHub Actions | Lint, types, tests, coverage floor, multi-arch build on every change |
 
 ---
 

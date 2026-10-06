@@ -20,7 +20,7 @@ from lxml import etree
 
 from xrv.core import Finding, Severity, Syntax
 from xrv.ingest import MalformedXmlError, identify
-from xrv.rules import Ruleset
+from xrv.rules import Ruleset, Scenario
 from xrv.validate import ValidationEngine, ValidationError
 
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
@@ -300,6 +300,60 @@ class TestDeterminism:
 
 
 class TestFailureModes:
+    def test_a_scenario_naming_a_stylesheet_the_engine_lacks_is_refused(
+        self, real_ruleset: Ruleset, corpus: Path
+    ) -> None:
+        """Running what is held and staying quiet about the rest would report a
+        document as checked against rules it never met."""
+
+        class Elsewhere:
+            def match(self, node: object) -> Scenario:
+                return Scenario(
+                    name="A kind of document from a newer configuration",
+                    match="true()",
+                    namespaces={},
+                    levels={},
+                    stylesheets=("resources/not-shipped/validation.xsl",),
+                )
+
+        with ValidationEngine(real_ruleset, syntaxes=[Syntax.UBL]) as engine:
+            engine._scenarios = Elsewhere()  # type: ignore[assignment]
+            with pytest.raises(ValidationError, match="does not hold"):
+                engine.rule_findings(corpus / "01.01a-INVOICE_ubl.xml", Syntax.UBL)
+
+    def test_a_value_the_rules_cannot_read_stops_the_rule_layer_loudly(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        """The arithmetic rules cast amounts. Text where an amount belongs is not
+        a rule failing — the stylesheet could not be run — and is reported as
+        that rather than as an empty, clean-looking list of findings."""
+        document = (corpus / "01.01a-INVOICE_ubl.xml").read_bytes()
+        amount = re.search(rb"<cbc:PayableAmount[^>]*>([^<]+)<", document)
+        assert amount is not None
+        broken = document.replace(
+            amount.group(0), amount.group(0).replace(amount.group(1), b"viel")
+        )
+        with pytest.raises(ValidationError, match="transform failed"):
+            engine.rule_findings(broken, Syntax.UBL)
+
+    def test_the_schema_catches_that_value_before_the_rules_are_asked(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        """Which is why a user never sees the failure above: the pipeline stops
+        at the structural finding."""
+        document = (corpus / "01.01a-INVOICE_ubl.xml").read_bytes()
+        amount = re.search(rb"<cbc:PayableAmount[^>]*>([^<]+)<", document)
+        assert amount is not None
+        broken = document.replace(
+            amount.group(0), amount.group(0).replace(amount.group(1), b"viel")
+        )
+        findings = engine.findings(broken, Syntax.UBL)
+        assert findings
+        assert all(f.severity is Severity.FATAL for f in findings)
+
+    def test_the_engine_says_which_saxon_it_runs(self, engine: ValidationEngine) -> None:
+        assert "Saxon" in engine.saxon_version
+
     def test_a_missing_file_is_reported_as_such(self, engine: ValidationEngine) -> None:
         with pytest.raises(ValidationError, match="no such document"):
             engine.findings(Path("/nonexistent/invoice.xml"), Syntax.UBL)

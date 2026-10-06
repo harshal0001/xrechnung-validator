@@ -78,7 +78,12 @@ jobs:
       - name: Tests
         env:
           XRV_REQUIRE_RULESET: "1"
-        run: uv run pytest --strict-markers
+        run: uv run pytest --strict-markers --cov --cov-report=term
+
+      # The floor is in pyproject.toml. Reported after the tests rather than as
+      # part of them so a failure says which of the two it was.
+      - name: Coverage
+        run: uv run coverage report
 
   frontend:
     name: frontend
