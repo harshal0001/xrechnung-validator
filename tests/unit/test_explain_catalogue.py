@@ -30,6 +30,8 @@ from xrv.explain import (
     CatalogueProvider,
     Entry,
     LanguageNotAvailableError,
+    as_written,
+    digests,
     rule_text_digest,
 )
 
@@ -199,20 +201,122 @@ class TestLoading:
 
     def test_an_entry_that_does_not_say_it_was_reviewed_is_not(self, tmp_path: Path) -> None:
         path = write_catalogue(tmp_path, {"BR-DE-15": {"what": WHAT}})
-        assert Catalogue.load(path).entries["BR-DE-15"].reviewed_digest is None
+        assert not Catalogue.load(path).entries["BR-DE-15"].reviewed_digests
+
+    def test_a_digest_that_is_neither_a_string_nor_a_list_is_refused(self, tmp_path: Path) -> None:
+        body = entry_json(reviewed=True)
+        body["reviewed_digest"] = 12345
+        with pytest.raises(CatalogueError, match="malformed entries"):
+            Catalogue.load(write_catalogue(tmp_path, {"BR-DE-15": body}))
 
 
 class TestEntry:
     def test_matches_current_text(self) -> None:
-        entry = Entry(what=WHAT, why=WHY, rule_text_digest=rule_text_digest(RULE_TEXT))
+        entry = Entry(what=WHAT, why=WHY, rule_text_digests=digests(rule_text_digest(RULE_TEXT)))
         assert entry.matches(RULE_TEXT)
         assert not entry.matches("something else")
 
     def test_is_reviewed_for_needs_both_halves(self) -> None:
-        digest = rule_text_digest(RULE_TEXT)
-        assert not Entry(WHAT, WHY, digest).is_reviewed_for(RULE_TEXT)
-        assert Entry(WHAT, WHY, digest, reviewed_digest=digest).is_reviewed_for(RULE_TEXT)
-        assert not Entry(WHAT, WHY, digest, reviewed_digest=digest).is_reviewed_for("other text")
+        one = digests(rule_text_digest(RULE_TEXT))
+        assert not Entry(WHAT, WHY, one).is_reviewed_for(RULE_TEXT)
+        assert Entry(WHAT, WHY, one, reviewed_digests=one).is_reviewed_for(RULE_TEXT)
+        assert not Entry(WHAT, WHY, one, reviewed_digests=one).is_reviewed_for("other text")
+
+
+#: The same rule as the two stylesheets word it. Real: BR-08 differs by exactly this.
+IN_CII = "An Invoice shall contain the Seller postal address (BG-5)."
+IN_UBL = "An Invoice shall contain the Seller postal address."
+
+
+class TestARuleWithTwoWordings:
+    """The UBL and CII stylesheets do not always word a rule the same way.
+
+    An approval is for a wording. Before the catalogue could hold more than one
+    digest, an entry approved against the CII text was withheld from every UBL
+    invoice, and nothing said so: the file showed it as reviewed.
+    """
+
+    def entry(self, *, approved: list[str]) -> dict:
+        return {
+            "what": WHAT,
+            "why": WHY,
+            "rule_text_digest": sorted([rule_text_digest(IN_CII), rule_text_digest(IN_UBL)]),
+            "reviewed_digest": [rule_text_digest(text) for text in approved] or None,
+        }
+
+    def provider(self, tmp_path: Path, *, approved: list[str]) -> CatalogueProvider:
+        path = write_catalogue(tmp_path, {"BR-08": self.entry(approved=approved)})
+        return CatalogueProvider(Catalogue.load(path))
+
+    def test_approved_for_both_it_is_served_for_both(self, tmp_path: Path) -> None:
+        provider = self.provider(tmp_path, approved=[IN_CII, IN_UBL])
+        assert provider.explain(finding("BR-08", IN_CII)) == WHAT
+        assert provider.explain(finding("BR-08", IN_UBL)) == WHAT
+        assert provider.catalogue.reviewed_count == 1
+        assert provider.catalogue.partly_reviewed == ()
+
+    def test_approved_for_one_it_is_withheld_for_the_other(self, tmp_path: Path) -> None:
+        provider = self.provider(tmp_path, approved=[IN_CII])
+        assert provider.explain(finding("BR-08", IN_CII)) == WHAT
+        assert provider.explain(finding("BR-08", IN_UBL)) is None
+        assert provider.context(finding("BR-08", IN_UBL)) is None
+
+    def test_approved_for_one_it_is_not_counted_as_reviewed(self, tmp_path: Path) -> None:
+        """The count is what the README reports. Half an approval is not one."""
+        catalogue = self.provider(tmp_path, approved=[IN_CII]).catalogue
+        assert catalogue.reviewed_count == 0
+        assert catalogue.partly_reviewed == ("BR-08",)
+
+    def test_approved_for_neither_it_is_a_draft(self, tmp_path: Path) -> None:
+        provider = self.provider(tmp_path, approved=[])
+        assert provider.explain(finding("BR-08", IN_CII)) is None
+        assert provider.catalogue.partly_reviewed == ()
+
+    def test_a_draft_can_still_be_shown_for_either_wording(self, tmp_path: Path) -> None:
+        path = write_catalogue(tmp_path, {"BR-08": self.entry(approved=[])})
+        ungated = CatalogueProvider(Catalogue.load(path), require_reviewed=False)
+        assert ungated.explain(finding("BR-08", IN_CII)) == WHAT
+        assert ungated.explain(finding("BR-08", IN_UBL)) == WHAT
+
+    def test_a_third_wording_nobody_recorded_is_withheld(self, tmp_path: Path) -> None:
+        provider = self.provider(tmp_path, approved=[IN_CII, IN_UBL])
+        assert provider.explain(finding("BR-08", "Something else entirely.")) is None
+
+    def test_one_digest_is_written_as_a_string_and_several_as_a_list(self) -> None:
+        """A rule with one wording, which is nearly all of them, keeps the file
+        shape it always had."""
+        assert as_written(digests("abc")) == "abc"
+        assert as_written(digests(["b", "a"])) == ["a", "b"]
+        assert as_written(digests(None)) is None
+        assert digests(as_written(digests(["b", "a"]))) == {"a", "b"}
+
+
+class TestRefreshing:
+    """`build_explanations.py --refresh`, on a file."""
+
+    def refreshed(self, tmp_path: Path, body: dict, wordings: tuple[str, ...]) -> dict:
+        from build_explanations import refresh
+
+        path = write_catalogue(tmp_path, {"BR-08": body})
+        refresh(path, {"BR-08": wordings})
+        return json.loads(path.read_text(encoding="utf-8"))["entries"]["BR-08"]
+
+    def test_a_wording_never_recorded_is_recorded(self, tmp_path: Path) -> None:
+        body = entry_json(reviewed=True, text=IN_CII)
+        after = self.refreshed(tmp_path, body, (IN_CII, IN_UBL))
+        assert after["rule_text_digest"] == sorted(
+            [rule_text_digest(IN_CII), rule_text_digest(IN_UBL)]
+        )
+
+    def test_recording_it_does_not_approve_it(self, tmp_path: Path) -> None:
+        """Otherwise a refresh would launder text nobody read into production."""
+        body = entry_json(reviewed=True, text=IN_CII)
+        after = self.refreshed(tmp_path, body, (IN_CII, IN_UBL))
+        assert after["reviewed_digest"] == rule_text_digest(IN_CII)
+
+    def test_a_rule_with_one_wording_is_left_as_it_was(self, tmp_path: Path) -> None:
+        body = entry_json(reviewed=True, text=IN_CII)
+        assert self.refreshed(tmp_path, dict(body), (IN_CII,)) == body
 
 
 class TestTheCommittedCatalogue:
@@ -238,6 +342,25 @@ class TestTheCommittedCatalogue:
             if rule_id in rule_texts and not entry.matches(rule_texts[rule_id])
         ]
         assert not drifted, f"entries written against text that has changed: {drifted}"
+
+    def test_every_entry_records_every_wording_of_its_rule(
+        self, catalogue: Catalogue, en_catalogue: Catalogue, real_ruleset
+    ) -> None:
+        """A wording the entry does not know about is one it can never be
+        approved for, so the explanation is silently missing for that syntax."""
+        from build_explanations import current_digests
+        from build_explanations import rule_texts as every_wording
+
+        wordings = every_wording(real_ruleset)
+        for cat in (catalogue, en_catalogue):
+            missing = [
+                rule_id
+                for rule_id, entry in cat.entries.items()
+                if entry.rule_text_digests != current_digests(wordings[rule_id])
+            ]
+            assert not missing, (
+                f"{cat.language}: run scripts/build_explanations.py --refresh for {missing}"
+            )
 
     def test_it_names_the_ruleset_it_belongs_to(self, catalogue: Catalogue, real_ruleset) -> None:
         assert catalogue.ruleset_version == real_ruleset.version
@@ -269,21 +392,19 @@ class TestLanguages:
         """Same digest per rule: both explain the text now in force, so a KoSIT
         rewording un-reviews both at once rather than leaving one stale."""
         for rule_id, de in catalogue.entries.items():
-            assert en_catalogue.entries[rule_id].rule_text_digest == de.rule_text_digest, rule_id
+            assert en_catalogue.entries[rule_id].rule_text_digests == de.rule_text_digests, rule_id
 
     def test_no_entry_is_reviewed_against_stale_text(
         self, catalogue: Catalogue, en_catalogue: Catalogue
     ) -> None:
-        """An approval only counts if it was given for the text now in force.
+        """An approval only counts if it was given for text now in force.
 
-        This replaces a snapshot assertion (English reviewed_count == 0) that the
-        review itself broke. The durable property is the invariant behind the
-        count: every entry with a reviewed_digest has one matching its
-        rule_text_digest, so reviewed_count never silently under-reports a
-        review that drifted.
+        Every digest an entry was approved for has to be a digest of a wording
+        the rule still has. An approval for anything else is for text that no
+        longer exists, and would sit in the file looking like a review.
         """
         for language, cat in (("de", catalogue), ("en", en_catalogue)):
-            approved = [e for e in cat.entries.values() if e.reviewed_digest is not None]
-            assert cat.reviewed_count == len(approved), language
-            for entry in approved:
-                assert entry.reviewed_digest == entry.rule_text_digest, language
+            for rule_id, entry in cat.entries.items():
+                assert entry.reviewed_digests <= entry.rule_text_digests, (language, rule_id)
+            approved = [e for e in cat.entries.values() if e.reviewed_digests]
+            assert cat.reviewed_count + len(cat.partly_reviewed) == len(approved), language
