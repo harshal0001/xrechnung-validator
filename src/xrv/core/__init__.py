@@ -13,6 +13,7 @@ from xrv.core.models import (
     Syntax,
     ValidationReport,
     severity_from_kosit_flag,
+    severity_from_kosit_level,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "ValidationReport",
     "render",
     "severity_from_kosit_flag",
+    "severity_from_kosit_level",
 ]
