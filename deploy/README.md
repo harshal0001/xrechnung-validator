@@ -62,7 +62,7 @@ updates, or adopts what exists, rather than failing.
 | Region | `eu-central-1` | Frankfurt. German invoices stay in Germany |
 | Architecture | `arm64` | Graviton, ~20% cheaper. CI builds arm64 on every push to main |
 | Memory | 1024 MB | Measured peak is ~220 MB; this is headroom, not a guess |
-| Timeout | 30 s | 27 ms per document warm |
+| Timeout | 30 s | 15 ms per document warm, 37 ms at the 95th percentile |
 | Front door | HTTP API | A Function URL is free and would be enough, but returns 403 on this account. See below |
 | IAM | logs only | The rule set is baked into the image and there is no database, so the function reads no AWS resource |
 
@@ -157,6 +157,19 @@ It forces a cold start by updating the function configuration, which discards
 warm execution environments, then times the first request against the next five.
 Measured here: 3.6–4.7 s to first response over three runs. Lambda does not bill
 the init phase, so the schema and stylesheet compilation inside that figure is free.
+
+## Measure warm latency
+
+```bash
+python scripts/measure_latency.py https://xrechnung.harshalkothari.tech \
+    --corpus tests/corpus/_downloaded/2026-08-31/instances/standard
+```
+
+Sends each of the 66 standard reference messages four times, discards the first
+pass, and reports the distribution of `duration_ms` — the service's own timing of
+the work, not the round trip. Measured here: p50 11 ms, p95 37 ms, p99 50 ms,
+mean 15 ms over 198 requests. The round trip is printed too and is mostly the
+network. Requests are paced at four a second, under the stage throttle.
 
 ## Running it anywhere else
 
