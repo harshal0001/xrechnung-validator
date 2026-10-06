@@ -74,6 +74,19 @@ ignore_missing_imports = true
 [tool.hatch.build.targets.wheel]
 packages = ["src/xrv"]
 
+# Measured over the service, not the tests or the scripts. Branches as well as
+# lines: most of what matters here is which way an `if` went.
+[tool.coverage.run]
+source = ["xrv"]
+branch = true
+
+# A floor, set a little under what is measured. It is there to stop coverage
+# sliding unnoticed, not to be a number anyone works towards.
+[tool.coverage.report]
+fail_under = 95
+skip_covered = true
+show_missing = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # src layout, so the suite runs against the tree without an editable install.
