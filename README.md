@@ -26,10 +26,10 @@ flowchart TD
     B["<b>ingest/</b> — sniff, route, unwrap<br/><i>lxml (entities off) · pikepdf</i>"]
     X["<b>415 / 422</b><br/>a reason a person can act on"]
     C["<b>validate/</b> layer 1 — XSD structure<br/><i>lxml</i>"]
-    D["<b>validate/</b> layer 2 — KoSIT Schematron<br/><i>SaxonC-HE, XSLT 2.0</i>"]
+    D["<b>validate/</b> layer 2 — KoSIT Schematron, chosen by scenario<br/><i>SaxonC-HE, XSLT 2.0</i>"]
     E["<b>SVRL → Finding[]</b><br/>severity read from the flag attribute"]
     F["<b>explain/</b> — frozen catalogue lookup<br/><i>reviewed German / English, no model call</i>"]
-    R["<b>ValidationReport</b><br/>+ rule set version and SHA-256"]
+    R["<b>ValidationReport</b><br/>+ scenario, rule set version and SHA-256"]
     G["<b>React UI</b><br/>shows the failing line in the document"]
 
     A --> B
@@ -80,7 +80,7 @@ measured.
 | Validation latency | 27 ms/document warm |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,439 backend, 21 frontend |
+| Tests | 2,452 backend, 21 frontend |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
@@ -111,10 +111,16 @@ and this makes that migration a configuration change.
 **Severity is where naive implementations fail.** KoSIT's `fatal` flag means a
 business-rule breach, not a structural failure, and valid reference invoices still
 emit informational assertions. Treating every failed assertion as an error would
-report **33 of 66 valid documents as broken**. It is also per document type: KoSIT's
-configuration re-grades individual rules for the extension and CVD scenarios, so the
-scenario's own match expression is evaluated and its overrides applied — without them,
-four more valid reference invoices are rejected. The report names the scenario it used.
+report **33 of 66 valid documents as broken**.
+
+**A document is validated as what it claims to be.** KoSIT's configuration lists the
+document types it knows, and for each one the XPath that recognises it, the stylesheets
+it is validated with, and the rules it re-grades. All three are read as data and
+followed. An XRechnung meets the EN 16931 core and the German CIUS. An invoice that
+claims only EN 16931 — a typical ZUGFeRD PDF — meets the core alone, and the report says
+the XRechnung rules were not applied rather than letting their absence read as a pass.
+The extension and CVD scenarios re-grade individual rules; without that, four valid
+reference invoices are rejected. Every report names the scenario it used.
 
 ---
 

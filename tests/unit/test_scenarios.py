@@ -22,7 +22,17 @@ SCENARIOS = """<scenarios xmlns="http://www.xoev.de/de/validator/framework/1/sce
     <namespace prefix="doc">urn:first</namespace>
     <namespace prefix="rep">urn:report</namespace>
     <match> exists(/doc:Invoice[doc:Kind = 'first']) </match>
+    <validateWithXmlSchema>
+      <resource><name>Schema</name><location>resources/first.xsd</location></resource>
+    </validateWithXmlSchema>
+    <validateWithSchematron>
+      <resource><name>Core</name><location>resources/core.xsl</location></resource>
+    </validateWithSchematron>
+    <validateWithSchematron>
+      <resource><name>National</name><location> resources/national.xsl </location></resource>
+    </validateWithSchematron>
     <createReport>
+      <resource><name>Report</name><location>resources/report.xsl</location></resource>
       <customLevel level="warning">BR-A</customLevel>
       <customLevel level="error">BR-B</customLevel>
       <customLevel level="information">BR-C</customLevel>
@@ -56,6 +66,13 @@ class TestReading:
     def test_prefixes_are_read_per_scenario(self, scenarios: tuple[Scenario, ...]) -> None:
         assert scenarios[0].namespaces == {"doc": "urn:first", "rep": "urn:report"}
         assert scenarios[1].namespaces == {"doc": "urn:first"}
+
+    def test_only_the_schematron_stylesheets_are_what_it_validates_with(
+        self, scenarios: tuple[Scenario, ...]
+    ) -> None:
+        """Not the schema and not the report template, which sit beside them."""
+        assert scenarios[0].stylesheets == ("resources/core.xsl", "resources/national.xsl")
+        assert scenarios[1].stylesheets == ()
 
     def test_overrides_are_read_as_severities(self, scenarios: tuple[Scenario, ...]) -> None:
         assert scenarios[0].levels == {
