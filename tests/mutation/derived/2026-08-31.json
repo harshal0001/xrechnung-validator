@@ -1,12 +1,12 @@
 {
  "ruleset_version": "2026-08-31",
  "ruleset_sha256": "2530cd107c414511c5d0462ec10f886910395abfca820db82e83d70bf01221a8",
- "bases": 82,
+ "bases": 86,
  "mutations": [
   {
    "rule_id": "BR-01",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID",
    "op": "set",
    "value": "",
@@ -18,7 +18,7 @@
   {
    "rule_id": "BR-02",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocument/ram:ID",
    "op": "set",
    "value": "",
@@ -29,7 +29,7 @@
   {
    "rule_id": "BR-03",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocument/ram:IssueDateTime/udt:DateTimeString",
    "op": "delete",
    "attribute": "format",
@@ -40,7 +40,7 @@
   {
    "rule_id": "BR-04",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocument/ram:TypeCode",
    "op": "delete",
    "collateral": [
@@ -51,28 +51,28 @@
   {
    "rule_id": "BR-05",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode",
    "op": "delete"
   },
   {
    "rule_id": "BR-06",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Name",
    "op": "delete"
   },
   {
    "rule_id": "BR-07",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:Name",
    "op": "delete"
   },
   {
    "rule_id": "BR-08",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress",
    "op": "delete",
    "collateral": [
@@ -82,14 +82,14 @@
   {
    "rule_id": "BR-09",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountryID",
    "op": "delete"
   },
   {
    "rule_id": "BR-10",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress",
    "op": "delete",
    "collateral": [
@@ -99,14 +99,14 @@
   {
    "rule_id": "BR-11",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountryID",
    "op": "delete"
   },
   {
    "rule_id": "BR-12",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:LineTotalAmount",
    "op": "delete",
    "collateral": [
@@ -117,7 +117,7 @@
   {
    "rule_id": "BR-13",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount",
    "op": "delete",
    "collateral": [
@@ -128,7 +128,7 @@
   {
    "rule_id": "BR-14",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount",
    "op": "delete",
    "collateral": [
@@ -139,7 +139,7 @@
   {
    "rule_id": "BR-15",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:DuePayableAmount",
    "op": "delete",
    "collateral": [
@@ -149,7 +149,7 @@
   {
    "rule_id": "BR-16",
    "syntax": "CII",
-   "base": "standard/01.02a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem",
    "op": "delete",
    "collateral": [
@@ -160,7 +160,7 @@
   {
    "rule_id": "BR-17",
    "syntax": "CII",
-   "base": "standard/01.14a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:Name",
    "op": "delete"
   },
@@ -198,8 +198,8 @@
   {
    "rule_id": "BR-22",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeDelivery",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery",
    "op": "delete",
    "collateral": [
     "BR-23"
@@ -208,8 +208,8 @@
   {
    "rule_id": "BR-23",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity",
    "op": "delete",
    "attribute": "unitCode"
   },
@@ -223,8 +223,8 @@
   {
    "rule_id": "BR-25",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct",
    "op": "delete"
   },
   {
@@ -373,15 +373,15 @@
   {
    "rule_id": "BR-49",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode",
    "op": "delete"
   },
   {
    "rule_id": "BR-50",
    "syntax": "CII",
-   "base": "technical-cases/cius/01.02_comprehensive_test_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans[1]/ram:PayeePartyCreditorFinancialAccount/ram:ProprietaryID",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:IBANID",
    "op": "set",
    "value": "",
    "collateral": [
@@ -452,7 +452,7 @@
   {
    "rule_id": "BR-62",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication/ram:URIID",
    "op": "delete",
    "attribute": "schemeID"
@@ -460,7 +460,7 @@
   {
    "rule_id": "BR-63",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication/ram:URIID",
    "op": "delete",
    "attribute": "schemeID"
@@ -468,13 +468,11 @@
   {
    "rule_id": "BR-64",
    "syntax": "CII",
-   "base": "standard/03.07a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:GlobalID",
-   "op": "delete",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:GlobalID",
+   "op": "set",
    "attribute": "schemeID",
-   "collateral": [
-    "CII-SR-046"
-   ]
+   "value": ""
   },
   {
    "rule_id": "BR-65",
@@ -701,7 +699,7 @@
   {
    "rule_id": "BR-CL-01",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocument/ram:TypeCode",
    "op": "set",
    "value": "0",
@@ -796,7 +794,7 @@
   {
    "rule_id": "BR-CL-14",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountryID",
    "op": "set",
    "value": "B"
@@ -812,7 +810,7 @@
   {
    "rule_id": "BR-CL-16",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode",
    "op": "set",
    "value": "0"
@@ -869,8 +867,8 @@
   {
    "rule_id": "BR-CL-23",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity",
    "op": "set",
    "attribute": "unitCode",
    "value": ""
@@ -905,14 +903,14 @@
   {
    "rule_id": "BR-CO-04",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:TypeCode",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:TypeCode",
    "op": "delete"
   },
   {
    "rule_id": "BR-CO-09",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID",
    "op": "set",
    "value": "E"
@@ -961,7 +959,7 @@
   {
    "rule_id": "BR-CO-15",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation",
    "op": "delete"
   },
@@ -1007,42 +1005,42 @@
   {
    "rule_id": "BR-DE-1",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-2",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-3",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CityName",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-4",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-5",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:PersonName",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-6",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:TelephoneUniversalCommunication",
    "op": "delete",
    "collateral": [
@@ -1052,7 +1050,7 @@
   {
    "rule_id": "BR-DE-7",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication",
    "op": "delete",
    "collateral": [
@@ -1062,14 +1060,14 @@
   {
    "rule_id": "BR-DE-8",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CityName",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-9",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode",
    "op": "delete"
   },
@@ -1097,14 +1095,14 @@
   {
    "rule_id": "BR-DE-15",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerReference",
    "op": "delete"
   },
   {
    "rule_id": "BR-DE-16",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration",
    "op": "delete",
    "collateral": [
@@ -1114,7 +1112,7 @@
   {
    "rule_id": "BR-DE-17",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocument/ram:TypeCode",
    "op": "set",
    "value": "0",
@@ -1164,8 +1162,8 @@
   {
    "rule_id": "BR-DE-23-a",
    "syntax": "CII",
-   "base": "technical-cases/cius/01.02_comprehensive_test_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans[1]/ram:PayeePartyCreditorFinancialAccount",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount",
    "op": "delete",
    "collateral": [
     "CII-SR-470"
@@ -1193,7 +1191,7 @@
   {
    "rule_id": "BR-DE-24-b",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode",
    "op": "set",
    "value": "48",
@@ -1216,7 +1214,7 @@
   {
    "rule_id": "BR-DE-25-b",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode",
    "op": "set",
    "value": "59",
@@ -1244,7 +1242,7 @@
   {
    "rule_id": "BR-DE-28",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication/ram:URIID",
    "op": "set",
    "value": "916"
@@ -1267,9 +1265,73 @@
    ]
   },
   {
+   "rule_id": "BR-DE-CVD-01",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:ContractReferencedDocument",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DE-CVD-02",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument[1]",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DE-CVD-03",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct",
+   "op": "delete",
+   "collateral": [
+    "BR-25"
+   ]
+  },
+  {
+   "rule_id": "BR-DE-CVD-04",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification[1]/ram:ClassCode",
+   "op": "set",
+   "value": "0.9"
+  },
+  {
+   "rule_id": "BR-DE-CVD-05",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic[1]/ram:Description",
+   "op": "set",
+   "value": "cva",
+   "collateral": [
+    "BR-DE-CVD-06-a"
+   ]
+  },
+  {
+   "rule_id": "BR-DE-CVD-06-a",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic[1]/ram:Description",
+   "op": "set",
+   "value": "cva",
+   "collateral": [
+    "BR-DE-CVD-05"
+   ]
+  },
+  {
+   "rule_id": "BR-DE-CVD-06-b",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification[1]",
+   "op": "delete",
+   "collateral": [
+    "BR-DE-CVD-03"
+   ]
+  },
+  {
    "rule_id": "BR-DE-TMP-32",
    "syntax": "CII",
-   "base": "standard/01.02a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent",
    "op": "delete"
   },
@@ -1317,7 +1379,7 @@
   {
    "rule_id": "BR-DEC-09",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:LineTotalAmount",
    "op": "set",
    "value": "1.234",
@@ -1353,7 +1415,7 @@
   {
    "rule_id": "BR-DEC-12",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount",
    "op": "set",
    "value": "1.234",
@@ -1376,7 +1438,7 @@
   {
    "rule_id": "BR-DEC-14",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount",
    "op": "set",
    "value": "1.234",
@@ -1418,7 +1480,7 @@
   {
    "rule_id": "BR-DEC-18",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:DuePayableAmount",
    "op": "set",
    "value": "1.234",
@@ -1451,8 +1513,8 @@
   {
    "rule_id": "BR-DEC-23",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount",
    "op": "set",
    "value": "1.234",
    "collateral": [
@@ -1500,6 +1562,36 @@
    "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge[1]/ram:BasisAmount",
    "op": "set",
    "value": "1.234"
+  },
+  {
+   "rule_id": "BR-DEX-04",
+   "syntax": "CII",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:GlobalID",
+   "op": "set",
+   "attribute": "schemeID",
+   "value": "3.0"
+  },
+  {
+   "rule_id": "BR-DEX-06",
+   "syntax": "CII",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:GlobalID",
+   "op": "set",
+   "attribute": "schemeID",
+   "value": "3.0"
+  },
+  {
+   "rule_id": "BR-DEX-07",
+   "syntax": "CII",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication/ram:URIID",
+   "op": "set",
+   "attribute": "schemeID",
+   "value": "3.0",
+   "collateral": [
+    "BR-CL-25"
+   ]
   },
   {
    "rule_id": "BR-E-01",
@@ -1700,8 +1792,8 @@
   {
    "rule_id": "BR-IC-02",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode",
    "op": "set",
    "value": "K",
    "collateral": [
@@ -1950,7 +2042,7 @@
   {
    "rule_id": "BR-S-01",
    "syntax": "CII",
-   "base": "standard/01.02a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode",
    "op": "set",
    "value": "L"
@@ -1958,7 +2050,7 @@
   {
    "rule_id": "BR-S-02",
    "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration",
    "op": "delete",
    "collateral": [
@@ -2067,10 +2159,22 @@
   {
    "rule_id": "BR-TMP-7",
    "syntax": "CII",
-   "base": "standard/01.02a-INVOICE_uncefact.xml",
+   "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString",
    "op": "delete",
    "attribute": "format"
+  },
+  {
+   "rule_id": "BR-TMP-CVD-01",
+   "syntax": "CII",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_uncefact.xml",
+   "path": "rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification[2]/ram:ClassCode",
+   "op": "set",
+   "attribute": "listID",
+   "value": "M1",
+   "collateral": [
+    "BR-CL-13"
+   ]
   },
   {
    "rule_id": "BR-Z-01",
@@ -2256,22 +2360,22 @@
   {
    "rule_id": "BR-14",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount",
    "op": "delete",
    "collateral": [
     "BR-CO-15",
-    "BR-CO-16"
+    "BR-DEX-09"
    ]
   },
   {
    "rule_id": "BR-15",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:LegalMonetaryTotal/cbc:PayableAmount",
    "op": "delete",
    "collateral": [
-    "BR-CO-16"
+    "BR-DEX-09"
    ],
    "caught_by_schema": true
   },
@@ -2599,7 +2703,7 @@
   {
    "rule_id": "BR-65",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:InvoiceLine[1]/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode",
    "op": "delete",
    "attribute": "listID"
@@ -2912,7 +3016,7 @@
   {
    "rule_id": "BR-CL-13",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:InvoiceLine[1]/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode",
    "op": "set",
    "attribute": "listID",
@@ -3398,6 +3502,63 @@
    ]
   },
   {
+   "rule_id": "BR-DE-CVD-01",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:ContractDocumentReference",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DE-CVD-02",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:OriginatorDocumentReference",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DE-CVD-03",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:AdditionalItemProperty[1]",
+   "op": "delete",
+   "collateral": [
+    "BR-DE-CVD-06-a"
+   ]
+  },
+  {
+   "rule_id": "BR-DE-CVD-04",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:CommodityClassification[1]/cbc:ItemClassificationCode",
+   "op": "set",
+   "value": "0.9"
+  },
+  {
+   "rule_id": "BR-DE-CVD-05",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:AdditionalItemProperty[1]/cbc:Value",
+   "op": "set",
+   "value": "0.9"
+  },
+  {
+   "rule_id": "BR-DE-CVD-06-a",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:AdditionalItemProperty[1]",
+   "op": "duplicate"
+  },
+  {
+   "rule_id": "BR-DE-CVD-06-b",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:CommodityClassification[1]",
+   "op": "delete",
+   "collateral": [
+    "BR-DE-CVD-03"
+   ]
+  },
+  {
    "rule_id": "BR-DE-TMP-32",
    "syntax": "UBL",
    "base": "extension/04.01a-INVOICE_ubl.xml",
@@ -3508,13 +3669,13 @@
   {
    "rule_id": "BR-DEC-14",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount",
    "op": "set",
    "value": "1.234",
    "collateral": [
     "BR-CO-15",
-    "BR-CO-16",
+    "BR-DEX-09",
     "UBL-DT-01"
    ]
   },
@@ -3545,12 +3706,12 @@
   {
    "rule_id": "BR-DEC-18",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:LegalMonetaryTotal/cbc:PayableAmount",
    "op": "set",
    "value": "1.234",
    "collateral": [
-    "BR-CO-16",
+    "BR-DEX-09",
     "UBL-DT-01"
    ]
   },
@@ -3581,7 +3742,7 @@
   {
    "rule_id": "BR-DEC-23",
    "syntax": "UBL",
-   "base": "standard/01.01a-INVOICE_ubl.xml",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
    "path": "cac:InvoiceLine[1]/cbc:LineExtensionAmount",
    "op": "set",
    "value": "1.234",
@@ -3682,12 +3843,55 @@
   {
    "rule_id": "BR-DEX-09",
    "syntax": "UBL",
-   "base": "extension/04.01a-INVOICE_ubl.xml",
-   "path": "cac:LegalMonetaryTotal/cbc:PrepaidAmount",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DEX-10",
+   "syntax": "UBL",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]/cbc:ID",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DEX-11",
+   "syntax": "UBL",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]/cbc:PaidAmount",
    "op": "delete",
    "collateral": [
-    "BR-CO-16"
+    "BR-DEX-09",
+    "BR-DEX-14"
    ]
+  },
+  {
+   "rule_id": "BR-DEX-12",
+   "syntax": "UBL",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]/cbc:InstructionID",
+   "op": "delete"
+  },
+  {
+   "rule_id": "BR-DEX-13",
+   "syntax": "UBL",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]/cbc:PaidAmount",
+   "op": "set",
+   "value": "1.234",
+   "collateral": [
+    "BR-DEX-09",
+    "UBL-DT-01"
+   ]
+  },
+  {
+   "rule_id": "BR-DEX-14",
+   "syntax": "UBL",
+   "base": "extension/05.01a-INVOICE_ubl.xml",
+   "path": "cac:PrepaidPayment[1]/cbc:PaidAmount",
+   "op": "set",
+   "attribute": "currencyID",
+   "value": ""
   },
   {
    "rule_id": "BR-E-01",
@@ -4240,6 +4444,18 @@
    "caught_by_schema": true
   },
   {
+   "rule_id": "BR-TMP-CVD-01",
+   "syntax": "UBL",
+   "base": "technical-cases/cvd/02.01a-cvd_INVOICE_ubl.xml",
+   "path": "cac:InvoiceLine[1]/cac:Item/cac:CommodityClassification[2]/cbc:ItemClassificationCode",
+   "op": "set",
+   "attribute": "listID",
+   "value": "M1",
+   "collateral": [
+    "BR-CL-13"
+   ]
+  },
+  {
    "rule_id": "BR-Z-01",
    "syntax": "UBL",
    "base": "standard/03.06a-INVOICE_ubl.xml",
@@ -4463,73 +4679,13 @@
    "reason": "no single edit breaches it"
   },
   {
-   "rule_id": "BR-DE-CVD-01",
-   "syntax": "CII",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-02",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-03",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-04",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-05",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-06-a",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-06-b",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
    "rule_id": "BR-DEX-01",
    "syntax": "CII",
    "shape": "other",
    "reason": "no reference message reaches its context"
   },
   {
-   "rule_id": "BR-DEX-04",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
    "rule_id": "BR-DEX-05",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-06",
-   "syntax": "CII",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-07",
    "syntax": "CII",
    "shape": "other",
    "reason": "no reference message reaches its context"
@@ -4544,7 +4700,7 @@
    "rule_id": "BR-DEX-15",
    "syntax": "CII",
    "shape": "presence",
-   "reason": "no reference message reaches its context"
+   "reason": "no single edit breaches it"
   },
   {
    "rule_id": "BR-G-03",
@@ -4586,12 +4742,6 @@
    "rule_id": "BR-S-04",
    "syntax": "CII",
    "shape": "code-list",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-TMP-CVD-01",
-   "syntax": "CII",
-   "shape": "other",
    "reason": "no reference message reaches its context"
   },
   {
@@ -4775,48 +4925,6 @@
    "reason": "no single edit breaches it"
   },
   {
-   "rule_id": "BR-DE-CVD-01",
-   "syntax": "UBL",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-02",
-   "syntax": "UBL",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-03",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-04",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-05",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-06-a",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DE-CVD-06-b",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
    "rule_id": "BR-DEC-13",
    "syntax": "UBL",
    "shape": "comparison",
@@ -4848,36 +4956,6 @@
   },
   {
    "rule_id": "BR-DEX-08",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-10",
-   "syntax": "UBL",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-11",
-   "syntax": "UBL",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-12",
-   "syntax": "UBL",
-   "shape": "presence",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-13",
-   "syntax": "UBL",
-   "shape": "comparison",
-   "reason": "no reference message reaches its context"
-  },
-  {
-   "rule_id": "BR-DEX-14",
    "syntax": "UBL",
    "shape": "other",
    "reason": "no reference message reaches its context"
@@ -4917,12 +4995,6 @@
    "syntax": "UBL",
    "shape": "presence",
    "reason": "no single edit breaches it"
-  },
-  {
-   "rule_id": "BR-TMP-CVD-01",
-   "syntax": "UBL",
-   "shape": "other",
-   "reason": "no reference message reaches its context"
   },
   {
    "rule_id": "BR-Z-03",
