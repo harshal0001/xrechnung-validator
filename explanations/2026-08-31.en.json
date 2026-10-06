@@ -274,6 +274,20 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
     },
+    "BR-DE-18": {
+      "what": "The cash discount (Skonto) information in Payment terms (BT-20) is not in the required form: each entry starts with #, the segments are separated by # and the line ends with #; the first segment is SKONTO, the second TAGE=n, the third PROZENT=n, with the percentage unsigned and written with a point and two decimal places; everything in capitals, no extra whitespace, and a line break after each complete entry.",
+      "why": "BT-20 is free text describing the payment terms. Discount terms inside it have to be machine-readable, for example #SKONTO#TAGE=14#PROZENT=2.25# If the discount applies to only part of the amount due, a fourth segment gives the base: #SKONTO#TAGE=14#PROZENT=2.25#BASISBETRAG=357.93# Free text must not contain a #. Only lines that start with # are checked.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-18; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": [
+        "523f32d2bc0670f4",
+        "beb80a312787e4b4"
+      ],
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-19": {
       "what": "The payment means (BT-81) asks for SEPA with code 58, but the payment account identifier (BT-84) does not hold a correct IBAN.",
       "why": "BT-84 identifies the account the payment is to be made to; within SEPA that is an IBAN. The check removes spaces, then tests the IBAN's format and its check digits.",
@@ -315,6 +329,20 @@
         "DRAFT, unreviewed. Mirrors the German entry for BR-DE-21; its review_notes carry the sourcing."
       ],
       "rule_text_digest": "3583c03d92e7897d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-22": {
+      "what": "The filename attributes of the embedded documents (EmbeddedDocumentBinaryObject) are not all unique.",
+      "why": "Filenames of supporting documents (BG-24) must be unique within an invoice, and the file extension counts as part of the name. KoSIT's specification says the comparison ignores upper and lower case; the check itself does not.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-22; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": [
+        "442cb9278b2fdcee",
+        "84b6b60ad408378a"
+      ],
       "reviewed_digest": null,
       "reviewed_by": null,
       "reviewed_at": null
@@ -384,6 +412,20 @@
       "reviewed_digest": "9a2b22710797d806",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-26": {
+      "what": "The invoice type code (BT-3) is 384 (Corrected invoice), but there is no PRECEDING INVOICE REFERENCE (BG-3).",
+      "why": "BG-3 gives information about an earlier invoice that is being corrected or credited, and is to be used when an earlier invoice is corrected.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-26; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": [
+        "8073b2e1d3a57f2b",
+        "cd635571ad927b44"
+      ],
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-27": {
       "what": "The seller contact's telephone number (BT-42) does not contain at least three digits.",
