@@ -51,7 +51,10 @@
       "review_notes": [
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
       ],
-      "rule_text_digest": "3d702cca17105faa",
+      "rule_text_digest": [
+        "3d702cca17105faa",
+        "a496599a2086b712"
+      ],
       "reviewed_digest": "3d702cca17105faa",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
@@ -73,7 +76,10 @@
       "review_notes": [
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 5; BG-25 is the rule's own term. Not yet reviewed in English."
       ],
-      "rule_text_digest": "a5ece4a512a32aae",
+      "rule_text_digest": [
+        "1742295b101482e1",
+        "a5ece4a512a32aae"
+      ],
       "reviewed_digest": "a5ece4a512a32aae",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
@@ -117,7 +123,10 @@
       "review_notes": [
         "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [CL] S, AE, Z — codes only, per the German reviewer decision. Not yet reviewed in English."
       ],
-      "rule_text_digest": "eb45453974dcb143",
+      "rule_text_digest": [
+        "33540495a99d367b",
+        "eb45453974dcb143"
+      ],
       "reviewed_digest": "eb45453974dcb143",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"

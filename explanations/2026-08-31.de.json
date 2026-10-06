@@ -47,7 +47,10 @@
         "Terminology: Rechnungssteller → Verkäufer (spec term).",
         "Sourced [UStG] Nr. 1: 'den vollständigen Namen und die vollständige Anschrift des leistenden Unternehmers und des Leistungsempfängers'."
       ],
-      "rule_text_digest": "3d702cca17105faa",
+      "rule_text_digest": [
+        "3d702cca17105faa",
+        "a496599a2086b712"
+      ],
       "reviewed_digest": "3d702cca17105faa",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
@@ -71,7 +74,10 @@
         "\"Häufige Ursache\" is speculation — keep only if a reviewer with AP experience agrees it is common.",
         "Sourced [UStG] Nr. 5 for the statutory duty; BG-25 is the rule's own term. Cut: 'Häufige Ursache: Export aus dem Vorsystem' — folklore, no source."
       ],
-      "rule_text_digest": "a5ece4a512a32aae",
+      "rule_text_digest": [
+        "1742295b101482e1",
+        "a5ece4a512a32aae"
+      ],
       "reviewed_digest": "a5ece4a512a32aae",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
@@ -120,7 +126,10 @@
         "Sourced: codes S, AE, Z present in the UNCL 5305 list [CL]. The German glosses are the UNCL 5305 category meanings; reviewer may prefer the spec's exact wording.",
         "Reviewer decision 2026-09-08: glosses (Regelsatz, Reverse Charge, Nullsatz) removed — the codes are verified present in the compiled list [CL]; their meanings were not fetched from an official document this session. Codes only."
       ],
-      "rule_text_digest": "eb45453974dcb143",
+      "rule_text_digest": [
+        "33540495a99d367b",
+        "eb45453974dcb143"
+      ],
       "reviewed_digest": "eb45453974dcb143",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"

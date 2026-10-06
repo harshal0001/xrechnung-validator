@@ -32,6 +32,8 @@ from xrv.explain.catalogue import (  # noqa: E402
     DEFAULT_LANGUAGE,
     LANGUAGES,
     Catalogue,
+    as_written,
+    digests,
     rule_text_digest,
 )
 from xrv.rules import default_registry  # noqa: E402
@@ -44,21 +46,32 @@ SVRL_NS = "http://purl.oclc.org/dsdl/svrl"
 PRIORITY = ("BR-DE-", "BR-CO-", "BR-CL-", "BR-S-", "BR-E-", "BR-Z-", "BR-AE-", "BR-G-", "BR-")
 
 
-def rule_texts(ruleset) -> dict[str, str]:
-    """Every rule id in the shipped stylesheets, with its normative text."""
-    found: dict[str, str] = {}
+def rule_texts(ruleset) -> dict[str, tuple[str, ...]]:
+    """Every rule id in the shipped stylesheets, with each wording of its text.
+
+    Usually one. The UBL and CII stylesheets are written separately and do not
+    always agree on a rule's wording, so a rule that fires in both can reach the
+    service with two different texts — and an explanation has to be approved for
+    each. Wordings that differ only in whitespace or case are one wording.
+    """
+    found: dict[str, dict[str, str]] = {}
     for key in ruleset.paths:
         if not key.startswith("xslt_"):
             continue
         tree = etree.parse(str(ruleset.path(key)))
         for assertion in tree.findall(f".//{{{SVRL_NS}}}failed-assert"):
             rule_id = assertion.get("id")
-            if not rule_id or rule_id in found:
+            if not rule_id:
                 continue
             node = assertion.find(f"{{{SVRL_NS}}}text")
             text = " ".join("".join(node.itertext()).split()) if node is not None else ""
-            found[rule_id] = re.sub(rf"^\[{re.escape(rule_id)}\]\s*-?\s*", "", text)
-    return found
+            text = re.sub(rf"^\[{re.escape(rule_id)}\]\s*-?\s*", "", text)
+            found.setdefault(rule_id, {}).setdefault(rule_text_digest(text), text)
+    return {rule_id: tuple(wordings.values()) for rule_id, wordings in found.items()}
+
+
+def current_digests(wordings: tuple[str, ...]) -> frozenset[str]:
+    return frozenset(rule_text_digest(text) for text in wordings)
 
 
 def priority_of(rule_id: str) -> int:
@@ -72,7 +85,7 @@ def catalogue_path(version: str, language: str) -> Path:
     return ROOT / "explanations" / f"{version}.{language}.json"
 
 
-def report_missing(texts: dict[str, str], catalogue: Catalogue, limit: int) -> int:
+def report_missing(texts: dict[str, tuple[str, ...]], catalogue: Catalogue, limit: int) -> int:
     missing = sorted(
         (r for r in texts if r not in catalogue.entries),
         key=lambda r: (priority_of(r), r),
@@ -81,27 +94,36 @@ def report_missing(texts: dict[str, str], catalogue: Catalogue, limit: int) -> i
     print(f"  {len(catalogue.entries)} written, {len(missing)} of {len(texts)} rules without one")
     print(f"  of those, {len(business)} are business rules worth explaining\n")
     for rule_id in business[:limit]:
-        print(f"  {rule_id:<16} {texts[rule_id][:88]}")
+        print(f"  {rule_id:<16} {texts[rule_id][0][:88]}")
     if len(business) > limit:
         print(f"  … and {len(business) - limit} more")
     return 0
 
 
-def report_check(texts: dict[str, str], catalogue: Catalogue) -> int:
+def report_check(texts: dict[str, tuple[str, ...]], catalogue: Catalogue) -> int:
     unknown = sorted(set(catalogue.entries) - set(texts))
     drifted = sorted(
         rule_id
         for rule_id, entry in catalogue.entries.items()
-        if rule_id in texts and not entry.matches(texts[rule_id])
+        if rule_id in texts and entry.rule_text_digests != current_digests(texts[rule_id])
     )
     unreviewed = sorted(
         rule_id
         for rule_id, entry in catalogue.entries.items()
-        if rule_id in texts and not entry.is_reviewed_for(texts[rule_id])
+        if not entry.reviewed_digests & entry.rule_text_digests
     )
+    partly = catalogue.partly_reviewed
 
     print(f"  entries      {len(catalogue.entries)}")
     print(f"  reviewed     {catalogue.reviewed_count}")
+    print(f"  in part      {len(partly)}")
+    for rule_id in partly:
+        entry = catalogue.entries[rule_id]
+        approved = len(entry.reviewed_digests & entry.rule_text_digests)
+        print(
+            f"                 {rule_id} — approved for {approved} of "
+            f"{len(entry.rule_text_digests)} wordings, withheld for the rest"
+        )
     print(f"  unreviewed   {len(unreviewed)}")
     for rule_id in unreviewed[:15]:
         print(f"                 {rule_id}")
@@ -111,35 +133,38 @@ def report_check(texts: dict[str, str], catalogue: Catalogue) -> int:
         for rule_id in unknown:
             print(f"    {rule_id}")
     if drifted:
-        print(f"\n  {len(drifted)} explanations were written against text that has since changed:")
+        print(f"\n  {len(drifted)} explanations do not match the rule text now in force:")
         for rule_id in drifted:
             print(f"    {rule_id}")
-        print("  Re-read these before running --refresh; the rule may now mean something else.")
+        print("  Either the text changed or a wording was never recorded. Re-read these")
+        print("  before running --refresh; the rule may now mean something else.")
 
     return 1 if (unknown or drifted) else 0
 
 
-def refresh(path: Path, texts: dict[str, str]) -> int:
-    """Rewrite `rule_text_digest` to the rule text now in force.
+def refresh(path: Path, texts: dict[str, tuple[str, ...]]) -> int:
+    """Rewrite `rule_text_digest` to every wording of the rule now in force.
 
     Deliberately never touches `reviewed_digest`. That is what makes a KoSIT
-    rewording un-review an entry: the two digests stop matching, and the entry is
-    withheld until a person reads the new text and approves it again. Refreshing
-    both would silently launder an unreviewed change into production.
+    rewording un-review an entry: the approval is for a digest the rule no
+    longer has, and the entry is withheld until a person reads the new text and
+    approves it again. The same holds for a wording that was never recorded —
+    recording it here does not approve it. Refreshing both would silently
+    launder an unreviewed change into production.
     """
     raw = json.loads(path.read_text(encoding="utf-8"))
     changed = []
     for rule_id, body in raw["entries"].items():
         if rule_id not in texts:
             continue
-        digest = rule_text_digest(texts[rule_id])
-        if body.get("rule_text_digest") != digest:
-            body["rule_text_digest"] = digest
+        current = current_digests(texts[rule_id])
+        if digests(body.get("rule_text_digest")) != current:
+            body["rule_text_digest"] = as_written(current)
             changed.append(rule_id)
     path.write_text(json.dumps(raw, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"  refreshed {len(changed)} digest(s)" + (f": {', '.join(changed)}" if changed else ""))
     if changed:
-        print("  reviewed_digest left untouched — those entries are now un-reviewed.")
+        print("  reviewed_digest left untouched — re-read whatever is no longer approved in full.")
     return 0
 
 

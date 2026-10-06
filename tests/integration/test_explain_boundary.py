@@ -177,8 +177,8 @@ class TestCatalogueProviderInPractice:
             assert isinstance(rule_id, str)
             assert isinstance(entry.what, str)
             assert isinstance(entry.why, str)
-            assert isinstance(entry.rule_text_digest, str)
-            assert entry.reviewed_digest is None or isinstance(entry.reviewed_digest, str)
+            for digest in entry.rule_text_digests | entry.reviewed_digests:
+                assert isinstance(digest, str)
 
     def test_findings_without_an_entry_are_returned_unchanged(
         self, findings: tuple[Finding, ...], catalogue
