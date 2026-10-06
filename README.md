@@ -94,8 +94,8 @@ measured.
 | Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,589 backend, 21 frontend |
-| Coverage | **97.8%** of lines and branches in `src/xrv`; CI fails below 95% |
+| Tests | 2,593 backend, 21 frontend |
+| Coverage | **97.7%** of lines and branches in `src/xrv`, as CI measures it; it fails below 95% |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
