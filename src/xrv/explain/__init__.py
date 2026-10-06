@@ -13,6 +13,8 @@ from xrv.explain.catalogue import (
     CatalogueProvider,
     Entry,
     LanguageNotAvailableError,
+    as_written,
+    digests,
     rule_text_digest,
 )
 from xrv.explain.port import (
@@ -35,5 +37,7 @@ __all__ = [
     "ExplanationProvider",
     "LanguageNotAvailableError",
     "NullProvider",
+    "as_written",
+    "digests",
     "rule_text_digest",
 ]

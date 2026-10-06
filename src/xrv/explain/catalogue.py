@@ -16,6 +16,13 @@ Every entry is split in two, and the split is the point:
 Serving is gated on `reviewed_digest` matching the rule text now in force. That
 is stronger than a boolean: if KoSIT rewords a rule, the entry un-reviews itself
 rather than leaving a stale approval standing over text nobody checked.
+
+A rule does not always have one text. The UBL and CII stylesheets are written
+separately and word some rules differently — a missing "(BG-5)", a full stop, or
+German in one and English in the other. Each wording has its own digest, and an
+approval is for a wording: an entry approved against the CII text is served to a
+CII invoice and withheld from a UBL one until someone has read that text too.
+So both digest fields hold one digest or several.
 """
 
 from __future__ import annotations
@@ -58,6 +65,28 @@ def rule_text_digest(rule_text: str) -> str:
     return hashlib.sha256(normalised.encode("utf-8")).hexdigest()[:16]
 
 
+def digests(value: object) -> frozenset[str]:
+    """Digests as a catalogue file writes them: one string, a list, or nothing.
+
+    A single string stays a single string in the file, so a rule with one
+    wording — nearly all of them — reads as it always did.
+    """
+    if value is None or value == "":
+        return frozenset()
+    if isinstance(value, str):
+        return frozenset({value})
+    if isinstance(value, list) and all(isinstance(item, str) and item for item in value):
+        return frozenset(value)
+    raise TypeError(f"a digest is a string or a list of strings, not {value!r}")
+
+
+def as_written(found: frozenset[str]) -> str | list[str] | None:
+    """The inverse of `digests`: what to put in the file for this set."""
+    if not found:
+        return None
+    return next(iter(found)) if len(found) == 1 else sorted(found)
+
+
 @dataclass(frozen=True, slots=True)
 class Entry:
     """One rule's explanation, its provenance, and its review state."""
@@ -66,10 +95,10 @@ class Entry:
     what: str
     #: Editorial context. Never claimed as grounded.
     why: str
-    #: Digest of the rule text this entry was written against.
-    rule_text_digest: str
-    #: Digest the reviewer approved. None until someone has read it.
-    reviewed_digest: str | None = None
+    #: Digest of every wording of the rule this entry was written against.
+    rule_text_digests: frozenset[str]
+    #: The wordings a reviewer approved it for. Empty until someone has read it.
+    reviewed_digests: frozenset[str] = frozenset()
     reviewed_by: str | None = None
     reviewed_at: str | None = None
     #: Notes from whoever drafted or migrated the entry. Never served.
@@ -77,17 +106,26 @@ class Entry:
 
     def matches(self, rule_text: str) -> bool:
         """Whether this entry was written against the text now in force."""
-        return self.rule_text_digest == rule_text_digest(rule_text)
+        return rule_text_digest(rule_text) in self.rule_text_digests
 
     def is_reviewed_for(self, rule_text: str) -> bool:
         """Whether a person approved this entry *for this exact text*.
 
         Both halves matter. An unreviewed entry has no approval; a reviewed one
-        whose rule has since been reworded has approval for something else.
+        whose rule has since been reworded has approval for something else. So
+        does one approved against the other syntax's wording of the same rule.
         """
-        return self.reviewed_digest is not None and self.reviewed_digest == rule_text_digest(
-            rule_text
-        )
+        return rule_text_digest(rule_text) in self.reviewed_digests
+
+    @property
+    def approved_in_full(self) -> bool:
+        """Approved for every wording of the rule, so served wherever it fires."""
+        return bool(self.rule_text_digests) and self.rule_text_digests <= self.reviewed_digests
+
+    @property
+    def approved_in_part(self) -> bool:
+        """Approved for some wordings and withheld for the rest."""
+        return bool(self.rule_text_digests & self.reviewed_digests) and not self.approved_in_full
 
 
 @dataclass(frozen=True)
@@ -123,8 +161,8 @@ class Catalogue:
                 rule_id: Entry(
                     what=body["what"],
                     why=body.get("why") or "",
-                    rule_text_digest=body.get("rule_text_digest", ""),
-                    reviewed_digest=body.get("reviewed_digest"),
+                    rule_text_digests=digests(body.get("rule_text_digest")),
+                    reviewed_digests=digests(body.get("reviewed_digest")),
                     reviewed_by=body.get("reviewed_by"),
                     reviewed_at=body.get("reviewed_at"),
                     review_notes=tuple(body.get("review_notes") or ()),
@@ -156,12 +194,17 @@ class Catalogue:
 
     @property
     def reviewed_count(self) -> int:
-        """Entries a person approved for the text they were written against."""
-        return sum(
-            1
-            for entry in self.entries.values()
-            if entry.reviewed_digest is not None and entry.reviewed_digest == entry.rule_text_digest
-        )
+        """Entries a person approved for every wording they were written against."""
+        return sum(1 for entry in self.entries.values() if entry.approved_in_full)
+
+    @property
+    def partly_reviewed(self) -> tuple[str, ...]:
+        """Rules whose entry is served for one wording and withheld for another.
+
+        Worth its own name because nothing else shows it: the entry looks
+        reviewed in the file and explains nothing to half the invoices.
+        """
+        return tuple(sorted(r for r, entry in self.entries.items() if entry.approved_in_part))
 
 
 @dataclass(frozen=True)

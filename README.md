@@ -59,7 +59,8 @@ and nothing else** — no document, no reference to one, no way to ask for it.
   Tested the same way: every value in a real invoice is searched for in every line.
 - **Review expires.** Each entry stores the digest of the rule text it was written
   against and serves only while that matches. Reword a rule upstream and the entry
-  un-reviews itself.
+  un-reviews itself. Where the UBL and CII stylesheets word a rule differently, each
+  wording has its own digest and needs its own approval.
 - **Accuracy measured in both directions.** Zero false positives is reachable by
   reporting nothing; proving rules fire is reachable by reporting everything. So the
   mutations are derived, not hand-picked: each rule's context and test are read out
@@ -80,11 +81,11 @@ measured.
 | …of which nothing else fires | 245 mutations; the rest record what fires with them |
 | Business rules no single edit reaches | 35, each listed with why |
 | Rules firing that should not | **0** |
-| Explanations reviewed by a person | **78 of 90** (39 of 45 DE, 39 of 45 EN) — the 12 drafts are withheld until reviewed |
+| Explanations reviewed by a person | **72 of 90** for every wording of their rule; 6 for one syntax's wording only; 12 drafts — whatever is not approved is withheld |
 | Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,573 backend, 21 frontend |
+| Tests | 2,585 backend, 21 frontend |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---

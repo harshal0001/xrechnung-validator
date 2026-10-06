@@ -37,6 +37,7 @@ XSD = "{http://www.w3.org/2001/XMLSchema}"
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
+from xrv.explain.catalogue import digests as stored_digests  # noqa: E402
 from xrv.explain.catalogue import rule_text_digest as _xrv_digest  # noqa: E402
 
 SVRL = "http://purl.oclc.org/dsdl/svrl"
@@ -251,8 +252,9 @@ def render(
         "never against memory. `why` is editorial and needs a native-speaker read.\n"
     )
     w("| Symbol | Meaning |\n|---|---|")
-    w("| ✅ | digest matches current rule text |")
-    w("| ❌ | digest mismatch — text changed, or your normalisation differs |")
+    w("| ✅ | this wording is recorded and approved — the entry is served for it |")
+    w("| ⏳ | this wording is recorded but not approved — the entry is withheld for it |")
+    w("| ❌ | digest mismatch — text changed, or a wording was never recorded |")
     w("| ⚠️ | rule id not found in ruleset |")
     w("| ✂️ | sentence looks editorial — belongs in `why` |")
     w("| 🔤 | terminology not the spec's (Verkäufer / Käufer) |\n")
@@ -270,21 +272,39 @@ def render(
                 "in this version.\n"
             )
         else:
-            for i, a in enumerate(asserts, 1):
-                label = f"Official text {i}/{len(asserts)}" if len(asserts) > 1 else "Official text"
+            # A wording is what an approval is for. Two assertions whose text
+            # differs only in whitespace or case are one wording, and are shown
+            # and judged once.
+            wordings: dict[str, Assertion] = {}
+            for a in asserts:
+                wordings.setdefault(digest(a.text), a)
+            recorded = stored_digests(entry.get("rule_text_digest"))
+            approved = stored_digests(entry.get("reviewed_digest"))
+
+            for i, (text_digest, a) in enumerate(wordings.items(), 1):
+                label = (
+                    f"Official text {i}/{len(wordings)}" if len(wordings) > 1 else "Official text"
+                )
                 flag = f" · flag `{a.flag}`" if a.flag else ""
                 w(f"**{label}**{flag} · `{a.source}`\n")
                 w(f"> {a.text}\n")
-            if len(asserts) > 1:
-                w("_Text differs between syntaxes — make sure `what` holds for both._\n")
+                if text_digest not in recorded:
+                    w(f"❌ digest `{text_digest}` — this wording is not recorded in the entry\n")
+                elif text_digest in approved:
+                    w(f"✅ digest `{text_digest}`\n")
+                else:
+                    w(f"⏳ digest `{text_digest}` — not approved\n")
+            if len(wordings) > 1:
+                w(
+                    "_Text differs between syntaxes. `what` has to hold for each wording, and "
+                    "each needs its own approval._\n"
+                )
 
-            current = [digest(a.text) for a in asserts]
-            stored = entry.get("rule_text_digest")
-            if stored in current:
-                w(f"✅ digest `{stored}`\n")
-            else:
+            if recorded != set(wordings):
                 problems += 1
-                w(f"❌ digest stored `{stored}`, current `{'`, `'.join(current)}`\n")
+                stale = sorted(recorded - set(wordings))
+                if stale:
+                    w(f"❌ recorded for text the rule no longer has: `{'`, `'.join(stale)}`\n")
 
         w(f"**what** — {entry['what']}\n")
         raw_what = entries[rule_id].get("explanation", entry["what"])
@@ -458,7 +478,7 @@ def main() -> None:
             "_note": (
                 "`what` must trace to the official rule text and is the only field the fidelity "
                 "eval checks. `why` is editorial context, human-approved, not claimed as grounded. "
-                "An entry is served only when reviewed_digest == rule_text_digest."
+                "An entry is served for a rule text only when reviewed_digest holds its digest."
             ),
             "entries": {rid: as_v2(e) for rid, e in data["entries"].items()},
         }
