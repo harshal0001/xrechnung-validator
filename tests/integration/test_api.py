@@ -15,6 +15,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from xrv.api import app
+from xrv.api.service import NATIONAL_RULES_NOT_APPLIED
 from xrv.ingest import MAX_BYTES
 
 UBL = "01.01a-INVOICE_ubl.xml"
@@ -60,6 +61,24 @@ class TestValidating:
         explain why a rule is only a warning here."""
         body = upload(client, (corpus / name).read_bytes()).json()
         assert "XRechnung" in body["scenario"]
+        assert NATIONAL_RULES_NOT_APPLIED not in {f["rule_id"] for f in body["findings"]}
+
+    @pytest.mark.parametrize("language", ["de", "en"])
+    def test_a_plain_en16931_invoice_is_told_what_it_was_not_checked_against(
+        self, client: TestClient, corpus: Path, language: str
+    ) -> None:
+        """No XRechnung findings because the rules passed and no XRechnung
+        findings because they never ran look identical in a list of findings."""
+        xrechnung = (corpus / UBL).read_bytes()
+        identifier = xrechnung.split(b"<cbc:CustomizationID>")[1].split(b"<")[0]
+        plain = xrechnung.replace(identifier, b"urn:cen.eu:en16931:2017")
+
+        body = upload(client, plain, lang=language).json()
+        (notice,) = [f for f in body["findings"] if f["rule_id"] == NATIONAL_RULES_NOT_APPLIED]
+        assert notice["severity"] == "info"
+        assert body["scenario"] in notice["rule_text"]
+        assert "XRechnung" in notice["rule_text"]
+        assert not [f for f in body["findings"] if f["severity"] in {"fatal", "error"}]
 
     def test_a_broken_invoice_reports_the_rule(self, client: TestClient, corpus: Path) -> None:
         cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"

@@ -97,6 +97,17 @@ MESSAGES: dict[str, dict[str, str]] = {
         "satisfy the German e-invoicing mandate. Business rules were not evaluated, "
         "because most would fail on data the profile does not claim to contain.",
     },
+    # Not an error. Findings that are absent because a rule set did not apply
+    # read exactly like findings that are absent because the document passed it,
+    # so the report says which it was.
+    "national_rules_not_applied": {
+        "de": "Dieses Dokument weist sich als „{scenario}“ aus, nicht als XRechnung. "
+        "Geprüft wurden die Regeln der EN 16931; die zusätzlichen Regeln der "
+        "XRechnung wurden nicht angewendet.",
+        "en": "This document identifies itself as “{scenario}”, not as XRechnung. It was "
+        "checked against the EN 16931 rules; the additional XRechnung rules were "
+        "not applied.",
+    },
 }
 
 
