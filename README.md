@@ -57,7 +57,10 @@ and nothing else** — no document, no reference to one, no way to ask for it.
   against and serves only while that matches. Reword a rule upstream and the entry
   un-reviews itself.
 - **Accuracy measured in both directions.** Zero false positives is reachable by
-  reporting nothing; proving rules fire is reachable by reporting everything.
+  reporting nothing; proving rules fire is reachable by reporting everything. So the
+  mutations are derived, not hand-picked: each rule's context and test are read out
+  of the stylesheets, single edits to the reference invoices are tried, and the
+  validator confirms which edit makes which rule fire — and what fires with it.
 
 ---
 
@@ -69,13 +72,15 @@ measured.
 | | |
 |---|---|
 | False positives on 66 reference invoices | **0** — structural and business rules |
-| Business rules proven to fire | **25** across 38 mutations, both syntaxes |
+| Business rules proven to fire | **235 of 284** — 449 mutations derived from the rule set, both syntaxes |
+| …of which nothing else fires | 230 mutations; the rest record what fires with them |
+| Business rules no single edit reaches | 49, each listed with why |
 | Rules firing that should not | **0** |
 | Explanations reviewed by a person | **78 of 78** (39 DE, 39 EN) |
 | Validation latency | 27 ms/document warm |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 493 backend, 21 frontend |
+| Tests | 2,409 backend, 21 frontend |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
