@@ -265,6 +265,17 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
     },
+    "BR-DE-19": {
+      "what": "The payment means (BT-81) asks for SEPA with code 58, but the payment account identifier (BT-84) does not hold a correct IBAN.",
+      "why": "BT-84 identifies the account the payment is to be made to; within SEPA that is an IBAN. The check removes spaces, then tests the IBAN's format and its check digits.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-19; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "04994258bdd8e9c3",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-2": {
       "what": "The seller contact details (BG-6) are missing.",
       "why": "The group comprises the contact point (BT-41), its telephone number (BT-42) and its email address (BT-43); XRechnung requires each of these fields individually (BR-DE-5, BR-DE-6, BR-DE-7).",
@@ -276,6 +287,28 @@
       "reviewed_digest": "2d54658cceb72936",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
+    },
+    "BR-DE-20": {
+      "what": "The payment means (BT-81) asks for SEPA with code 59, but the debited account identifier (BT-91) does not hold a correct IBAN.",
+      "why": "BT-91 identifies the account the direct debit is to be taken from; within SEPA that is an IBAN. The check removes spaces, then tests the IBAN's format and its check digits.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-20; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "9930773972a5f7b0",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-21": {
+      "what": "The specification identifier (BT-24) does not match the identifier of the XRechnung standard.",
+      "why": "BT-24 names the specification — content, cardinalities and business rules — that the invoice declares it conforms to. The XRechnung identifiers in this rule set are: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-21; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "3583c03d92e7897d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-23-a": {
       "what": "The payment means (BT-81) is a credit transfer (code 30 or 58), but the CREDIT TRANSFER group (BG-17) is missing.",
@@ -342,6 +375,28 @@
       "reviewed_digest": "9a2b22710797d806",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-27": {
+      "what": "The seller contact's telephone number (BT-42) does not contain at least three digits.",
+      "why": "BT-42 is the telephone number of the contact person or contact point. BR-DE-6 is the rule that requires it to be present.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-27; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "fe100cbb0a9c58ea",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-28": {
+      "what": "The seller contact's email address (BT-43) does not meet the requirements: exactly one @ sign, flanked on both sides by at least two characters and not by a space or a full stop, and no full stop at the start or the end.",
+      "why": "BT-43 is an email address of the contact person or contact point. BR-DE-7 is the rule that requires it to be present.",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-28; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "dd45ea6508280a33",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-3": {
       "what": "The seller city (BT-37) is missing.",
@@ -441,6 +496,17 @@
       "reviewed_digest": "2a8dc0f18e7475ae",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-09"
+    },
+    "BR-DE-TMP-32": {
+      "what": "The invoice states the delivery or service date in none of the three places for it: Actual delivery date (BT-72), Invoicing period (BG-14), or an Invoice line period (BG-26) on every invoice line.",
+      "why": "BT-72 is the date the delivery was actually made or the service actually performed. BG-14 and BG-26 give the invoicing period for the invoice and for a line. German VAT law makes the time of the supply a mandatory part of an invoice (§ 14 (4) no. 6 UStG).",
+      "review_notes": [
+        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-TMP-32; its review_notes carry the sourcing."
+      ],
+      "rule_text_digest": "d5cc96c369437d11",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     }
   }
 }

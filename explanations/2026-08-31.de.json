@@ -298,6 +298,20 @@
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
     },
+    "BR-DE-19": {
+      "what": "Als Zahlungsmittel (BT-81) wird mit dem Code 58 SEPA gefordert, aber die Kennung des Kontos, auf das die Zahlung erfolgen soll (BT-84), enthält keine korrekte IBAN.",
+      "why": "BT-84 ist die Kennung des Kontos, auf das die Zahlung erfolgen soll: IBAN für Zahlungen im SEPA-Raum, Kontonummer oder IBAN im Falle von Auslandszahlungen. BT-81 gibt das erwartete oder genutzte Zahlungsmittel als Code an.",
+      "review_notes": [
+        "DRAFT, unreviewed. German wording: every term is from [L1] or [SEM] — 'korrekte IBAN', 'mit dem Code 58 SEPA als Zahlungsmittel gefordert' from the rule text; 'die Kennung des Kontos, auf das die Zahlung erfolgen soll' and the SEPA sentence in `why` from KoSIT's description of BT-84; 'das erwartete oder genutzte Zahlungsmittel' from BT-81.",
+        "[L1] Resolved against the compiled test: `not(PaymentMeansCode = '58') or xr:checkIBAN(...)`. The rule's context also matches code 30, but the test passes it unconditionally, so `what` names 58 only, as the text does.",
+        "[L1] What 'korrekt' means is in `xr:checkIBAN`: whitespace is removed, then the value must match `^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{0,30}$` and pass the ISO 7064 mod-97 check. The German says none of this: neither source has a German word for 'check digit', and writing 'Prüfziffer' would be ours. The English `why` does say it. Reviewer to decide whether the German should.",
+        "The stylesheet flags this rule `warning` ('soll'). The severity is shown beside the finding, so it is not restated in the text."
+      ],
+      "rule_text_digest": "04994258bdd8e9c3",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
     "BR-DE-2": {
       "what": "Die Kontaktdaten des Verkäufers (BG-6) fehlen.",
       "why": "Die Gruppe umfasst den Ansprechpartner (BT-41), seine Telefonnummer (BT-42) und seine E-Mail-Adresse (BT-43); XRechnung verlangt jedes dieser Felder einzeln (BR-DE-5, BR-DE-6, BR-DE-7).",
@@ -310,6 +324,33 @@
       "reviewed_digest": "2d54658cceb72936",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-20": {
+      "what": "Als Zahlungsmittel (BT-81) wird mit dem Code 59 SEPA gefordert, aber die Kennung des Kontos, von dem die Lastschrift erfolgen soll (BT-91), enthält keine korrekte IBAN.",
+      "why": "BT-91 ist die Kennung des Kontos, von dem die Lastschrift erfolgen soll: IBAN für Zahlungen im SEPA-Raum, Kontonummer oder IBAN im Falle von Auslandszahlungen. BT-81 gibt das erwartete oder genutzte Zahlungsmittel als Code an.",
+      "review_notes": [
+        "DRAFT, unreviewed. The direct-debit counterpart of BR-DE-19; see its notes for what 'korrekt' tests and why the German does not spell it out.",
+        "German wording: 'die Kennung des Kontos, von dem die Lastschrift erfolgen soll' is KoSIT's description of BT-91 [SEM], the phrasing already approved in BR-DE-25-a, BR-DE-30 and BR-DE-31. 'korrekte IBAN' and 'mit dem Code 59 SEPA als Zahlungsmittel gefordert' are the rule text [L1].",
+        "[L1] Compiled test: `not(PaymentMeansCode = '59') or xr:checkIBAN(PaymentMandate/PayerFinancialAccount/ID)`."
+      ],
+      "rule_text_digest": "9930773972a5f7b0",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-21": {
+      "what": "Die Kennung der Spezifikation (BT-24) entspricht syntaktisch nicht der Kennung des Standards XRechnung.",
+      "why": "BT-24 ist eine Kennung der Spezifikation, die das gesamte Regelwerk zum semantischen Inhalt, zu den Kardinalitäten und den Geschäftsregeln enthält, denen die in der Rechnung enthaltenen Daten entsprechen. Damit wird die Konformität zum jeweiligen Dokument erklärt. Kennungen des Standards XRechnung: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+      "review_notes": [
+        "DRAFT, unreviewed. German wording: 'syntaktisch der Kennung des Standards XRechnung entsprechen' is the rule text [L1]; 'Kennung der Spezifikation' and both `why` sentences are KoSIT's description of BT-24 [SEM], verbatim.",
+        "[L1] 'syntaktisch entsprechen' resolved against the compiled test: exact equality with one of three identifiers, `$XR-CIUS-ID`, `$XR-EXTENSION-ID`, `$XR-CVD-ID`. The three values in `why` are those variables evaluated for this rule set (major.minor 3.0, CVD 0.9), not typed from memory.",
+        "[SEM] KoSIT's description of BT-24 goes on to give `…xrechnung_1.2` as the identifier. That example is stale and is deliberately not quoted.",
+        "Worth knowing when reviewing: since the scenario work, a document whose BT-24 is none of the three is not recognised as XRechnung at all. One that says plain `urn:cen.eu:en16931:2017` is validated without the German rules and never reaches this rule; any other value is run through everything and trips it."
+      ],
+      "rule_text_digest": "3583c03d92e7897d",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-23-a": {
       "what": "Das Zahlungsmittel (BT-81) ist eine Überweisung (Code 30 oder 58), aber die Gruppe CREDIT TRANSFER (BG-17) fehlt.",
@@ -390,6 +431,32 @@
       "reviewed_digest": "9a2b22710797d806",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-11"
+    },
+    "BR-DE-27": {
+      "what": "Die Telefonnummer des Verkäufer-Ansprechpartners (BT-42) enthält nicht mindestens drei Ziffern.",
+      "why": "BT-42 ist die Telefonnummer des Ansprechpartners oder der Kontaktstelle. Dass das Element übermittelt wird, verlangt BR-DE-6.",
+      "review_notes": [
+        "DRAFT, unreviewed. German wording: 'mindestens drei Ziffern' is the rule text [L1]; 'Telefonnummer des Verkäufer-Ansprechpartners (BT-42)' is the phrase already approved in BR-DE-6; 'Telefonnummer des Ansprechpartners oder der Kontaktstelle' is KoSIT's description of BT-42 [SEM]; 'übermittelt' is the verb of BR-DE-6's own text.",
+        "'enthält nicht mindestens drei Ziffern' negates the rule's phrase without replacing it. 'weniger als drei' reads better and is not in either source — a native reader should choose.",
+        "[L1] Compiled test: `matches(normalize-space(Telephone), '.*([0-9].*){3,}.*')` — any three digits anywhere. No format, country code or length is checked."
+      ],
+      "rule_text_digest": "fe100cbb0a9c58ea",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
+    },
+    "BR-DE-28": {
+      "what": "Die E-Mail-Adresse des Verkäufer-Ansprechpartners (BT-43) entspricht nicht den Vorgaben: genau ein @-Zeichen, das nicht von einem Leerzeichen oder einem Punkt, aber von mindestens zwei Zeichen auf beiden Seiten flankiert wird, und kein Punkt am Anfang oder am Ende.",
+      "why": "BT-43 ist eine E-Mail-Adresse des Ansprechpartners oder der Kontaktstelle. Dass das Element übermittelt wird, verlangt BR-DE-7.",
+      "review_notes": [
+        "DRAFT, unreviewed. German wording: the conditions after the colon are the rule text [L1] with its 'soll' removed; 'E-Mail-Adresse des Verkäufer-Ansprechpartners (BT-43)' is the phrase approved in BR-DE-7; the first `why` sentence is KoSIT's description of BT-43 [SEM]. 'Vorgaben' is KoSIT's own word, in the text of BR-DE-18.",
+        "[L1] THE TEXT AND THE TEST DISAGREE, and the reviewer should know before approving. Compiled test: `^[^@\\s]+@([^@.\\s]+\\.)+[^@.\\s]+$`. (a) It needs one character before the @, not two. (b) It requires a dot somewhere after the @, which the text never says — `name@localhost` fires. (c) It accepts a dot as the first character, which the text says it should not. (d) It rejects whitespace anywhere, not only beside the @.",
+        "`what` restates the text, because that is the contract for `what`. It can therefore describe a breach the validator did not test for, and miss one it did. If that is judged misleading, the honest alternative is a `why` sentence saying the check is a pattern — which needs German wording neither source supplies."
+      ],
+      "rule_text_digest": "dd45ea6508280a33",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     },
     "BR-DE-3": {
       "what": "Der Ort des Verkäufers (BT-37) fehlt.",
@@ -502,6 +569,21 @@
       "reviewed_digest": "2a8dc0f18e7475ae",
       "reviewed_by": "Harshal",
       "reviewed_at": "2026-09-08"
+    },
+    "BR-DE-TMP-32": {
+      "what": "Die Rechnung enthält zur Angabe des Liefer-/Leistungsdatums weder BT-72 \"Actual delivery date\" noch BG-14 \"Invoicing period\" noch in jeder Rechnungsposition BG-26 \"Invoice line period\".",
+      "why": "BT-72 ist das Datum, an dem die Lieferung tatsächlich erfolgt bzw. die Dienstleistung tatsächlich erbracht wird. BG-14 liefert Informationen über den Rechnungszeitraum, BG-26 über den für die Rechnungsposition maßgeblichen Rechnungszeitraum. Der Zeitpunkt der Lieferung oder sonstigen Leistung ist eine gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 6 UStG).",
+      "review_notes": [
+        "DRAFT, unreviewed. This is the finding every visitor sees first: both failing demo invoices and many reference messages trip it. It is flagged `information`.",
+        "German wording: `what` is the rule text [L1] with 'sollte … entweder … oder … enthalten' turned into 'enthält … weder … noch'; the three element names stay as the text writes them. The first two `why` sentences are KoSIT's descriptions of BT-72, BG-14 and BG-26 [SEM].",
+        "[UStG] The last `why` sentence follows the pattern approved in BR-03 ('… ist eine gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 3 UStG)'). 'Zeitpunkt der Lieferung oder sonstigen Leistung' is the statute's wording for Nr. 6 as I have it — the reviewer must check it against gesetze-im-internet.de before approving; I have not fetched the page.",
+        "[L1] Compiled test: BT-72 present, or BG-14 present, or every line has BG-26. 'in jeder Rechnungsposition' is therefore literal: one line without a period fails the third branch.",
+        "'TMP' marks a rule KoSIT carries temporarily. Expect its id or text to change in a later rule set; the digest will un-review this entry when it does."
+      ],
+      "rule_text_digest": "d5cc96c369437d11",
+      "reviewed_digest": null,
+      "reviewed_by": null,
+      "reviewed_at": null
     }
   },
   "_sources": {
