@@ -34,8 +34,6 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 
-from saxonche import PySaxonProcessor  # noqa: E402
-
 from mutation.derive import (  # noqa: E402
     SVRL,
     TARGET_PREFIX,
@@ -48,77 +46,61 @@ from mutation.derive import (  # noqa: E402
     read_stylesheet,
 )
 from xrv.core import Syntax  # noqa: E402
-from xrv.ingest import identify, parse, to_text  # noqa: E402
+from xrv.ingest import identify  # noqa: E402
 from xrv.rules import Ruleset  # noqa: E402
-from xrv.validate import StructureValidator, parse_svrl  # noqa: E402
+from xrv.validate import ValidationEngine, ValidationError  # noqa: E402
 
-
-class Runner:
-    """The stylesheets, run for the search.
-
-    Not the service's engine, because the search needs one thing the engine
-    drops on purpose: which rule contexts were evaluated at all. That is the
-    difference between a rule no edit could breach and a rule the reference
-    messages never exercise, and it is in the raw report as `svrl:fired-rule`.
-    Every mutation found here is replayed through the real engine by the tests,
-    so a difference between the two would show up there as a rule not firing.
-    """
-
-    def __init__(self, ruleset: Ruleset) -> None:
-        self._processor = PySaxonProcessor(license=False)
-        compiler = self._processor.new_xslt30_processor()
-        self._compiled = {
-            syntax: tuple(
-                compiler.compile_stylesheet(stylesheet_file=str(sheet))
-                for sheet in ruleset.stylesheets(syntax)
-            )
-            for syntax in Syntax
-        }
-        self.structure = StructureValidator(ruleset)
-
-    def run(self, document: bytes, syntax: Syntax) -> tuple[Counter[str], frozenset[str], bool]:
-        """Rules fired, contexts evaluated, and whether anything fired is blocking."""
-        node = self._processor.parse_xml(xml_text=to_text(parse(document)))
-        fired: Counter[str] = Counter()
-        contexts: set[str] = set()
-        blocking = False
-        for executable in self._compiled[syntax]:
-            report = executable.transform_to_string(xdm_node=node)
-            for finding in parse_svrl(report):
-                fired[finding.rule_id] += 1
-                blocking = blocking or finding.blocking
-            for rule in etree.fromstring(report.encode()).iter(f"{{{SVRL}}}fired-rule"):
-                contexts.add(rule.get("context") or "")
-        return fired, frozenset(contexts), blocking
-
-
-_runner: Runner | None = None
+_engine: ValidationEngine | None = None
 _plans: dict[Syntax, dict[str, Plan]] = {}
 _corpus = Path()
 
 
 def _start(ruleset_root: str, corpus: str) -> None:
-    global _runner, _corpus
+    global _engine, _corpus
     # Saxon prints a stack of template frames to the process's stderr for every
     # transform that stops on an uncastable value, and thousands do. A failure
     # of the search itself is a Python exception and still reaches the parent.
     os.dup2(os.open(os.devnull, os.O_WRONLY), 2)
     ruleset = Ruleset(root=Path(ruleset_root))
-    _runner = Runner(ruleset)
+    _engine = ValidationEngine(ruleset)
     _corpus = Path(corpus)
     for syntax in Syntax:
         _plans[syntax] = plans(read_stylesheet(sheet) for sheet in ruleset.stylesheets(syntax))
 
 
+def _fired(engine: ValidationEngine, document: bytes, syntax: Syntax) -> Counter[str]:
+    return Counter(finding.rule_id for finding in engine.rule_findings(document, syntax))
+
+
+def _contexts(engine: ValidationEngine, document: bytes, syntax: Syntax) -> frozenset[str]:
+    """Rule contexts the stylesheets evaluated for this document.
+
+    A `Finding` records an assertion that failed. Whether a rule was evaluated
+    at all is in the raw report, as `svrl:fired-rule`, and it is the difference
+    between a rule no edit could breach and one the reference messages never
+    exercise.
+    """
+    return frozenset(
+        rule.get("context") or ""
+        for report in engine.reports(document, syntax)
+        for rule in etree.fromstring(report.encode()).iter(f"{{{SVRL}}}fired-rule")
+    )
+
+
 def _sweep(base: str) -> dict[str, object]:
-    """Try every edit the rules suggest for one reference message."""
-    assert _runner is not None
+    """Try every edit the rules suggest for one reference message.
+
+    Everything is judged by the engine the service runs: the scenario the
+    document belongs to decides which stylesheets apply and how each rule is
+    graded, here as there.
+    """
+    assert _engine is not None
     document = (_corpus / base).read_bytes()
     syntax = identify(document).syntax
 
-    before, contexts, blocking = _runner.run(document, syntax)
-    if blocking or _runner.structure.findings(document, syntax):
+    if any(finding.blocking for finding in _engine.findings(document, syntax)):
         return {"base": base, "skipped": True}
+    before = _fired(_engine, document, syntax)
 
     index = DocumentIndex(document)
     edits: dict[Edit, None] = {}
@@ -131,21 +113,21 @@ def _sweep(base: str) -> dict[str, object]:
     for edit in edits:
         edited = edit.apply(document)
         try:
-            after, _, _ = _runner.run(edited, syntax)
-        except Exception:
+            after = _fired(_engine, edited, syntax)
+        except ValidationError:
             # A value the stylesheet cannot cast — text where an amount goes —
             # stops the transform. That is not a rule firing.
             failed += 1
             continue
         fired = newly_fired(before, after)
         if fired:
-            hits.append((edit, fired, bool(_runner.structure.findings(edited, syntax))))
+            hits.append((edit, fired, bool(_engine.structure.findings(edited, syntax))))
 
     return {
         "base": base,
         "skipped": False,
         "syntax": syntax,
-        "contexts": contexts,
+        "contexts": _contexts(_engine, document, syntax),
         "trials": len(edits),
         "failed": failed,
         "hits": hits,

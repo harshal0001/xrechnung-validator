@@ -1,9 +1,10 @@
 """Replay the derived mutations through the engine the service runs.
 
-`scripts/derive_mutations.py` found these by search, with its own handle on
-Saxon. Nothing found that way is trusted until it is shown again here: each
-edit is applied to its reference message and validated by `ValidationEngine`,
-and the rule it was recorded against has to fire.
+`scripts/derive_mutations.py` found these by search. The file it wrote is data,
+and data drifts from the code and the rule set that produced it, so nothing in
+it is trusted until it is shown again here: each edit is applied to its
+reference message and validated by `ValidationEngine`, and the rule it was
+recorded against has to fire.
 
 The second assertion is the one that keeps the count honest. A validator that
 reported every rule on every document would pass "the rule fires" for all of
