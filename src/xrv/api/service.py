@@ -8,7 +8,7 @@ status codes.
 One constraint shapes the design. SaxonC-HE is not thread-safe: a processor and
 its compiled stylesheets belong to the thread that made them. Validation is
 therefore serialised behind a lock. That caps throughput at one document at a
-time per process, which is the honest trade for a service whose work is 27 ms of
+time per process, which is the honest trade for a service whose work is 15 ms of
 CPU — the way to scale it is more worker processes, not more threads in one.
 """
 

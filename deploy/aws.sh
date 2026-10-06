@@ -17,7 +17,7 @@ set -euo pipefail
 REGION="${AWS_REGION:-eu-central-1}"          # Frankfurt: German data stays in Germany
 NAME="${XRV_NAME:-xrechnung-validator}"
 MEMORY="${XRV_MEMORY:-1024}"                  # measured peak ~220 MB; 1 GiB is headroom
-# 27 ms/document warm and 9.7 s for the slowest invocation ever recorded (a cold
+# 15 ms/document warm and 9.7 s for the slowest invocation ever recorded (a cold
 # start plus a 4 MB upload). 20 s is twice that, and every second above it is
 # only there to be billed if something goes wrong.
 TIMEOUT="${XRV_TIMEOUT:-20}"
