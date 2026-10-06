@@ -15,13 +15,17 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from lxml import etree
 
 from xrv.core import Finding, Severity, Syntax
-from xrv.ingest import MalformedXmlError
+from xrv.ingest import MalformedXmlError, identify
 from xrv.rules import Ruleset
 from xrv.validate import ValidationEngine, ValidationError
 
 SYNTAX_GLOB = {Syntax.UBL: "*_ubl.xml", Syntax.CII: "*_uncefact.xml"}
+CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+#: A specification identifier no scenario claims.
+UNRECOGNISED = b"urn:example:not-a-cius"
 
 
 def invoices(corpus: Path, syntax: Syntax) -> list[Path]:
@@ -57,6 +61,119 @@ class TestAgainstReferenceMessages:
         """
         total = sum(len(engine.findings(i, syntax)) for i in invoices(corpus, syntax))
         assert total > 0
+
+
+def every_reference_message(corpus: Path) -> list[Path]:
+    """The standard messages and the ones beside them: extension, CVD, technical cases."""
+    return sorted(corpus.parent.rglob("*.xml"))
+
+
+def customization_id(document: bytes) -> str:
+    """BT-24 as the document carries it — read, never spelled here."""
+    return etree.fromstring(document).findtext(f"{{{CBC}}}CustomizationID") or ""
+
+
+class TestScenarios:
+    """A document is graded as the kind of document it says it is.
+
+    KoSIT's configuration re-grades rules per scenario. The standard messages
+    never show it, because nothing they trip is re-graded to or from blocking;
+    the extension and CVD messages do, and were reported as invalid before the
+    overrides were applied.
+    """
+
+    def test_no_reference_message_of_any_kind_is_rejected(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        messages = every_reference_message(corpus)
+        assert len(messages) > len(list(corpus.glob("*.xml")))
+        false_positives = {}
+        for message in messages:
+            document = message.read_bytes()
+            blocking = [
+                f for f in engine.findings(document, identify(document).syntax) if f.blocking
+            ]
+            if blocking:
+                false_positives[message.name] = sorted({f.rule_id for f in blocking})
+        assert not false_positives
+
+    def test_every_reference_message_is_recognised(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        for message in every_reference_message(corpus):
+            document = message.read_bytes()
+            assert engine.evaluate(document, identify(document).syntax).scenario, message.name
+
+    def test_the_kinds_are_told_apart(self, engine: ValidationEngine, corpus: Path) -> None:
+        seen = set()
+        for message in every_reference_message(corpus):
+            document = message.read_bytes()
+            scenario = engine.evaluate(document, identify(document).syntax).scenario
+            assert scenario is not None
+            seen.add(scenario.name)
+        assert len(seen) >= 6
+
+    def test_an_override_is_what_makes_an_extension_message_valid(
+        self, engine: ValidationEngine, real_ruleset: Ruleset, corpus: Path
+    ) -> None:
+        """Not vacuous: the rule fires, the stylesheet calls it fatal, and the
+        scenario is the only reason the document is not rejected."""
+        downgraded = 0
+        for message in sorted((corpus.parent / "extension").glob("*.xml")):
+            document = message.read_bytes()
+            evaluation = engine.evaluate(document, identify(document).syntax)
+            assert evaluation.scenario is not None
+            for finding in evaluation.findings:
+                if evaluation.scenario.levels.get(finding.rule_id) is Severity.INFO:
+                    assert finding.severity is Severity.INFO
+                    downgraded += 1
+        assert downgraded
+
+    def test_an_override_can_also_make_a_rule_blocking(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        """Sub invoice lines are an extension feature. The same lines in a
+        document that claims to be plain XRechnung are an error there, though
+        the stylesheet only warns."""
+        standard = customization_id((corpus / "01.01a-INVOICE_ubl.xml").read_bytes())
+        upgraded: set[str] = set()
+        for message in sorted((corpus.parent / "extension").glob("*_ubl.xml")):
+            document = message.read_bytes()
+            own = customization_id(document).encode()
+            ungraded = engine.findings(document.replace(own, UNRECOGNISED), Syntax.UBL)
+            as_standard = engine.findings(document.replace(own, standard.encode()), Syntax.UBL)
+            warned = {f.rule_id for f in ungraded if not f.blocking}
+            upgraded |= warned & {f.rule_id for f in as_standard if f.blocking}
+        assert upgraded
+
+    def test_a_document_no_scenario_recognises_keeps_the_stylesheets_grades(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        document = (corpus / "01.01a-INVOICE_ubl.xml").read_bytes()
+        unknown = document.replace(customization_id(document).encode(), UNRECOGNISED)
+        evaluation = engine.evaluate(unknown, Syntax.UBL)
+        assert evaluation.scenario is None
+        assert evaluation.findings == engine.rule_findings(unknown, Syntax.UBL)
+
+    def test_a_structural_failure_is_not_given_a_scenario(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        """Nothing past the schema ran, so nothing was graded."""
+        document = (corpus / "01.01a-INVOICE_ubl.xml").read_bytes()
+        broken = document.replace(b"<cbc:ID>", b"<cbc:Oops>", 1).replace(
+            b"</cbc:ID>", b"</cbc:Oops>", 1
+        )
+        evaluation = engine.evaluate(broken, Syntax.UBL)
+        assert evaluation.scenario is None
+        assert all(f.severity is Severity.FATAL for f in evaluation.findings)
+
+    def test_the_rule_layer_alone_is_graded_the_same_way(
+        self, engine: ValidationEngine, corpus: Path
+    ) -> None:
+        for message in sorted((corpus.parent / "extension").glob("*.xml")):
+            document = message.read_bytes()
+            syntax = identify(document).syntax
+            assert engine.rule_findings(document, syntax) == engine.findings(document, syntax)
 
 
 class TestFindingsAreWellFormed:

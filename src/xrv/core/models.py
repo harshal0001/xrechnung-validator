@@ -86,6 +86,28 @@ def severity_from_kosit_flag(flag: str | None) -> Severity:
     return _KOSIT_FLAG_TO_SEVERITY.get(flag.strip().lower(), Severity.ERROR)
 
 
+# A scenario re-grades a rule with `customLevel`, and that element has its own
+# vocabulary: the report's levels, not the stylesheet's flags. "error" there is
+# what a stylesheet calls "fatal".
+_KOSIT_LEVEL_TO_SEVERITY = {
+    "error": Severity.ERROR,
+    "warning": Severity.WARNING,
+    "information": Severity.INFO,
+}
+
+KNOWN_KOSIT_LEVELS = frozenset(_KOSIT_LEVEL_TO_SEVERITY)
+
+
+def severity_from_kosit_level(level: str | None) -> Severity:
+    """Map a scenario's `customLevel` onto a `Severity`.
+
+    Unrecognised levels map to ERROR, for the reason unrecognised flags do.
+    """
+    if level is None:
+        return Severity.ERROR
+    return _KOSIT_LEVEL_TO_SEVERITY.get(level.strip().lower(), Severity.ERROR)
+
+
 class Finding(BaseModel):
     """One rule violation, and everything an explanation may be grounded in.
 
@@ -122,6 +144,10 @@ class Finding(BaseModel):
     def blocking(self) -> bool:
         return self.severity.blocking
 
+    def with_severity(self, severity: Severity) -> Self:
+        """Return a copy graded differently. The original is unchanged."""
+        return self if severity is self.severity else self.model_copy(update={"severity": severity})
+
     def with_explanation(self, explanation: str, context: str | None = None) -> Self:
         """Return a copy carrying an explanation. The original is unchanged.
 
@@ -151,6 +177,14 @@ class ValidationReport(BaseModel):
     )
     ruleset_version: str
     ruleset_sha256: str
+    scenario: str | None = Field(
+        default=None,
+        description=(
+            "The KoSIT scenario the document was recognised as, whose severity "
+            "overrides were applied. None when no scenario recognised it, or when "
+            "it failed structurally before one was looked for."
+        ),
+    )
     findings: tuple[Finding, ...] = ()
     duration_ms: float = Field(ge=0)
     source_xml: str | None = Field(

@@ -31,6 +31,8 @@ export interface ValidationReport {
   mandate_ready: boolean;
   ruleset_version: string;
   ruleset_sha256: string;
+  /** The KoSIT scenario the document was recognised as, if any. */
+  scenario: string | null;
   findings: Finding[];
   duration_ms: number;
   /** The XML that was validated. For a ZUGFeRD PDF this is the extracted

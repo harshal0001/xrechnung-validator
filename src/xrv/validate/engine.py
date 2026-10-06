@@ -14,6 +14,7 @@ container instead.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Self
@@ -22,13 +23,24 @@ from saxonche import PySaxonProcessor, PyXsltExecutable
 
 from xrv.core import Finding, Syntax
 from xrv.ingest import parse, to_text
-from xrv.rules import Ruleset
+from xrv.rules import Ruleset, Scenario
+from xrv.validate.scenario import ScenarioMatcher
 from xrv.validate.structure import StructureValidator
 from xrv.validate.svrl import parse_svrl
 
 
 class ValidationError(RuntimeError):
     """The document could not be run through the rules at all."""
+
+
+@dataclass(frozen=True)
+class Evaluation:
+    """What validating one document found, and what it was validated as."""
+
+    findings: tuple[Finding, ...]
+    #: The KoSIT scenario that recognised the document. None when none did, and
+    #: when the document failed structurally, because nothing past the schema ran.
+    scenario: Scenario | None = None
 
 
 class ValidationEngine:
@@ -44,6 +56,7 @@ class ValidationEngine:
         self._processor = PySaxonProcessor(license=False)
         self._compiled: dict[Syntax, tuple[PyXsltExecutable, ...]] = {}
         self.structure = StructureValidator(ruleset, syntaxes=wanted)
+        self._scenarios = ScenarioMatcher(self._processor, ruleset.scenarios)
 
         compiler = self._processor.new_xslt30_processor()
         for syntax in wanted:
@@ -69,11 +82,15 @@ class ValidationEngine:
         number fails structurally and never reaches the rule that says so. The
         FATAL finding is the honest answer in that case.
         """
+        return self.evaluate(source, syntax).findings
+
+    def evaluate(self, source: Path | str | bytes, syntax: Syntax) -> Evaluation:
+        """`findings`, together with the scenario the document was recognised as."""
         payload = self._payload(source)
         structural = self.structure.findings(payload, syntax)
         if structural:
-            return structural
-        return self.rule_findings(payload, syntax)
+            return Evaluation(structural)
+        return self._rules(payload, syntax)
 
     @staticmethod
     def _payload(source: Path | str | bytes) -> bytes:
@@ -99,14 +116,21 @@ class ValidationEngine:
         its own — a mutation that also breaks the schema would otherwise never
         reach the rule it was written to prove.
         """
+        # Asked for before the document is read: a syntax this engine cannot
+        # run is the caller's mistake whatever the document turns out to be.
+        self._executables(syntax)
+        return self._rules(self._payload(source), syntax).findings
+
+    def _executables(self, syntax: Syntax) -> tuple[PyXsltExecutable, ...]:
         try:
-            executables = self._compiled[syntax]
+            return self._compiled[syntax]
         except KeyError:
             raise ValidationError(
                 f"engine was not built for {syntax}; it has {sorted(self._compiled)}"
             ) from None
 
-        payload = self._payload(source)
+    def _rules(self, payload: bytes, syntax: Syntax) -> Evaluation:
+        executables = self._executables(syntax)
 
         # Parsed here rather than handed to Saxon as a file path: the same bytes
         # then go through both layers, and a document declaring an encoding other
@@ -122,7 +146,17 @@ class ValidationEngine:
             if svrl is None:
                 raise ValidationError("transform returned nothing")
             collected.extend(parse_svrl(svrl))
-        return tuple(collected)
+
+        # A stylesheet grades each rule once, for every document it is run on.
+        # The scenario grades it for this kind of document, and that is the
+        # grade KoSIT's own validator reports.
+        scenario = self._scenarios.match(node)
+        if scenario is None:
+            return Evaluation(tuple(collected))
+        return Evaluation(
+            tuple(f.with_severity(scenario.severity(f.rule_id, f.severity)) for f in collected),
+            scenario,
+        )
 
     def close(self) -> None:
         """Drop the compiled schemas and stylesheets, and shut the processor down.
