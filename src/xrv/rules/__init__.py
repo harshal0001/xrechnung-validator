@@ -10,5 +10,13 @@ from xrv.rules.registry import (
     RulesetRegistry,
     default_registry,
 )
+from xrv.rules.scenarios import Scenario, read_scenarios
 
-__all__ = ["Ruleset", "RulesetNotFoundError", "RulesetRegistry", "default_registry"]
+__all__ = [
+    "Ruleset",
+    "RulesetNotFoundError",
+    "RulesetRegistry",
+    "Scenario",
+    "default_registry",
+    "read_scenarios",
+]

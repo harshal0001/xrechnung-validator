@@ -24,6 +24,7 @@ from functools import cached_property
 from pathlib import Path
 
 from xrv.core import LocalisedError, Syntax
+from xrv.rules.scenarios import Scenario, read_scenarios
 
 MANIFEST_NAME = "manifest.json"
 
@@ -132,6 +133,11 @@ class Ruleset:
                 f"{syntax} has no schema for root element '{root}' (have: {known})"
             ) from None
         return self.path(key)
+
+    @cached_property
+    def scenarios(self) -> tuple[Scenario, ...]:
+        """The document types this configuration knows, in the order it lists them."""
+        return read_scenarios(self.path("scenarios"))
 
     def document_roots(self, syntax: Syntax) -> tuple[str, ...]:
         """Root element names this syntax validates."""

@@ -52,6 +52,15 @@ class TestValidating:
         assert len(body["ruleset_sha256"]) == 64
         assert body["duration_ms"] > 0
 
+    @pytest.mark.parametrize("name", [UBL, CII])
+    def test_a_response_says_what_the_document_was_validated_as(
+        self, client: TestClient, corpus: Path, name: str
+    ) -> None:
+        """Severities depend on the scenario, so a report that hides it cannot
+        explain why a rule is only a warning here."""
+        body = upload(client, (corpus / name).read_bytes()).json()
+        assert "XRechnung" in body["scenario"]
+
     def test_a_broken_invoice_reports_the_rule(self, client: TestClient, corpus: Path) -> None:
         cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
         from lxml import etree

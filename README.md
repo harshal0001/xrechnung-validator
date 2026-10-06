@@ -71,7 +71,7 @@ measured.
 
 | | |
 |---|---|
-| False positives on 66 reference invoices | **0** — structural and business rules |
+| False positives on 86 reference invoices | **0** — standard, extension and CVD, structural and business rules |
 | Business rules proven to fire | **235 of 284** — 449 mutations derived from the rule set, both syntaxes |
 | …of which nothing else fires | 230 mutations; the rest record what fires with them |
 | Business rules no single edit reaches | 49, each listed with why |
@@ -80,7 +80,7 @@ measured.
 | Validation latency | 27 ms/document warm |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,409 backend, 21 frontend |
+| Tests | 2,439 backend, 21 frontend |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
 ---
@@ -111,7 +111,10 @@ and this makes that migration a configuration change.
 **Severity is where naive implementations fail.** KoSIT's `fatal` flag means a
 business-rule breach, not a structural failure, and valid reference invoices still
 emit informational assertions. Treating every failed assertion as an error would
-report **33 of 66 valid documents as broken**.
+report **33 of 66 valid documents as broken**. It is also per document type: KoSIT's
+configuration re-grades individual rules for the extension and CVD scenarios, so the
+scenario's own match expression is evaluated and its overrides applied — without them,
+four more valid reference invoices are rejected. The report names the scenario it used.
 
 ---
 

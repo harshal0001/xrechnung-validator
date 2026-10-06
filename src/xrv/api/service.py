@@ -128,7 +128,7 @@ class ValidationService:
 
         with self._lock:
             engine = self._engine_for(ruleset)
-            findings = self._findings(engine, document, language)
+            findings, scenario = self._findings(engine, document, language)
             if explain:
                 findings = self._explain(findings, ruleset.version, language)
 
@@ -139,6 +139,7 @@ class ValidationService:
             mandate_ready=document.mandate_ready,
             ruleset_version=ruleset.version,
             ruleset_sha256=ruleset.sha256,
+            scenario=scenario,
             findings=findings,
             duration_ms=round((time.perf_counter() - started) * 1000, 2),
             source_xml=_decoded(document.content) if include_source else None,
@@ -146,8 +147,10 @@ class ValidationService:
 
     def _findings(
         self, engine: ValidationEngine, document: Document, language: str
-    ) -> tuple[Finding, ...]:
+    ) -> tuple[tuple[Finding, ...], str | None]:
         """Validate, unless the profile says there is nothing to validate against.
+
+        Returns the findings and the name of the scenario they were graded under.
 
         A ZUGFeRD MINIMUM document has no line items. Running the full rule set
         over it produces dozens of failures for data the profile never claimed to
@@ -171,8 +174,9 @@ class ValidationService:
                     ),
                     xpath=f"/{document.root}",
                 ),
-            )
-        return engine.findings(document.content, document.syntax)
+            ), None
+        evaluation = engine.evaluate(document.content, document.syntax)
+        return evaluation.findings, evaluation.scenario.name if evaluation.scenario else None
 
     def _explain(
         self, findings: tuple[Finding, ...], version: str, language: str
