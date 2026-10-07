@@ -61,6 +61,7 @@ class ValidationEngine:
         self._compiled: dict[Syntax, tuple[tuple[Path, PyXsltExecutable], ...]] = {}
         self.structure = StructureValidator(ruleset, syntaxes=wanted)
         self._scenarios = ScenarioMatcher(self._processor, ruleset.scenarios)
+        self._shared = {syntax: self._common_ground(syntax) for syntax in wanted}
 
         compiler = self._processor.new_xslt30_processor()
         for syntax in wanted:
@@ -68,6 +69,24 @@ class ValidationEngine:
                 (sheet, compiler.compile_stylesheet(stylesheet_file=str(sheet)))
                 for sheet in ruleset.stylesheets(syntax)
             )
+
+    def _common_ground(self, syntax: Syntax) -> frozenset[Path]:
+        """The stylesheets every scenario of this syntax validates with.
+
+        For a document no scenario recognises. It has not said what it is, so
+        it is not held to any one scenario's extra rules — but it is held to
+        what all of them share, which in the shipped configuration is the EN
+        16931 core. Read from the configuration rather than named here, so a
+        release that changes the common ground changes this with it. If the
+        configuration has no common ground, everything held applies.
+        """
+        held = frozenset(self.ruleset.stylesheets(syntax))
+        shared: frozenset[Path] | None = None
+        for scenario in self.ruleset.scenarios:
+            named = frozenset(self.ruleset.root / location for location in scenario.stylesheets)
+            if named and named <= held:
+                shared = named if shared is None else shared & named
+        return shared or held
 
     @property
     def saxon_version(self) -> str:
@@ -117,8 +136,8 @@ class ValidationEngine:
         rules and still breach the national restriction. A document that claims
         only EN 16931 is validated against the core alone — holding it to a CIUS
         it never claimed reports a valid invoice as broken. One no scenario
-        recognises gets both, which is the stricter reading of a document that
-        has not said what it is.
+        recognises is held to what every scenario shares, which is that same
+        core: it has not said what it is, and the report says so.
 
         Exposed separately from `findings` so the rule layer can be exercised on
         its own — a mutation that also breaks the schema would otherwise never
@@ -159,8 +178,9 @@ class ValidationEngine:
         node = self._processor.parse_xml(xml_text=to_text(parse(payload)))
 
         scenario = self._scenarios.match(node)
-        applies = held
-        if scenario is not None:
+        if scenario is None:
+            applies = tuple(pair for pair in held if pair[0] in self._shared[syntax])
+        else:
             named = {self.ruleset.root / location for location in scenario.stylesheets}
             unknown = named - {sheet for sheet, _ in held}
             if unknown:
@@ -189,7 +209,7 @@ class ValidationEngine:
         reports, scenario, skipped = self._run(payload, syntax)
         collected = tuple(finding for report in reports for finding in parse_svrl(report))
         if scenario is None:
-            return Evaluation(collected)
+            return Evaluation(collected, None, skipped)
 
         # A stylesheet grades each rule once, for every document it is run on.
         # The scenario grades it for this kind of document, and that is the

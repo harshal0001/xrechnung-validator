@@ -86,15 +86,15 @@ measured.
 | | |
 |---|---|
 | False positives on 86 reference invoices | **0** — standard, extension and CVD, structural and business rules |
-| Business rules proven to fire | **249 of 284** — 473 mutations derived from the rule set, both syntaxes |
+| Business rules proven to fire | **248 of 284** — 471 mutations derived from the rule set, both syntaxes |
 | …of which nothing else fires | 245 mutations; the rest record what fires with them |
-| Business rules no single edit reaches | 35, each listed with why |
+| Business rules no single edit reaches | 36, each listed with why — one of them, BR-DE-21, by design: a document whose identifier is wrong is not an XRechnung, so the XRechnung rule about identifiers never runs |
 | Rules firing that should not | **0** |
 | Explanations reviewed by a person | **96 of 96** (48 DE, 48 EN) |
 | Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,593 backend, 21 frontend |
+| Tests | 2,594 backend, 21 frontend |
 | Coverage | **97.7%** of lines and branches in `src/xrv`, as CI measures it; it fails below 95% |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 
@@ -134,6 +134,10 @@ it is validated with, and the rules it re-grades. All three are read as data and
 followed. An XRechnung meets the EN 16931 core and the German CIUS. An invoice that
 claims only EN 16931 — a typical ZUGFeRD PDF — meets the core alone, and the report says
 the XRechnung rules were not applied rather than letting their absence read as a pass.
+One that no scenario recognises — ZUGFeRD EXTENDED, Peppol, or an XRechnung with a typo
+in its identifier — is held to what every scenario shares, which is that same core, and
+is warned that nothing recognised it. KoSIT's own validator rejects such a document
+outright; a validator people use on their own invoices should say what it found.
 The extension and CVD scenarios re-grade individual rules; without that, four valid
 reference invoices are rejected. Every report names the scenario it used.
 

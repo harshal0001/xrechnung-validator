@@ -15,7 +15,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from xrv.api import app
-from xrv.api.service import NATIONAL_RULES_NOT_APPLIED
+from xrv.api.service import DOCUMENT_TYPE_NOT_RECOGNISED, NATIONAL_RULES_NOT_APPLIED
 from xrv.ingest import MAX_BYTES
 
 UBL = "01.01a-INVOICE_ubl.xml"
@@ -79,6 +79,25 @@ class TestValidating:
         assert body["scenario"] in notice["rule_text"]
         assert "XRechnung" in notice["rule_text"]
         assert not [f for f in body["findings"] if f["severity"] in {"fatal", "error"}]
+
+    @pytest.mark.parametrize("language", ["de", "en"])
+    def test_an_invoice_of_no_known_type_is_warned_and_checked_against_the_core(
+        self, client: TestClient, corpus: Path, language: str
+    ) -> None:
+        """A ZUGFeRD EXTENDED or Peppol invoice, or an XRechnung with a typo in
+        its identifier. It is not rejected and not held to the German rules; it
+        is told, as a warning, that nothing recognised it."""
+        xrechnung = (corpus / UBL).read_bytes()
+        identifier = xrechnung.split(b"<cbc:CustomizationID>")[1].split(b"<")[0]
+        unknown = xrechnung.replace(identifier, b"urn:example:something-else")
+
+        body = upload(client, unknown, lang=language).json()
+        assert body["scenario"] is None
+        (notice,) = [f for f in body["findings"] if f["rule_id"] == DOCUMENT_TYPE_NOT_RECOGNISED]
+        assert notice["severity"] == "warning"
+        assert "BT-24" in notice["rule_text"]
+        assert not [f for f in body["findings"] if f["severity"] in {"fatal", "error"}]
+        assert NATIONAL_RULES_NOT_APPLIED not in {f["rule_id"] for f in body["findings"]}
 
     def test_a_broken_invoice_reports_the_rule(self, client: TestClient, corpus: Path) -> None:
         cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
