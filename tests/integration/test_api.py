@@ -122,11 +122,17 @@ class TestExplanations:
         body = upload(client, (corpus / UBL).read_bytes()).json()
         assert all(f["explanation"] is None for f in body["findings"])
 
-    def test_a_valid_invoice_gets_no_explanations(self, client: TestClient, corpus: Path) -> None:
-        """Nothing blocking fires on a reference invoice, so there is nothing to
-        explain — only the informational BR-DE-TMP-32, which has no entry."""
+    def test_an_informational_finding_is_explained_too(
+        self, client: TestClient, corpus: Path
+    ) -> None:
+        """Nothing blocking fires on a reference invoice. What does fire is the
+        informational BR-DE-TMP-32, and an explanation is not reserved for
+        errors: a person reading "information" still wants to know what it is."""
         body = upload(client, (corpus / UBL).read_bytes(), explain="true").json()
-        assert all(f["explanation"] is None for f in body["findings"])
+        assert not [f for f in body["findings"] if f["severity"] in {"fatal", "error"}]
+        (finding,) = [f for f in body["findings"] if f["rule_id"] == "BR-DE-TMP-32"]
+        assert finding["severity"] == "info"
+        assert finding["explanation"]
 
     def test_a_reviewed_rule_is_explained_in_two_fields(
         self, client: TestClient, corpus: Path
