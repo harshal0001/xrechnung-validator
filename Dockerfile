@@ -21,7 +21,7 @@
 # Built here rather than committed, so dist/ never drifts from src/. The output
 # is ~50 kB gzipped and is served by the API itself: one container, one origin,
 # no CORS to configure.
-FROM node:20-slim AS frontend
+FROM node:22-slim AS frontend
 WORKDIR /ui
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
