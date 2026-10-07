@@ -45,15 +45,19 @@
       "why": "Der vollständige Name und die vollständige Anschrift des leistenden Unternehmers sind gesetzliche Pflichtangaben (§ 14 Abs. 4 Nr. 1 UStG).",
       "review_notes": [
         "Terminology: Rechnungssteller → Verkäufer (spec term).",
-        "Sourced [UStG] Nr. 1: 'den vollständigen Namen und die vollständige Anschrift des leistenden Unternehmers und des Leistungsempfängers'."
+        "Sourced [UStG] Nr. 1: 'den vollständigen Namen und die vollständige Anschrift des leistenden Unternehmers und des Leistungsempfängers'.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-08 only by the missing '(BG-5)'; the explanation holds for both."
       ],
       "rule_text_digest": [
         "3d702cca17105faa",
         "a496599a2086b712"
       ],
-      "reviewed_digest": "3d702cca17105faa",
+      "reviewed_digest": [
+        "3d702cca17105faa",
+        "a496599a2086b712"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-08"
+      "reviewed_at": "2026-10-07"
     },
     "BR-10": {
       "what": "Die Anschrift des Käufers (BG-8) fehlt.",
@@ -72,15 +76,19 @@
       "why": "Menge und Art der gelieferten Gegenstände bzw. Umfang und Art der Leistung sind gesetzliche Pflichtangaben (§ 14 Abs. 4 Nr. 5 UStG). Im Standard tragen die Rechnungspositionen (BG-25) diese Angaben.",
       "review_notes": [
         "\"Häufige Ursache\" is speculation — keep only if a reviewer with AP experience agrees it is common.",
-        "Sourced [UStG] Nr. 5 for the statutory duty; BG-25 is the rule's own term. Cut: 'Häufige Ursache: Export aus dem Vorsystem' — folklore, no source."
+        "Sourced [UStG] Nr. 5 for the statutory duty; BG-25 is the rule's own term. Cut: 'Häufige Ursache: Export aus dem Vorsystem' — folklore, no source.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-08 only by the missing full stop; the explanation holds for both."
       ],
       "rule_text_digest": [
         "1742295b101482e1",
         "a5ece4a512a32aae"
       ],
-      "reviewed_digest": "a5ece4a512a32aae",
+      "reviewed_digest": [
+        "1742295b101482e1",
+        "a5ece4a512a32aae"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-08"
+      "reviewed_at": "2026-10-07"
     },
     "BR-CL-01": {
       "what": "Der Rechnungstyp ist kein zulässiger Code aus der Codeliste UNTDID 1001.",
@@ -124,15 +132,19 @@
       "review_notes": [
         "Confirmed against 2026-08-31 text: only the UNCL 5305 code list is named — S/AE/Z stay in why. Text differs between UBL and CII ('UNCL 5305' vs 'UNCL5305').",
         "Sourced: codes S, AE, Z present in the UNCL 5305 list [CL]. The German glosses are the UNCL 5305 category meanings; reviewer may prefer the spec's exact wording.",
-        "Reviewer decision 2026-09-08: glosses (Regelsatz, Reverse Charge, Nullsatz) removed — the codes are verified present in the compiled list [CL]; their meanings were not fetched from an official document this session. Codes only."
+        "Reviewer decision 2026-09-08: glosses (Regelsatz, Reverse Charge, Nullsatz) removed — the codes are verified present in the compiled list [CL]; their meanings were not fetched from an official document this session. Codes only.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-08 only by the space in 'UNCL 5305'; the explanation holds for both."
       ],
       "rule_text_digest": [
         "33540495a99d367b",
         "eb45453974dcb143"
       ],
-      "reviewed_digest": "eb45453974dcb143",
+      "reviewed_digest": [
+        "33540495a99d367b",
+        "eb45453974dcb143"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-08"
+      "reviewed_at": "2026-10-07"
     },
     "BR-CO-09": {
       "what": "Die Umsatzsteuer-Identifikationsnummer des Verkäufers (BT-31), des Steuervertreters des Verkäufers (BT-63) oder des Käufers (BT-48) beginnt nicht mit dem Länderpräfix nach ISO 3166-1 alpha-2.",
