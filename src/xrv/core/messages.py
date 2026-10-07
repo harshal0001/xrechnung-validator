@@ -98,8 +98,8 @@ MESSAGES: dict[str, dict[str, str]] = {
         "because most would fail on data the profile does not claim to contain.",
     },
     "internal_error": {
-        "de": "Die Prüfung ist unerwartet fehlgeschlagen. Nennen Sie bei einer Meldung "
-        "bitte die Kennung {request_id}.",
+        "de": "Die Prüfung ist unerwartet fehlgeschlagen. Wenn Sie den Fehler melden, "
+        "geben Sie bitte die Kennung {request_id} an.",
         "en": "The check failed unexpectedly. Quote {request_id} if you report it.",
     },
     # Not an error. Findings that are absent because a rule set did not apply
@@ -107,8 +107,8 @@ MESSAGES: dict[str, dict[str, str]] = {
     # so the report says which it was.
     "national_rules_not_applied": {
         "de": "Dieses Dokument weist sich als „{scenario}“ aus, nicht als XRechnung. "
-        "Geprüft wurden die Regeln der EN 16931; die zusätzlichen Regeln der "
-        "XRechnung wurden nicht angewendet.",
+        "Es wurde nur gegen die Regeln der EN 16931 geprüft; die zusätzlichen Regeln "
+        "der XRechnung wurden nicht angewendet.",
         "en": "This document identifies itself as “{scenario}”, not as XRechnung. It was "
         "checked against the EN 16931 rules; the additional XRechnung rules were "
         "not applied.",
