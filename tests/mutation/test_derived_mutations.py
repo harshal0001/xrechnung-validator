@@ -58,7 +58,7 @@ def findings(
             document = (instances / mutation.base).read_bytes()
             if mutation.base not in before:
                 before[mutation.base] = engine.rule_findings(document, mutation.syntax)
-            edited = mutation.edit.apply(document)
+            edited = mutation.apply(document)
             after[mutation.name] = (
                 before[mutation.base],
                 engine.rule_findings(edited, mutation.syntax),
@@ -108,7 +108,7 @@ class TestRulesFire:
     def test_the_rule_is_reported(self, findings, mutation: Derived) -> None:
         reported = fired(findings(mutation))
         assert mutation.rule_id in reported, (
-            f"{mutation.edit.describe()} in {mutation.base} — expected {mutation.rule_id}, "
+            f"{mutation.describe()} in {mutation.base} — expected {mutation.rule_id}, "
             f"got {sorted(reported) or 'nothing'}"
         )
 
@@ -116,7 +116,7 @@ class TestRulesFire:
     def test_nothing_unrecorded_is_reported(self, findings, mutation: Derived) -> None:
         reported = fired(findings(mutation))
         assert reported == mutation.expected, (
-            f"{mutation.edit.describe()} in {mutation.base} — "
+            f"{mutation.describe()} in {mutation.base} — "
             f"unrecorded: {sorted(reported - mutation.expected)}, "
             f"missing: {sorted(mutation.expected - reported)}"
         )
@@ -134,7 +134,7 @@ class TestRulesFire:
     ) -> None:
         """Whether the XSD stops the edited document first is a property of the
         rule set, so it is asserted in both directions."""
-        edited = mutation.edit.apply((corpus.parent / mutation.base).read_bytes())
+        edited = mutation.apply((corpus.parent / mutation.base).read_bytes())
         structural = engine.structure.findings(edited, mutation.syntax)
         assert bool(structural) is mutation.caught_by_schema
 
