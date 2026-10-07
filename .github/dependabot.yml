@@ -34,3 +34,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # Odd-numbered Node releases are not maintained past the following
+      # spring. The build stage stays on an LTS line.
+      - dependency-name: "node"
+        versions: ["21-slim", "23-slim", "25-slim", "27-slim", "29-slim"]
