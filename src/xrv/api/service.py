@@ -45,6 +45,11 @@ PROFILE_TOO_THIN = "PROFILE-NOT-MANDATE-READY"
 #: "no XRechnung findings" must not be read as "passes XRechnung".
 NATIONAL_RULES_NOT_APPLIED = "NATIONAL-RULES-NOT-APPLIED"
 
+#: Reported when no scenario recognised the document at all. It was held to the
+#: rules every document type shares and to nothing more, and a reader who meant
+#: to send an XRechnung needs to hear that the identifier did not say so.
+DOCUMENT_TYPE_NOT_RECOGNISED = "DOCUMENT-TYPE-NOT-RECOGNISED"
+
 
 def _decoded(content: bytes) -> str:
     """The document as text, honouring its declared encoding.
@@ -182,12 +187,28 @@ class ValidationService:
                 ),
             ), None
         evaluation = engine.evaluate(document.content, document.syntax)
-        if evaluation.scenario is None:
-            return evaluation.findings, None
+        name = evaluation.scenario.name if evaluation.scenario else None
+        if not evaluation.skipped:
+            return evaluation.findings, name
 
-        findings = evaluation.findings
-        if evaluation.skipped:
-            name = evaluation.scenario.name
+        if evaluation.scenario is None:
+            notice = Finding(
+                rule_id=DOCUMENT_TYPE_NOT_RECOGNISED,
+                severity=Severity.WARNING,
+                rule_text=render(
+                    "document_type_not_recognised",
+                    {},
+                    language,
+                    fallback=(
+                        "This document is not a known document type: its specification "
+                        "identifier (BT-24) is neither XRechnung's nor EN 16931's. It was "
+                        "checked against the EN 16931 rules only; the additional XRechnung "
+                        "rules were not applied."
+                    ),
+                ),
+                xpath=f"/{document.root}",
+            )
+        else:
             notice = Finding(
                 rule_id=NATIONAL_RULES_NOT_APPLIED,
                 severity=Severity.INFO,
@@ -203,8 +224,7 @@ class ValidationService:
                 ),
                 xpath=f"/{document.root}",
             )
-            findings = (notice, *findings)
-        return findings, evaluation.scenario.name
+        return (notice, *evaluation.findings), name
 
     def _explain(
         self, findings: tuple[Finding, ...], version: str, language: str

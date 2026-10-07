@@ -9,11 +9,7 @@
    "base": "extension/04.05a-INVOICE_uncefact.xml",
    "path": "rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID",
    "op": "set",
-   "value": "",
-   "collateral": [
-    "BR-DE-21",
-    "PEPPOL-EN16931-R008"
-   ]
+   "value": ""
   },
   {
    "rule_id": "BR-02",
@@ -1145,14 +1141,6 @@
    "value": "30"
   },
   {
-   "rule_id": "BR-DE-21",
-   "syntax": "CII",
-   "base": "standard/01.01a-INVOICE_uncefact.xml",
-   "path": "rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID",
-   "op": "set",
-   "value": "VA"
-  },
-  {
    "rule_id": "BR-DE-22",
    "syntax": "CII",
    "base": "standard/03.07a-INVOICE_uncefact.xml",
@@ -2252,10 +2240,7 @@
    "syntax": "UBL",
    "base": "extension/04.01a-INVOICE_ubl.xml",
    "path": "cbc:CustomizationID",
-   "op": "delete",
-   "collateral": [
-    "BR-DE-21"
-   ]
+   "op": "delete"
   },
   {
    "rule_id": "BR-02",
@@ -3381,14 +3366,6 @@
    "path": "cac:PaymentMeans/cac:PaymentMandate/cac:PayerFinancialAccount/cbc:ID",
    "op": "set",
    "value": "59"
-  },
-  {
-   "rule_id": "BR-DE-21",
-   "syntax": "UBL",
-   "base": "extension/04.01a-INVOICE_ubl.xml",
-   "path": "cbc:CustomizationID",
-   "op": "set",
-   "value": "."
   },
   {
    "rule_id": "BR-DE-22",
@@ -4679,6 +4656,12 @@
    "reason": "no single edit breaches it"
   },
   {
+   "rule_id": "BR-DE-21",
+   "syntax": "CII",
+   "shape": "other",
+   "reason": "no single edit breaches it"
+  },
+  {
    "rule_id": "BR-DEX-01",
    "syntax": "CII",
    "shape": "other",
@@ -4922,6 +4905,12 @@
    "rule_id": "BR-CO-24",
    "syntax": "UBL",
    "shape": "presence",
+   "reason": "no single edit breaches it"
+  },
+  {
+   "rule_id": "BR-DE-21",
+   "syntax": "UBL",
+   "shape": "other",
    "reason": "no single edit breaches it"
   },
   {
