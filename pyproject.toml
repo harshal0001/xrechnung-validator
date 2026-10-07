@@ -13,7 +13,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "saxonche>=13.0.0,<14",   # SaxonC-HE. Native library. The constraint that shapes deployment.
     "lxml>=5.3,<7",           # XSD validation + tree work
-    "pikepdf>=9,<10",         # PDF/A-3 embedded file extraction
+    "pikepdf>=9,<11",         # PDF/A-3 embedded file extraction
     "fastapi>=0.115,<1",
     "python-multipart>=0.0.20",  # multipart uploads; a runtime need, not a dev one
     "uvicorn[standard]>=0.32,<1",
