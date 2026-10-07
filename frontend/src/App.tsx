@@ -13,12 +13,20 @@ import {
 } from "./labels";
 import type { Lang } from "./labels";
 import { locate } from "./locate";
+import { THEMES, applyTheme, storedTheme } from "./theme";
+import type { Theme } from "./theme";
 
 type State =
   | { status: "idle" }
   | { status: "checking"; filename: string }
   | { status: "done"; filename: string; report: ValidationReport }
   | { status: "failed"; filename: string; error: ApiError };
+
+const THEME_LABEL: Record<Theme, string> = {
+  system: "themeSystem",
+  light: "themeLight",
+  dark: "themeDark",
+};
 
 const SEVERITY_ORDER: Severity[] = ["fatal", "error", "warning", "info"];
 
@@ -29,6 +37,7 @@ function bySeverity(a: Finding, b: Finding): number {
 export default function App() {
   const [state, setState] = useState<State>({ status: "idle" });
   const [lang, setLang] = useState<Lang>("de");
+  const [theme, setTheme] = useState<Theme>(storedTheme);
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   // The last file checked, so changing a toggle re-runs against it. Without
@@ -103,18 +112,41 @@ export default function App() {
       <header>
         <div className="masthead">
           <h1>{t.title}</h1>
-          <div className="lang" role="group" aria-label={t.language}>
-            {LANGS.map((code) => (
-              <button
-                key={code}
-                type="button"
-                className={code === lang ? "lang__btn lang__btn--on" : "lang__btn"}
-                aria-pressed={code === lang}
-                onClick={() => setLang(code)}
-              >
-                {code.toUpperCase()}
-              </button>
-            ))}
+          <div className="controls">
+            <div className="switch" role="group" aria-label={t.theme}>
+              {THEMES.map((option) => {
+                const label = t[THEME_LABEL[option]] ?? option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className="switch__btn"
+                    aria-pressed={option === theme}
+                    aria-label={label}
+                    title={label}
+                    onClick={() => {
+                      setTheme(option);
+                      applyTheme(option);
+                    }}
+                  >
+                    <ThemeIcon theme={option} />
+                  </button>
+                );
+              })}
+            </div>
+            <div className="switch" role="group" aria-label={t.language}>
+              {LANGS.map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  className="switch__btn switch__btn--text"
+                  aria-pressed={code === lang}
+                  onClick={() => setLang(code)}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <p className="lede">{t.lede}</p>
@@ -146,6 +178,9 @@ export default function App() {
             if (file) void check(file);
           }}
         />
+        <svg className="dropzone__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" />
+        </svg>
         <p className="dropzone__main">{t.dropMain}</p>
         <p className="dropzone__hint">{t.dropHint}</p>
       </section>
@@ -247,7 +282,11 @@ function Report({
     <section className="panel">
       <header className={`verdict verdict--${clean ? "ok" : "bad"}`}>
         <div>
-          <h2>{clean ? t.clean : `${blocking.length} ${t.blocking}`}</h2>
+          <h2>
+            {clean
+              ? t.clean
+              : `${blocking.length} ${blocking.length === 1 ? t.blockingOne : t.blockingMany}`}
+          </h2>
           <p>{clean ? t.cleanSub : t.blockingSub}</p>
         </div>
         {report.findings.length > 0 && (
@@ -287,6 +326,28 @@ function Report({
         <code>{report.ruleset_sha256.slice(0, 16)}…</code>
       </p>
     </section>
+  );
+}
+
+/** Sun, moon, and a screen for "follow the system". Stroke icons, drawn in the
+ *  text colour, so they change with the theme like everything else. */
+function ThemeIcon({ theme }: { theme: Theme }) {
+  return (
+    <svg className="switch__icon" viewBox="0 0 24 24" aria-hidden="true">
+      {theme === "light" && (
+        <>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" />
+        </>
+      )}
+      {theme === "dark" && <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />}
+      {theme === "system" && (
+        <>
+          <rect x="3" y="4" width="18" height="12" rx="2" />
+          <path d="M8 20h8m-4-4v4" />
+        </>
+      )}
+    </svg>
   );
 }
 

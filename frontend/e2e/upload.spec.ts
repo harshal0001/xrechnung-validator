@@ -17,7 +17,7 @@ test("an invoice with no buyer reference is reported, explained, and placed", as
   await page.locator('input[type="file"]').setInputFiles(sample("missing-buyer-reference.xml"));
 
   const report = page.locator("section.panel:has(.facts)");
-  await expect(report.getByRole("heading", { level: 2 })).toContainText("1 blockierende(r) Fehler");
+  await expect(report.getByRole("heading", { level: 2 })).toContainText("1 blockierender Fehler");
 
   const finding = report.locator("li", { hasText: "BR-DE-15" }).first();
   await expect(finding).toContainText("Die Käuferreferenz (BT-10) fehlt.");
@@ -40,7 +40,7 @@ test("the samples run through the same path as an upload", async ({ page }) => {
   await page.locator("button.sample").nth(2).click();
 
   const report = page.locator("section.panel:has(.facts)");
-  await expect(report.getByRole("heading", { level: 2 })).toContainText("2 blockierende(r) Fehler");
+  await expect(report.getByRole("heading", { level: 2 })).toContainText("2 blockierende Fehler");
   await expect(report).toContainText("BR-CO-10");
   await expect(report).toContainText("BR-CO-13");
 });
@@ -49,11 +49,11 @@ test("switching language re-renders the report in English", async ({ page }) => 
   await page.goto("/");
   await page.locator("button.sample").nth(1).click();
   const report = page.locator("section.panel:has(.facts)");
-  await expect(report.getByRole("heading", { level: 2 })).toContainText("blockierende(r)");
+  await expect(report.getByRole("heading", { level: 2 })).toContainText("blockierender Fehler");
 
   await page.getByRole("button", { name: "EN", exact: true }).click();
 
-  await expect(report.getByRole("heading", { level: 2 })).toContainText("1 blocking error(s)");
+  await expect(report.getByRole("heading", { level: 2 })).toContainText("1 blocking error");
   await expect(report).toContainText("The buyer reference (BT-10) is missing.");
   await expect(report.locator(".facts")).toContainText("Checked as");
 });
@@ -80,4 +80,25 @@ test("a file that is not an invoice is refused with a reason", async ({ page }) 
   const failure = page.getByRole("alert");
   await expect(failure).toContainText("konnte nicht geprüft werden");
   await expect(failure).toContainText("weder XML noch ein PDF");
+});
+
+test("a chosen theme applies at once and survives a reload", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  const root = page.locator("html");
+  const background = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const light = await background();
+
+  await page.getByRole("button", { name: "Dunkel" }).click();
+  await expect(root).toHaveAttribute("data-theme", "dark");
+  expect(await background()).not.toBe(light);
+
+  // Applied by the inline script before the app mounts, so there is no flash.
+  await page.reload();
+  await expect(root).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Dunkel" })).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: "Wie das System" }).click();
+  await expect(root).not.toHaveAttribute("data-theme", /.+/);
+  expect(await background()).toBe(light);
 });
