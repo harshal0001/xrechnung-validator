@@ -49,15 +49,19 @@
       "what": "The seller's postal address (BG-5) is missing.",
       "why": "The full name and full address of the supplier are statutory mandatory items (§ 14 Abs. 4 Nr. 1 UStG).",
       "review_notes": [
-        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English."
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 1. Not yet reviewed in English.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-09 only by the missing '(BG-5)'; the explanation holds for both."
       ],
       "rule_text_digest": [
         "3d702cca17105faa",
         "a496599a2086b712"
       ],
-      "reviewed_digest": "3d702cca17105faa",
+      "reviewed_digest": [
+        "3d702cca17105faa",
+        "a496599a2086b712"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-09"
+      "reviewed_at": "2026-10-07"
     },
     "BR-10": {
       "what": "The buyer's postal address (BG-8) is missing.",
@@ -74,15 +78,19 @@
       "what": "The invoice contains no invoice line (BG-25).",
       "why": "Quantity and kind of the goods delivered, or scope and kind of the service, are statutory mandatory items (§ 14 Abs. 4 Nr. 5 UStG). In the standard, the invoice lines (BG-25) carry these details.",
       "review_notes": [
-        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 5; BG-25 is the rule's own term. Not yet reviewed in English."
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [UStG] Nr. 5; BG-25 is the rule's own term. Not yet reviewed in English.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-09 only by the missing full stop; the explanation holds for both."
       ],
       "rule_text_digest": [
         "1742295b101482e1",
         "a5ece4a512a32aae"
       ],
-      "reviewed_digest": "a5ece4a512a32aae",
+      "reviewed_digest": [
+        "1742295b101482e1",
+        "a5ece4a512a32aae"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-09"
+      "reviewed_at": "2026-10-07"
     },
     "BR-CL-01": {
       "what": "The document type code is not a permitted code from code list UNTDID 1001.",
@@ -121,15 +129,19 @@
       "what": "The VAT category code is not a permitted code from code list UNCL 5305.",
       "why": "Permitted codes from UNCL 5305 include S, AE and Z.",
       "review_notes": [
-        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [CL] S, AE, Z — codes only, per the German reviewer decision. Not yet reviewed in English."
+        "Drafted 2026-09-08 from the German entry reviewed by Harshal on 2026-09-08. Same sources: [CL] S, AE, Z — codes only, per the German reviewer decision. Not yet reviewed in English.",
+        "Reviewer decision 2026-10-07: the UBL wording approved as well. It differs from the CII wording approved on 2026-09-09 only by the space in 'UNCL 5305'; the explanation holds for both."
       ],
       "rule_text_digest": [
         "33540495a99d367b",
         "eb45453974dcb143"
       ],
-      "reviewed_digest": "eb45453974dcb143",
+      "reviewed_digest": [
+        "33540495a99d367b",
+        "eb45453974dcb143"
+      ],
       "reviewed_by": "Harshal",
-      "reviewed_at": "2026-09-09"
+      "reviewed_at": "2026-10-07"
     },
     "BR-CO-09": {
       "what": "The seller VAT identifier (BT-31), the seller tax representative VAT identifier (BT-63) or the buyer VAT identifier (BT-48) does not start with the ISO 3166-1 alpha-2 country prefix.",
