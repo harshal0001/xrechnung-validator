@@ -1,11 +1,11 @@
 // Take the README's screenshot: the report for the sample invoice with no
 // buyer reference, in English, as the deployed page renders it.
 //
-// Run by hand when the page changes, not as part of the build — it needs a
-// browser, which nothing else here does:
+// Run by hand when the page changes, not as part of the build. Playwright is
+// already a dev dependency for the browser tests; only the browser is extra:
 //
 //   cd frontend
-//   npm install --no-save playwright && npx playwright install chromium
+//   npm ci && npx playwright install chromium
 //   node scripts/screenshot.mjs
 //
 // It photographs the live service rather than a local build on purpose. The
