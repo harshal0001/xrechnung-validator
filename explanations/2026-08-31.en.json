@@ -288,28 +288,33 @@
     },
     "BR-DE-18": {
       "what": "The cash discount (Skonto) information in Payment terms (BT-20) is not in the required form: each entry starts with #, the segments are separated by # and the line ends with #; the first segment is SKONTO, the second TAGE=n, the third PROZENT=n, with the percentage unsigned and written with a point and two decimal places; everything in capitals, no extra whitespace, and a line break after each complete entry.",
-      "why": "BT-20 is free text describing the payment terms. Discount terms inside it have to be machine-readable, for example #SKONTO#TAGE=14#PROZENT=2.25# If the discount applies to only part of the amount due, a fourth segment gives the base: #SKONTO#TAGE=14#PROZENT=2.25#BASISBETRAG=357.93# Free text must not contain a #. Only lines that start with # are checked.",
+      "why": "BT-20 is free text describing the payment terms. Discount terms inside it have to be machine-readable, for example “#SKONTO#TAGE=14#PROZENT=2.25#”. If the discount applies to only part of the amount due, a fourth segment gives the base: “#SKONTO#TAGE=14#PROZENT=2.25#BASISBETRAG=357.93#”. Free text must not contain a #. Only lines that start with # are checked.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-18; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-18; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": [
         "523f32d2bc0670f4",
         "beb80a312787e4b4"
       ],
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": [
+        "523f32d2bc0670f4",
+        "beb80a312787e4b4"
+      ],
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-19": {
-      "what": "The payment means (BT-81) asks for SEPA with code 58, but the payment account identifier (BT-84) does not hold a correct IBAN.",
+      "what": "The payment means (BT-81) is a SEPA credit transfer (code 58), but the payment account identifier (BT-84) does not hold a correct IBAN.",
       "why": "BT-84 identifies the account the payment is to be made to; within SEPA that is an IBAN. The check removes spaces, then tests the IBAN's format and its check digits.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-19; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-19; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "04994258bdd8e9c3",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "04994258bdd8e9c3",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-2": {
       "what": "The seller contact details (BG-6) are missing.",
@@ -324,40 +329,46 @@
       "reviewed_at": "2026-09-09"
     },
     "BR-DE-20": {
-      "what": "The payment means (BT-81) asks for SEPA with code 59, but the debited account identifier (BT-91) does not hold a correct IBAN.",
+      "what": "The payment means (BT-81) is a SEPA direct debit (code 59), but the debited account identifier (BT-91) does not hold a correct IBAN.",
       "why": "BT-91 identifies the account the direct debit is to be taken from; within SEPA that is an IBAN. The check removes spaces, then tests the IBAN's format and its check digits.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-20; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-20; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "9930773972a5f7b0",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "9930773972a5f7b0",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-21": {
       "what": "The specification identifier (BT-24) does not match the identifier of the XRechnung standard.",
-      "why": "BT-24 names the specification — content, cardinalities and business rules — that the invoice declares it conforms to. The XRechnung identifiers in this rule set are: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0 · urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+      "why": "BT-24 names the specification — content, cardinalities and business rules — that the invoice declares it conforms to. The XRechnung identifiers in this rule set — XRechnung: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0 · XRechnung Extension: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0 · XRechnung CVD: urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-21; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-21; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "3583c03d92e7897d",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "3583c03d92e7897d",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-22": {
       "what": "The filename attributes of the embedded documents (EmbeddedDocumentBinaryObject) are not all unique.",
-      "why": "Filenames of supporting documents (BG-24) must be unique within an invoice, and the file extension counts as part of the name. KoSIT's specification says the comparison ignores upper and lower case; the check itself does not.",
+      "why": "These are the filenames of the documents embedded in the invoice (BT-125). Filenames of supporting documents (BG-24) must be unique within an invoice, and the file extension counts as part of the name. KoSIT's specification says the comparison ignores upper and lower case; the check itself does not.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-22; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-22; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": [
         "442cb9278b2fdcee",
         "84b6b60ad408378a"
       ],
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": [
+        "442cb9278b2fdcee",
+        "84b6b60ad408378a"
+      ],
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-23-a": {
       "what": "The payment means (BT-81) is a credit transfer (code 30 or 58), but the CREDIT TRANSFER group (BG-17) is missing.",
@@ -429,37 +440,43 @@
       "what": "The invoice type code (BT-3) is 384 (Corrected invoice), but there is no PRECEDING INVOICE REFERENCE (BG-3).",
       "why": "BG-3 gives information about an earlier invoice that is being corrected or credited, and is to be used when an earlier invoice is corrected.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-26; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-26; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": [
         "8073b2e1d3a57f2b",
         "cd635571ad927b44"
       ],
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": [
+        "8073b2e1d3a57f2b",
+        "cd635571ad927b44"
+      ],
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-27": {
-      "what": "The seller contact's telephone number (BT-42) does not contain at least three digits.",
+      "what": "The seller contact's telephone number (BT-42) contains fewer than three digits.",
       "why": "BT-42 is the telephone number of the contact person or contact point. BR-DE-6 is the rule that requires it to be present.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-27; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-27; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "fe100cbb0a9c58ea",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "fe100cbb0a9c58ea",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-28": {
       "what": "The seller contact's email address (BT-43) does not meet the requirements: exactly one @ sign, flanked on both sides by at least two characters and not by a space or a full stop, and no full stop at the start or the end.",
-      "why": "BT-43 is an email address of the contact person or contact point. BR-DE-7 is the rule that requires it to be present.",
+      "why": "BT-43 is an email address of the contact person or contact point. BR-DE-7 is the rule that requires it to be present. What is checked: exactly one @ sign, at least one character before it, at least one dot after it with characters on both sides, and no spaces.",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-28; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-28; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "dd45ea6508280a33",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "dd45ea6508280a33",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     },
     "BR-DE-3": {
       "what": "The seller city (BT-37) is missing.",
@@ -564,12 +581,13 @@
       "what": "The invoice states the delivery or service date in none of the three places for it: Actual delivery date (BT-72), Invoicing period (BG-14), or an Invoice line period (BG-26) on every invoice line.",
       "why": "BT-72 is the date the delivery was actually made or the service actually performed. BG-14 and BG-26 give the invoicing period for the invoice and for a line. German VAT law makes the time of the supply a mandatory part of an invoice (§ 14 (4) no. 6 UStG).",
       "review_notes": [
-        "DRAFT, unreviewed. Mirrors the German entry for BR-DE-TMP-32; its review_notes carry the sourcing."
+        "Mirrors the German entry for BR-DE-TMP-32; its review_notes carry the sourcing.",
+        "Approved 2026-10-07 by Harshal, with the German entry; its notes carry the checks."
       ],
       "rule_text_digest": "d5cc96c369437d11",
-      "reviewed_digest": null,
-      "reviewed_by": null,
-      "reviewed_at": null
+      "reviewed_digest": "d5cc96c369437d11",
+      "reviewed_by": "Harshal",
+      "reviewed_at": "2026-10-07"
     }
   }
 }
