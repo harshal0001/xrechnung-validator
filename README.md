@@ -73,8 +73,9 @@ and nothing else** — no document, no reference to one, no way to ask for it.
 - **Accuracy measured in both directions.** Zero false positives is reachable by
   reporting nothing; proving rules fire is reachable by reporting everything. So the
   mutations are derived, not hand-picked: each rule's context and test are read out
-  of the stylesheets, single edits to the reference invoices are tried, and the
-  validator confirms which edit makes which rule fire — and what fires with it.
+  of the stylesheets, single edits to the reference invoices are tried — then pairs,
+  for the rules one edit cannot reach — and the validator confirms which edit makes
+  which rule fire, and what fires with it.
 
 ---
 
@@ -86,15 +87,15 @@ measured.
 | | |
 |---|---|
 | False positives on 86 reference invoices | **0** — standard, extension and CVD, structural and business rules |
-| Business rules proven to fire | **248 of 284** — 471 mutations derived from the rule set, both syntaxes |
-| …of which nothing else fires | 245 mutations; the rest record what fires with them |
-| Business rules no single edit reaches | 36, each listed with why — one of them, BR-DE-21, by design: a document whose identifier is wrong is not an XRechnung, so the XRechnung rule about identifiers never runs |
+| Business rules proven to fire | **259 of 284** — 484 mutations derived from the rule set, both syntaxes; 14 of them need two edits |
+| …of which nothing else fires | 246 mutations; the rest record what fires with them |
+| Business rules no edit reaches | 25, each listed with why |
 | Rules firing that should not | **0** |
 | Explanations reviewed by a person | **96 of 96** (48 DE, 48 EN) |
 | Validation latency | **p50 11 ms, p95 37 ms**, mean 15 ms — measured by the service on Lambda, 198 requests |
 | Startup | 2.4 s — three schemas, four stylesheets |
 | Image | 218 MB, amd64 and arm64 |
-| Tests | 2,594 backend, 21 frontend, 6 in a browser against the running service |
+| Tests | 2,649 backend, 21 frontend, 6 in a browser against the running service |
 | Coverage | **97.7%** of lines and branches in `src/xrv`, as CI measures it; it fails below 95% |
 | Cold start | **3.6–4.7 s**, three runs — unbilled, and kept off the visitor's path |
 

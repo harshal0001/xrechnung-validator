@@ -307,6 +307,11 @@ class Target:
     #: game for removal too: a rule reading `cac:Contact/cbc:Telephone` is
     #: broken by removing the contact as surely as by removing the telephone.
     enclosing: int = 0
+    #: Whether the path came from the rule's context or its test. An edit to a
+    #: context path can carry a document *into* a rule's context — set a VAT
+    #: category to one the invoice did not use — which is how a rule no
+    #: reference message exercises gets reached at all.
+    origin: str = "test"
 
 
 @dataclass(frozen=True)
@@ -349,11 +354,11 @@ def _plan(assertion: Assertion, sheet: Stylesheet) -> Plan:
         names = _clark(chain.steps, sheet.namespaces)
         if names is not None:
             tails.append(names)
-            targets.append(Target(anchored=(), loose=names))
+            targets.append(Target(anchored=(), loose=names, origin="context"))
     for chain in context_predicates:
         names = _clark(chain.steps, sheet.namespaces)
         if names is not None:
-            targets.append(Target(anchored=(), loose=names))
+            targets.append(Target(anchored=(), loose=names, origin="context"))
 
     test_paths, test_predicates = read_expression(test)
     for chain in test_paths:
@@ -428,17 +433,13 @@ class Edit:
         return f"{where} {'removed' if self.op is Op.DELETE else 'repeated'}"
 
     def apply(self, document: bytes) -> bytes:
-        """Return the document with this edit made.
+        """Return the document with this edit made. See `apply_edits`."""
+        return apply_edits(document, (self,))
 
-        Raises when the edit would change nothing, for the reason the
-        hand-written catalogue does: a mutation that does not mutate turns its
-        test into an assertion about a valid invoice.
-        """
-        tree = etree.parse(BytesIO(document))
-        node = tree.getroot().find(self.path, namespaces=NAMESPACES)
-        if node is None:
-            raise MutationError(f"{self.path!r} matched nothing — the base document changed shape")
-
+    def perform(self, node: etree._Element) -> None:
+        """Make the edit on a node already found. Raises when it changes nothing,
+        for the reason the hand-written catalogue does: a mutation that does
+        not mutate turns its test into an assertion about a valid invoice."""
         if self.attribute is not None:
             if self.attribute not in node.attrib:
                 raise MutationError(f"{self.path!r} has no attribute {self.attribute!r}")
@@ -459,7 +460,26 @@ class Edit:
         else:
             node.text = self.value
 
-        return etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
+
+def apply_edits(document: bytes, edits: Iterable[Edit]) -> bytes:
+    """Return the document with every edit made.
+
+    Every node is found before anything is changed. A path with a position in
+    it, `cac:AllowanceCharge[2]`, stops meaning the same node once its sibling
+    is removed, so finding the second node after making the first edit would
+    edit the wrong thing.
+    """
+    tree = etree.parse(BytesIO(document))
+    root = tree.getroot()
+    found = []
+    for edit in edits:
+        node = root.find(edit.path, namespaces=NAMESPACES)
+        if node is None:
+            raise MutationError(f"{edit.path!r} matched nothing — the base document changed shape")
+        found.append((edit, node))
+    for edit, node in found:
+        edit.perform(node)
+    return etree.tostring(tree, xml_declaration=True, encoding="UTF-8")
 
 
 _NUMBER = re.compile(r"-?\d+(?:\.\d+)?")
@@ -535,9 +555,15 @@ class DocumentIndex:
             ]
         return [(element, attribute) for element in pool[:_MAX_NODES]]
 
-    def edits(self, plan: Plan) -> Iterator[Edit]:
-        """Every single edit this rule's own reading of the document suggests."""
+    def edits(self, plan: Plan, origin: str | None = None) -> Iterator[Edit]:
+        """Every single edit this rule's own reading of the document suggests.
+
+        `origin` narrows it to the paths read from the rule's context or from
+        its test; both by default.
+        """
         for target in plan.targets:
+            if origin is not None and target.origin != origin:
+                continue
             selected = [hit for names in target.anchored for hit in self._select(names)]
             if not selected:
                 selected = self._select(target.loose)
@@ -550,7 +576,7 @@ class DocumentIndex:
                         break
                     yield from self._edits_at(enclosing, None, ())
 
-        for suffix in plan.suffixes:
+        for suffix in plan.suffixes if origin != "test" else ():
             seen: set[str] = set()
             for element in self._names:
                 local = etree.QName(element).localname
@@ -583,13 +609,19 @@ class DocumentIndex:
 
 @dataclass(frozen=True)
 class Derived:
-    """A mutation the stylesheets confirmed: this edit makes this rule fire."""
+    """A mutation the stylesheets confirmed: these edits make this rule fire.
+
+    Usually one edit. Some rules cannot be breached by one — an allowance must
+    carry a reason or a reason code, so both have to go — and some are never
+    evaluated on any reference message until one edit carries the document
+    into their context and a second breaks them there.
+    """
 
     rule_id: str
     syntax: Syntax
     #: Reference message, relative to the test suite's `instances` directory.
     base: str
-    edit: Edit
+    edits: tuple[Edit, ...]
     #: Every other rule the same edit trips. Recorded, not chosen: it is what
     #: the stylesheets reported for this edit when the file was derived.
     collateral: frozenset[str] = frozenset()
@@ -606,23 +638,28 @@ class Derived:
     def name(self) -> str:
         return f"{self.rule_id}-{self.syntax}"
 
+    def describe(self) -> str:
+        return " and ".join(edit.describe() for edit in self.edits)
+
+    def apply(self, document: bytes) -> bytes:
+        return apply_edits(document, self.edits)
+
     def rank(self) -> tuple[object, ...]:
         """Lower is a better witness for the rule.
 
         A mutation the schema lets through shows the rule firing in the pipeline
         a user actually gets, and one with no collateral shows it firing for
-        exactly one reason. After that, the plainest edit wins, and the rest of
-        the key only makes the choice repeatable.
+        exactly one reason. One edit beats two. After that, the plainest edit
+        wins, and the rest of the key only makes the choice repeatable.
         """
         return (
             self.caught_by_schema,
             len(self.collateral),
-            (Op.DELETE, Op.SET, Op.DUPLICATE).index(self.edit.op),
-            len(self.edit.value or ""),
+            len(self.edits),
+            tuple((Op.DELETE, Op.SET, Op.DUPLICATE).index(e.op) for e in self.edits),
+            sum(len(e.value or "") for e in self.edits),
             self.base,
-            self.edit.path,
-            self.edit.attribute or "",
-            self.edit.value or "",
+            tuple((e.path, e.attribute or "", e.value or "") for e in self.edits),
         )
 
     def to_json(self) -> dict[str, object]:
@@ -630,13 +667,8 @@ class Derived:
             "rule_id": self.rule_id,
             "syntax": str(self.syntax),
             "base": self.base,
-            "path": self.edit.path,
-            "op": str(self.edit.op),
+            "edits": [_edit_json(edit) for edit in self.edits],
         }
-        if self.edit.attribute is not None:
-            record["attribute"] = self.edit.attribute
-        if self.edit.value is not None:
-            record["value"] = self.edit.value
         if self.collateral:
             record["collateral"] = sorted(self.collateral)
         if self.caught_by_schema:
@@ -646,20 +678,34 @@ class Derived:
     @classmethod
     def from_json(cls, record: Mapping[str, object]) -> Derived:
         collateral = record.get("collateral", ())
-        assert isinstance(collateral, list | tuple)
+        edits = record.get("edits")
+        assert isinstance(collateral, list | tuple) and isinstance(edits, list) and edits
         return cls(
             rule_id=str(record["rule_id"]),
             syntax=Syntax(str(record["syntax"])),
             base=str(record["base"]),
-            edit=Edit(
-                path=str(record["path"]),
-                op=Op(str(record["op"])),
-                attribute=None if record.get("attribute") is None else str(record["attribute"]),
-                value=None if record.get("value") is None else str(record["value"]),
-            ),
+            edits=tuple(_edit_from_json(edit) for edit in edits),
             collateral=frozenset(str(rule) for rule in collateral),
             caught_by_schema=bool(record.get("caught_by_schema", False)),
         )
+
+
+def _edit_json(edit: Edit) -> dict[str, str]:
+    record = {"path": edit.path, "op": str(edit.op)}
+    if edit.attribute is not None:
+        record["attribute"] = edit.attribute
+    if edit.value is not None:
+        record["value"] = edit.value
+    return record
+
+
+def _edit_from_json(record: Mapping[str, object]) -> Edit:
+    return Edit(
+        path=str(record["path"]),
+        op=Op(str(record["op"])),
+        attribute=None if record.get("attribute") is None else str(record["attribute"]),
+        value=None if record.get("value") is None else str(record["value"]),
+    )
 
 
 def newly_fired(before: Counter[str], after: Counter[str]) -> frozenset[str]:
