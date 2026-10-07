@@ -46,13 +46,6 @@ export default function App() {
     document.title = t.title ?? document.title;
   }, [lang, t]);
 
-  // Re-check when the language changes, so the explanations come back in the
-  // language now selected rather than the one switched away from.
-  useEffect(() => {
-    if (lastFile.current) void check(lastFile.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
-
   const check = useCallback(
     async (file: File) => {
       lastFile.current = file;
@@ -68,6 +61,14 @@ export default function App() {
     },
     [lang, t],
   );
+
+  // Re-check when the language changes, so the explanations come back in the
+  // language now selected rather than the one switched away from. `check` is
+  // remade exactly when the language changes, so depending on it is depending
+  // on the language — and says so to the linter without an exception.
+  useEffect(() => {
+    if (lastFile.current) void check(lastFile.current);
+  }, [check]);
 
   /** Fetch a bundled sample and run it through the same path as an upload. */
   const checkSample = useCallback(
