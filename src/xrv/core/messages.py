@@ -113,6 +113,15 @@ MESSAGES: dict[str, dict[str, str]] = {
         "checked against the EN 16931 rules; the additional XRechnung rules were "
         "not applied.",
     },
+    "document_type_not_recognised": {
+        "de": "Dieses Dokument entspricht keinem bekannten Dokumenttyp: Die Kennung der "
+        "Spezifikation (BT-24) ist weder die der XRechnung noch die der EN 16931. Es wurde "
+        "nur gegen die Regeln der EN 16931 geprüft; die zusätzlichen Regeln der XRechnung "
+        "wurden nicht angewendet.",
+        "en": "This document is not a known document type: its specification identifier "
+        "(BT-24) is neither XRechnung's nor EN 16931's. It was checked against the "
+        "EN 16931 rules only; the additional XRechnung rules were not applied.",
+    },
 }
 
 

@@ -219,15 +219,39 @@ class TestScenarios:
         assert len(engine.reports(relabelled(document, EN16931), Syntax.UBL)) == held - 1
         assert all("schematron-output" in report for report in engine.reports(document, Syntax.UBL))
 
-    def test_a_document_no_scenario_recognises_is_held_to_everything(
-        self, engine: ValidationEngine, corpus: Path
+    @pytest.mark.parametrize("syntax", list(Syntax))
+    def test_a_document_no_scenario_recognises_is_held_to_what_all_of_them_share(
+        self, engine: ValidationEngine, real_ruleset: Ruleset, corpus: Path, syntax: Syntax
     ) -> None:
-        """It has not said what it is, so nothing is assumed in its favour."""
-        document = without_buyer_reference((corpus / "01.01a-INVOICE_ubl.xml").read_bytes())
-        evaluation = engine.evaluate(relabelled(document, UNRECOGNISED), Syntax.UBL)
+        """It has not said what it is, so it is not held to any one scenario's
+        extra rules — only to the core every scenario applies."""
+        document = without_buyer_reference(invoices(corpus, syntax)[0].read_bytes())
+        evaluation = engine.evaluate(relabelled(document, UNRECOGNISED), syntax)
         assert evaluation.scenario is None
-        assert not evaluation.skipped
-        assert "BR-DE-15" in {f.rule_id for f in evaluation.findings if f.blocking}
+        assert len(evaluation.skipped) == len(real_ruleset.stylesheets(syntax)) - 1
+        assert "BR-DE-15" not in {f.rule_id for f in evaluation.findings}
+
+    @pytest.mark.parametrize("syntax", list(Syntax))
+    def test_but_still_to_the_core(
+        self, engine: ValidationEngine, corpus: Path, syntax: Syntax
+    ) -> None:
+        document = relabelled(invoices(corpus, syntax)[0].read_bytes(), UNRECOGNISED)
+        currency = b"DocumentCurrencyCode>" if syntax is Syntax.UBL else b"InvoiceCurrencyCode>"
+        broken = document.replace(currency + b"EUR<", currency + b"ZZZ<")
+        assert broken != document
+        fired = {f.rule_id for f in engine.evaluate(broken, syntax).findings if f.blocking}
+        assert fired & {"BR-CL-03", "BR-CL-04"}
+
+    def test_the_common_ground_is_read_from_the_configuration(
+        self, engine: ValidationEngine, real_ruleset: Ruleset
+    ) -> None:
+        """In the shipped configuration every scenario of a syntax shares exactly
+        one stylesheet, the EN 16931 core. Asserted so a release that changes
+        that is noticed here rather than in what a user is told."""
+        for syntax in Syntax:
+            shared = engine._common_ground(syntax)
+            assert len(shared) == 1
+            assert shared < set(real_ruleset.stylesheets(syntax))
 
     def test_a_document_no_scenario_recognises_keeps_the_stylesheets_grades(
         self, engine: ValidationEngine, corpus: Path
