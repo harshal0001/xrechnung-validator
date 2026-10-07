@@ -112,6 +112,68 @@ jobs:
       - name: Build
         run: npm run build
 
+  # The page, driven in a browser against the service that serves it. The
+  # service is started here from source with the built frontend beside it,
+  # which is what the container does too, minus the container.
+  browser:
+    name: browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.11"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras
+
+      - name: Fetch KoSIT ruleset
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run python scripts/fetch_ruleset.py --version "$RULESET_VERSION"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the page
+        working-directory: frontend
+        run: npm ci && npm run build
+
+      - name: Install the browser
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start the service
+        run: |
+          uv run uvicorn xrv.api:app --host 127.0.0.1 --port 8080 &
+          for attempt in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8080/healthz | grep -q '"warm":true' && exit 0
+            sleep 1
+          done
+          echo "the service did not become ready"; exit 1
+
+      - name: Browser tests
+        working-directory: frontend
+        run: npm run e2e
+
+      - name: Keep the traces of a failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7
+
   image:
     name: docker build
     runs-on: ubuntu-latest
@@ -150,7 +212,7 @@ jobs:
   # Set it up with deploy/github-oidc.sh.
   deploy:
     name: deploy
-    needs: [check, frontend, image]
+    needs: [check, frontend, browser, image]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

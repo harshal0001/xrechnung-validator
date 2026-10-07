@@ -54,3 +54,7 @@ docs/review/*.batch-*.md
 # Agent handoff notes. Kept local: it names the private planning doc and
 # carries internal links that do not belong in a repo destined to be public.
 CLAUDE.md
+
+# Playwright output
+frontend/test-results/
+frontend/playwright-report/
