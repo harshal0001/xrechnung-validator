@@ -22,6 +22,7 @@ from mutation.derive import (
     Edit,
     Op,
     Shape,
+    apply_edits,
     classify,
     expand,
     literals,
@@ -320,6 +321,23 @@ class TestProposingEdits:
         address = "cac:AccountingSupplierParty/cac:Party/cac:PostalAddress"
         assert Edit(address, Op.DELETE) in found
 
+    def test_edits_can_be_asked_for_by_where_the_rule_read_them(self, tmp_path: Path) -> None:
+        """Context paths are how a document is carried *into* a rule; test
+        paths are how it is broken there. A pair needs one of each."""
+        sheet = read_stylesheet(
+            stylesheet(
+                tmp_path,
+                template("cac:TaxTotal[cbc:TaxAmount = '0.00']", "BR-X-1", "cbc:TaxAmount"),
+            )
+        )
+        (plan,) = plans([sheet]).values()
+        index = DocumentIndex(INVOICE)
+        entering = set(index.edits(plan, origin="context"))
+        breaking = set(index.edits(plan, origin="test"))
+        assert Edit("cac:TaxTotal/cbc:TaxAmount", Op.SET, value="0.00") in entering
+        assert Edit("cac:TaxTotal/cbc:TaxAmount", Op.DELETE) in breaking
+        assert set(index.edits(plan)) == entering | breaking
+
     def test_a_group_is_never_given_text(self, tmp_path: Path) -> None:
         found = self.edits(tmp_path, "/ubl:Invoice", "cac:TaxTotal")
         assert {e.op for e in found if e.path == "cac:TaxTotal"} == {Op.DELETE, Op.DUPLICATE}
@@ -366,18 +384,36 @@ class TestResults:
             "rule_id": "BR-X-1",
             "syntax": Syntax.UBL,
             "base": "standard/a.xml",
-            "edit": Edit("cbc:ID", Op.DELETE),
+            "edits": (Edit("cbc:ID", Op.DELETE),),
         }
         return Derived(**{**fields, **changes})  # type: ignore[arg-type]
 
     def test_survives_the_file(self) -> None:
         full = self.derived(
-            edit=Edit("cbc:Amount", Op.SET, "currencyID", ""),
+            edits=(Edit("cbc:Amount", Op.SET, "currencyID", ""), Edit("cbc:Note", Op.DELETE)),
             collateral=frozenset({"BR-CO-15", "BR-CO-13"}),
             caught_by_schema=True,
         )
         for mutation in (self.derived(), full):
             assert Derived.from_json(mutation.to_json()) == mutation
+
+    def test_one_edit_beats_two(self) -> None:
+        """A rule reached by a single edit is explained by one thing being wrong."""
+        single = self.derived(edits=(Edit("cbc:ID", Op.SET, value="ZZZ"),))
+        pair = self.derived(edits=(Edit("cbc:ID", Op.DELETE), Edit("cbc:Note", Op.DELETE)))
+        assert single.rank() < pair.rank()
+
+    def test_two_edits_find_their_nodes_before_either_is_made(self) -> None:
+        """Removing the first line shifts the second line's position. Both are
+        found first, so the second edit still lands on the second line."""
+        edited = apply_edits(
+            INVOICE,
+            (
+                Edit("cac:InvoiceLine[1]", Op.DELETE),
+                Edit("cac:InvoiceLine[2]/cbc:ID", Op.SET, value="9"),
+            ),
+        )
+        assert text_at(edited, "cac:InvoiceLine/cbc:ID") == ["9"]
 
     def test_passing_the_schema_beats_everything(self) -> None:
         caught = self.derived(caught_by_schema=True)
@@ -385,14 +421,14 @@ class TestResults:
         assert noisy.rank() < caught.rank()
 
     def test_less_collateral_beats_a_plainer_edit(self) -> None:
-        alone = self.derived(edit=Edit("cbc:ID", Op.SET, value="ZZZ"))
+        alone = self.derived(edits=(Edit("cbc:ID", Op.SET, value="ZZZ"),))
         noisy = self.derived(collateral=frozenset({"A"}))
         assert alone.rank() < noisy.rank()
 
     def test_edits_on_and_off_an_attribute_can_be_ranked(self) -> None:
         """One has an attribute name and the other None; the key must not compare them."""
         plain = self.derived()
-        attribute = self.derived(edit=Edit("cbc:ID", Op.DELETE, "schemeID"))
+        attribute = self.derived(edits=(Edit("cbc:ID", Op.DELETE, "schemeID"),))
         assert sorted([attribute, plain], key=Derived.rank) == [plain, attribute]
 
     def test_a_rule_firing_once_more_than_before_has_newly_fired(self) -> None:

@@ -41,6 +41,7 @@ from mutation.derive import (  # noqa: E402
     DocumentIndex,
     Edit,
     Plan,
+    apply_edits,
     newly_fired,
     plans,
     read_stylesheet,
@@ -104,14 +105,35 @@ def _sweep(base: str) -> dict[str, object]:
 
     index = DocumentIndex(document)
     edits: dict[Edit, None] = {}
-    for plan in _plans[syntax].values():
-        for edit in index.edits(plan):
+    suggested: dict[str, int] = {}
+    for rule_id, plan in _plans[syntax].items():
+        own = set(index.edits(plan))
+        suggested[rule_id] = len(own)
+        for edit in own:
             edits.setdefault(edit)
 
+    hits, failed = _try(document, syntax, before, [(edit,) for edit in edits])
+    return {
+        "base": base,
+        "skipped": False,
+        "syntax": syntax,
+        "contexts": _contexts(_engine, document, syntax),
+        "suggested": suggested,
+        "trials": len(edits),
+        "failed": failed,
+        "hits": hits,
+    }
+
+
+def _try(
+    document: bytes, syntax: Syntax, before: Counter[str], candidates: list[tuple[Edit, ...]]
+) -> tuple[list[tuple[tuple[Edit, ...], frozenset[str], bool]], int]:
+    """Run each candidate and keep the ones that made something new fire."""
+    assert _engine is not None
     hits = []
     failed = 0
-    for edit in edits:
-        edited = edit.apply(document)
+    for edits in candidates:
+        edited = apply_edits(document, edits)
         try:
             after = _fired(_engine, edited, syntax)
         except ValidationError:
@@ -121,14 +143,54 @@ def _sweep(base: str) -> dict[str, object]:
             continue
         fired = newly_fired(before, after)
         if fired:
-            hits.append((edit, fired, bool(_engine.structure.findings(edited, syntax))))
+            hits.append((edits, fired, bool(_engine.structure.findings(edited, syntax))))
+    return hits, failed
 
+
+#: Pairs tried per rule and reference message. Enough to pair every way into a
+#: rule's context with every way of breaking it in a typical message; a cap so
+#: a rule with many literals does not take the afternoon.
+_MAX_PAIRS = 600
+
+
+def _sweep_pairs(task: tuple[str, list[str]]) -> dict[str, object]:
+    """Try pairs of edits for rules no single edit reached in this message.
+
+    Two kinds of rule need two edits. One is written as "A or B": both have to
+    go. The other is never evaluated on any reference message, because none is
+    in its context — no invoice in the corpus uses VAT category G — so one
+    edit carries the document into the context and a second breaks the rule
+    there. The pairs are the rule's own single edits, combined: an edit read
+    from the context with one read from the test, and test edits with each
+    other. Nothing outside what the rule reads is tried.
+    """
+    assert _engine is not None
+    base, rule_ids = task
+    document = (_corpus / base).read_bytes()
+    syntax = identify(document).syntax
+    before = _fired(_engine, document, syntax)
+    index = DocumentIndex(document)
+
+    candidates: dict[tuple[Edit, ...], None] = {}
+    for rule_id in rule_ids:
+        plan = _plans[syntax][rule_id]
+        entering = list(dict.fromkeys(index.edits(plan, origin="context")))
+        breaking = list(dict.fromkeys(index.edits(plan, origin="test")))
+        pairs: list[tuple[Edit, ...]] = []
+        for first in entering:
+            pairs.extend((first, second) for second in breaking if second.path != first.path)
+        for i, first in enumerate(breaking):
+            pairs.extend(
+                (first, second) for second in breaking[i + 1 :] if second.path != first.path
+            )
+        for pair in pairs[:_MAX_PAIRS]:
+            candidates.setdefault(pair)
+
+    hits, failed = _try(document, syntax, before, list(candidates))
     return {
         "base": base,
-        "skipped": False,
         "syntax": syntax,
-        "contexts": _contexts(_engine, document, syntax),
-        "trials": len(edits),
+        "trials": len(candidates),
         "failed": failed,
         "hits": hits,
     }
@@ -165,29 +227,67 @@ def main() -> int:
 
     best: dict[tuple[Syntax, str], Derived] = {}
     contexts: dict[Syntax, set[str]] = {syntax: set() for syntax in Syntax}
-    for result in usable:
+
+    def keep(result: dict[str, object]) -> None:
         syntax = result["syntax"]
-        contexts[syntax] |= result["contexts"]
-        for edit, fired, caught in result["hits"]:
+        for edits, fired, caught in result["hits"]:  # type: ignore[union-attr]
             for rule_id in fired:
                 if not rule_id.startswith(TARGET_PREFIX):
                     continue
                 found = Derived(
                     rule_id=rule_id,
-                    syntax=syntax,
-                    base=result["base"],
-                    edit=edit,
+                    syntax=syntax,  # type: ignore[arg-type]
+                    base=str(result["base"]),
+                    edits=edits,
                     collateral=fired - {rule_id},
                     caught_by_schema=caught,
                 )
-                held = best.get((syntax, rule_id))
+                held = best.get((syntax, rule_id))  # type: ignore[arg-type]
                 if held is None or found.rank() < held.rank():
-                    best[(syntax, rule_id)] = found
+                    best[(syntax, rule_id)] = found  # type: ignore[index]
+
+    for result in usable:
+        contexts[result["syntax"]] |= result["contexts"]  # type: ignore[index]
+        keep(result)
+
+    every = {
+        syntax: plans(read_stylesheet(sheet) for sheet in ruleset.stylesheets(syntax))
+        for syntax in Syntax
+    }
+
+    # Second phase: pairs, for what single edits left unreached. Tried in the
+    # four messages that suit the rule best: ones where its context was
+    # evaluated at all come first — a rule about allowances needs a message
+    # with an allowance in it, not one with the most charges — and among
+    # those, the ones where the rule's own reading found the most to edit.
+    tasks: dict[str, list[str]] = {}
+    for syntax in Syntax:
+        for rule_id, plan in every[syntax].items():
+            if (syntax, rule_id) in best:
+                continue
+            ranked = sorted(
+                (r for r in usable if r["syntax"] is syntax),
+                key=lambda r: (
+                    not (plan.contexts & r["contexts"]),  # type: ignore[operator]
+                    -r["suggested"].get(rule_id, 0),  # type: ignore[union-attr]
+                    r["base"],
+                ),
+            )
+            for result in ranked[:4]:
+                tasks.setdefault(str(result["base"]), []).append(rule_id)
+    started_pairs = time.perf_counter()
+    with ProcessPoolExecutor(
+        max_workers=args.jobs, initializer=_start, initargs=(str(ruleset.root), str(corpus))
+    ) as pool:
+        paired = list(pool.map(_sweep_pairs, sorted(tasks.items())))
+    pair_trials = sum(int(r["trials"]) for r in paired)  # type: ignore[call-overload]
+    for result in paired:
+        keep(result)
+    elapsed_pairs = time.perf_counter() - started_pairs
 
     unreached = []
     for syntax in Syntax:
-        sheets = [read_stylesheet(sheet) for sheet in ruleset.stylesheets(syntax)]
-        for rule_id, plan in plans(sheets).items():
+        for rule_id, plan in every[syntax].items():
             if (syntax, rule_id) in best:
                 continue
             exercised = bool(plan.contexts & contexts[syntax])
@@ -223,6 +323,10 @@ def main() -> int:
 
     trials = sum(result["trials"] for result in usable)
     print(f"{len(usable)} reference messages, {trials} edits tried in {elapsed:.0f} s")
+    print(
+        f"then {pair_trials} pairs of edits for the rules that left unreached, "
+        f"in {elapsed_pairs:.0f} s"
+    )
     if skipped:
         print(f"skipped, not clean to begin with: {', '.join(skipped)}")
     for syntax in Syntax:
@@ -230,9 +334,10 @@ def main() -> int:
         left = [u for u in unreached if u["syntax"] == str(syntax)]
         alone = sum(1 for m in mine if not m.collateral)
         through = sum(1 for m in mine if not m.caught_by_schema)
+        paired_up = sum(1 for m in mine if len(m.edits) > 1)
         print(
             f"{syntax}: {len(mine)} of {len(mine) + len(left)} business rules fire — "
-            f"{alone} alone, {through} past the schema"
+            f"{alone} alone, {through} past the schema, {paired_up} needing two edits"
         )
     rules = {m.rule_id for m in mutations}
     every = rules | {u["rule_id"] for u in unreached}
