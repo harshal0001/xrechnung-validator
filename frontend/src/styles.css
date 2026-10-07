@@ -1,60 +1,61 @@
-/* A German administrative document, set for a screen.
+/* A document, set for a screen.
  *
- * The reference is a printed form, not a dashboard: hairline rules, hard edges,
- * a strict left margin, and one signal colour. Two earlier passes drifted toward
- * white cards with soft shadows and rounded corners — the house style of every
- * generated interface — so this one deliberately removes all three. There is not
- * a single border-radius or box-shadow below.
+ * The reference is still a printed form rather than a dashboard: hairline rules,
+ * a strict left edge, one signal colour, no shadows. Corners are softened a
+ * little and the micro-labels speak in sentence case instead of tracked
+ * capitals — the earlier version was right about structure and too loud in its
+ * small print.
  *
- * Structure carries the hierarchy instead: a fixed label column, uppercase
- * micro-labels with wide tracking, monospace for every technical identifier, and
- * a lot of white space. Colour is spent only where it means something — red for
- * a failure, and nothing else competes with it.
+ * Monospace is reserved for what is literally code: rule ids, locations, the
+ * hash, the XML excerpt. Everything a person reads is IBM Plex Sans.
+ *
+ * Colours are written once with light-dark(). Which half applies is decided by
+ * color-scheme: "light dark" follows the system, and the theme switch pins one
+ * of them through data-theme on <html>.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
 
-  --paper: #fbfaf7;
-  --sheet: #ffffff;
-  --wash: #f3f2ed;
-  --rule: #ded9cf;
-  --rule-firm: #211f1c;
+  --paper: light-dark(#fafaf8, #111110);
+  --sheet: light-dark(#ffffff, #181816);
+  --wash: light-dark(#f4f3ef, #1f1e1c);
+  --rule: light-dark(#e4e1da, #2e2c29);
+  --rule-firm: light-dark(#c9c4b9, #4a4741);
 
-  --ink: #131211;
-  --ink-2: #55524b;
-  --ink-3: #8d887e;
+  --ink: light-dark(#1a1917, #ecebe7);
+  --ink-2: light-dark(#5a5750, #b3afa6);
+  --ink-3: light-dark(#8a867d, #7f7b73);
 
   /* One signal colour. Everything else is ink on paper. */
-  --signal: #b5121b;
-  --signal-wash: #fbf0ef;
-  --caution: #7a5c12;
-  --caution-wash: #f9f4e6;
-  --pass: #2c5f45;
+  --signal: light-dark(#b4232a, #f07067);
+  --signal-wash: light-dark(#fbefee, #2b1715);
+  --caution: light-dark(#80600f, #d8ae4c);
+  --caution-wash: light-dark(#faf4e4, #261f11);
+  --pass: light-dark(#2d6a4b, #74c497);
+  --pass-wash: light-dark(#eef6f1, #142219);
 
-  --label-col: 6.5rem;
+  /* Five sizes, and nothing between them. */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.625rem;
+
+  --radius: 8px;
+  --radius-sm: 6px;
+  --label-col: 7rem;
+
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
+:root[data-theme="light"] {
+  color-scheme: light;
+}
 
-    --paper: #12110f;
-    --sheet: #191816;
-    --wash: #201e1b;
-    --rule: #33302b;
-    --rule-firm: #d9d4c9;
-
-    --ink: #f4f1ea;
-    --ink-2: #b0aa9e;
-    --ink-3: #7d786e;
-
-    --signal: #f2685f;
-    --signal-wash: #2a1614;
-    --caution: #d9ae4a;
-    --caution-wash: #241d10;
-    --pass: #6fbc90;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 * {
@@ -65,130 +66,175 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Public Sans", system-ui, -apple-system, sans-serif;
-  font-size: 15px;
-  line-height: 1.62;
+  font-family: var(--sans);
+  font-size: var(--fs-md);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 code,
 .mono {
-  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-  font-size: 0.8125rem;
+  font-family: var(--mono);
+  font-size: 0.92em;
   font-feature-settings: "zero" 1;
 }
 
 .page {
   max-width: 46rem;
   margin: 0 auto;
-  padding: 5rem 1.75rem 8rem;
+  padding: 4.5rem 1.75rem 7rem;
   display: flex;
   flex-direction: column;
-  gap: 2.75rem;
+  gap: 2.5rem;
 }
 
-/* ---- masthead: a heavy rule under the title, like a form header ---- */
-header {
-  border-bottom: 2px solid var(--rule-firm);
-  padding-bottom: 1.25rem;
+/* ---- masthead ---- */
+.page > header {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1.5rem;
 }
 
 .masthead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
 h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.014em;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin: 0;
 }
 
 .lede {
   color: var(--ink-2);
-  margin: 0.7rem 0 0;
-  max-width: 40rem;
-  font-size: 0.9375rem;
+  margin: 0.75rem 0 0;
+  max-width: 38rem;
 }
 
-.lang {
+/* ---- the two switches: appearance and language ---- */
+.controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.switch {
   display: inline-flex;
-  gap: 1.1rem;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--sheet);
 }
 
-.lang__btn {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  padding: 0 0 3px;
+.switch__btn {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  height: 1.75rem;
+  padding: 0 0.45rem;
+  border: 0;
+  border-radius: var(--radius-sm);
   background: none;
   color: var(--ink-3);
-  border: 0;
-  border-bottom: 2px solid transparent;
+  font: 500 var(--fs-xs) / 1 var(--sans);
+  letter-spacing: 0.02em;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
-.lang__btn:hover {
-  color: var(--ink-2);
-}
-
-.lang__btn--on {
+.switch__btn:hover {
   color: var(--ink);
-  border-bottom-color: var(--signal);
+}
+
+.switch__btn[aria-pressed="true"] {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.switch__icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ---- upload ---- */
 .dropzone {
-  border: 1px dashed var(--rule);
+  border: 1px dashed var(--rule-firm);
+  border-radius: var(--radius);
   background: var(--sheet);
-  padding: 3rem 1.5rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .dropzone:hover,
 .dropzone--active {
-  border-color: var(--rule-firm);
-  border-style: solid;
+  border-color: var(--ink-2);
   background: var(--wash);
 }
 
+.dropzone__icon {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 0.6rem;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.15s, transform 0.15s;
+}
+
+.dropzone:hover .dropzone__icon,
+.dropzone--active .dropzone__icon {
+  stroke: var(--ink);
+  transform: translateY(-2px);
+}
+
 .dropzone__main {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.25rem;
   font-weight: 500;
 }
 
 .dropzone__hint {
   margin: 0;
   color: var(--ink-3);
-  font-size: 0.8125rem;
+  font-size: var(--fs-sm);
 }
 
-/* ---- samples: numbered, like items on a form ---- */
-.samples {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: -1.75rem;
-}
-
+/* ---- labels: small, sentence case, never shouting ---- */
 .samples__label,
 .fact dt,
 .finding__context-label,
-.excerpt__caption {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
+.excerpt__caption,
+.finding__where > span,
+.finding__value > span {
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
   font-weight: 500;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--ink-3);
   margin: 0;
+}
+
+/* ---- samples ---- */
+.samples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: -1.5rem;
 }
 
 .samples__row {
@@ -203,28 +249,26 @@ h1 {
   background: none;
   border: 0;
   border-bottom: 1px solid var(--rule);
-  padding: 0.75rem 0;
+  padding: 0.7rem 0.25rem;
   cursor: pointer;
   display: flex;
   align-items: baseline;
   gap: 1rem;
   color: var(--ink);
-  transition: padding-left 0.12s, color 0.12s;
+  transition: background 0.15s, color 0.15s, padding-left 0.15s;
 }
 
 .sample:hover {
-  padding-left: 0.5rem;
   color: var(--signal);
+  padding-left: 0.6rem;
 }
 
 .sample__label {
-  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .sample__note {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.75rem;
+  font-size: var(--fs-sm);
   color: var(--ink-3);
   margin-left: auto;
 }
@@ -232,24 +276,33 @@ h1 {
 .status {
   color: var(--ink-2);
   margin: 0;
-  font-size: 0.9375rem;
 }
 
 /* ---- result sheet ---- */
 .panel {
   background: var(--sheet);
   border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: arrive 0.22s ease-out;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 .panel h2 {
-  font-size: 1.0625rem;
-  font-weight: 700;
+  font-size: var(--fs-lg);
+  font-weight: 600;
   letter-spacing: -0.01em;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.2rem;
 }
 
 .panel--problem {
-  padding: 1.4rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   border-left: 3px solid var(--signal);
 }
 
@@ -260,11 +313,10 @@ h1 {
 .panel--problem p {
   margin: 0;
   color: var(--ink-2);
-  font-size: 0.9375rem;
 }
 
 .verdict {
-  padding: 1.4rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--rule);
   display: flex;
   align-items: flex-start;
@@ -276,11 +328,19 @@ h1 {
 .verdict p {
   margin: 0;
   color: var(--ink-2);
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
+}
+
+.verdict--ok {
+  background: var(--pass-wash);
 }
 
 .verdict--ok h2 {
   color: var(--pass);
+}
+
+.verdict--bad {
+  background: var(--signal-wash);
 }
 
 .verdict--bad h2 {
@@ -288,56 +348,51 @@ h1 {
 }
 
 .copy {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: none;
-  color: var(--ink-3);
-  border: 0;
-  border-bottom: 1px solid var(--rule);
-  padding: 0 0 3px;
+  font: 500 var(--fs-xs) / 1 var(--sans);
+  background: var(--sheet);
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.7rem;
   cursor: pointer;
   white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .copy:hover {
   color: var(--ink);
-  border-bottom-color: var(--rule-firm);
+  border-color: var(--rule-firm);
 }
 
 .notice {
   margin: 0;
-  padding: 0.9rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   background: var(--caution-wash);
   color: var(--caution);
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   border-bottom: 1px solid var(--rule);
 }
 
-/* Facts as a label column, the way a form sets them. */
+/* Facts as a label column, the way a form sets them — but quiet: they are
+   provenance, not the result. */
 .facts {
   margin: 0;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--rule);
-  background: var(--wash);
   display: grid;
   grid-template-columns: var(--label-col) 1fr;
-  gap: 0.3rem 1rem;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  font-size: var(--fs-sm);
 }
 
 .fact {
   display: contents;
 }
 
-.fact dt {
-  padding-top: 0.18rem;
-}
-
 .fact dd {
   margin: 0;
-  font-size: 0.875rem;
+  color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -349,7 +404,7 @@ h1 {
 }
 
 .finding {
-  padding: 1.4rem 1.5rem;
+  padding: 1.35rem 1.5rem 1.4rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -359,109 +414,115 @@ h1 {
 
 .finding__head {
   display: flex;
-  gap: 0.7rem;
+  gap: 0.6rem;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
 }
 
 .finding__rule {
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: var(--fs-sm);
   color: var(--ink);
 }
 
-/* A bar, not a pill: a 3px stroke of the severity colour and the word beside it. */
+/* A small tag: the severity colour on its own wash. */
 .finding__severity {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
+  font-size: var(--fs-xs);
   font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding-left: 0.5rem;
-  border-left: 3px solid currentColor;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+  border-radius: 999px;
   cursor: help;
 }
 
 .finding--fatal .finding__severity,
 .finding--error .finding__severity {
   color: var(--signal);
+  background: var(--signal-wash);
 }
 
 .finding--warning .finding__severity {
   color: var(--caution);
+  background: var(--caution-wash);
 }
 
 .finding--info .finding__severity {
+  color: var(--ink-2);
+  background: var(--wash);
+}
+
+.finding__source-link,
+.finding__toggle {
+  font: 400 var(--fs-xs) / 1.4 var(--sans);
   color: var(--ink-3);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-firm);
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
 }
 
 .finding__source-link {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.05em;
-  color: var(--ink-3);
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule);
   margin-left: auto;
 }
 
-.finding__source-link:hover {
+.finding__source-link:hover,
+.finding__toggle:hover {
   color: var(--ink);
-  border-bottom-color: var(--rule-firm);
+  text-decoration-color: currentColor;
 }
 
+/* The explanation is the result. It reads first and largest. */
 .finding__explanation {
   margin: 0 0 0.6rem;
   color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.55;
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
 }
 
 .finding__unexplained {
   margin: 0 0 0.6rem;
   color: var(--ink-3);
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   font-style: italic;
 }
 
 .finding__context {
   margin: 0 0 0.75rem;
-  padding-left: 0.9rem;
-  border-left: 1px solid var(--rule);
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--wash);
   color: var(--ink-2);
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
 }
 
 .finding__context-label {
   display: block;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
+/* The official text, as it was published: smaller, set aside, checkable. */
 .finding__rule-text {
-  margin: 0 0 0.85rem;
-  color: var(--ink-2);
-  font-size: 0.875rem;
+  margin: 0 0 0.8rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
   font-style: italic;
 }
 
 .finding__where,
 .finding__value {
-  margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
+  margin: 0.2rem 0 0;
+  font-size: var(--fs-sm);
   color: var(--ink-3);
   display: grid;
   grid-template-columns: var(--label-col) 1fr;
-  gap: 1rem;
+  gap: 0.15rem 1rem;
   align-items: baseline;
-}
-
-.finding__where > span,
-.finding__value > span {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
 }
 
 .finding__where code,
@@ -471,52 +532,42 @@ h1 {
 }
 
 .finding__toggle {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.05em;
   background: none;
   border: 0;
-  border-bottom: 1px solid var(--rule);
-  color: var(--ink-2);
-  padding: 0 0 2px;
+  padding: 0;
   cursor: pointer;
   justify-self: start;
   grid-column: 2;
 }
 
-.finding__toggle:hover {
-  color: var(--signal);
-  border-bottom-color: var(--signal);
-}
-
 /* ---- source excerpt ----
    The point of the feature: a rule id names a problem, this shows it. The marked
-   line carries a wash AND a heavy left rule AND a red line number, so it reads
-   in monochrome and to a colour-blind reader. */
+   line carries a wash AND a left rule AND a coloured line number, so it reads in
+   monochrome and to a colour-blind reader. */
 .excerpt {
-  margin-top: 1rem;
+  margin-top: 0.9rem;
 }
 
 .excerpt__caption,
 .excerpt__note {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.45rem;
 }
 
 .excerpt__note {
-  font-size: 0.8125rem;
+  font-size: var(--fs-sm);
   color: var(--ink-3);
 }
 
 .excerpt__code {
   margin: 0;
-  padding: 0.85rem 0;
+  padding: 0.8rem 0;
   background: var(--wash);
   border: 1px solid var(--rule);
-  border-left: 2px solid var(--rule-firm);
+  border-radius: var(--radius-sm);
   overflow-x: auto;
-  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-  font-size: 0.78125rem;
-  line-height: 1.7;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  line-height: 1.75;
   tab-size: 2;
 }
 
@@ -544,38 +595,61 @@ h1 {
 
 .excerpt__line--marked .excerpt__num {
   color: var(--signal);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .provenance {
   margin: 0;
-  padding: 0.9rem 1.5rem;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
+  padding: 0.85rem 1.5rem;
+  font-size: var(--fs-xs);
   color: var(--ink-3);
   border-top: 1px solid var(--rule);
   background: var(--wash);
 }
 
+.provenance code {
+  color: var(--ink-2);
+}
+
 /* ---- focus, motion ---- */
 :where(button, a, [tabindex]):focus-visible {
   outline: 2px solid var(--signal);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+    animation: none !important;
   }
 }
 
 @media (max-width: 34rem) {
   :root {
-    --label-col: 5rem;
+    --label-col: 5.5rem;
   }
 
   .page {
-    padding: 3rem 1.1rem 5rem;
+    padding: 2.75rem 1.1rem 5rem;
+  }
+
+  /* The note goes under the label rather than beside it, so a rule id is
+     never broken across two lines. */
+  .sample {
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .sample__note {
+    margin-left: 0;
+  }
+
+  .finding,
+  .verdict,
+  .facts,
+  .provenance {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
   }
 }

@@ -12,14 +12,25 @@
     <meta name="google" content="notranslate" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Public Sans is the typeface of the US government design system: drawn for
-         dense civic forms, legible at small sizes, no personality it has not
-         earned. For a compliance tool that is a reason, not a preference.
-         IBM Plex Mono carries every technical identifier. -->
+    <!-- IBM Plex Sans for text and IBM Plex Mono for technical identifiers: one
+         family, drawn together, so the two sit on the same proportions and the
+         mono reads as a register of the text rather than a second voice. Plex
+         Sans is quiet at small sizes and its umlauts are properly drawn. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <!-- Applies a stored light/dark choice before the first paint. Done in the
+         stylesheet alone, a reader who chose dark would see a white flash on
+         every load. src/theme.ts keeps it in step afterwards. -->
+    <script>
+      try {
+        var theme = localStorage.getItem("xrv-theme");
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+      } catch (e) {}
+    </script>
     <title>XRechnung prüfen</title>
     <meta
       name="description"
