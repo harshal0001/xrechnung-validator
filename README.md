@@ -15,12 +15,12 @@ invoices ship with the page, so it can be tried without having an XRechnung file
 
 <p align="center">
   <img src="docs/screenshot.png" width="640"
-       alt="The report for an invoice with no buyer reference: one blocking error, BR-DE-15, explained in plain English with its background, the official rule text beneath it, and the rule set it was checked against.">
+       alt="The report for an invoice with no buyer reference: one blocking error, BR-DE-15, and one informational finding, BR-DE-TMP-32, each explained in plain English with its background and the official rule text beneath, and the rule set it was checked against.">
 </p>
 
 The report for the sample invoice with no buyer reference, as the live service
-returns it. The first finding is explained. The second shows only the official text:
-its explanation is drafted and not yet reviewed, so it is withheld.
+returns it: the blocking error and an informational finding, each with its reviewed
+explanation, its background, and the official rule text beneath.
 
 > Validates against the published KoSIT rule set. Not a legal compliance
 > certification, and does not claim to be.
