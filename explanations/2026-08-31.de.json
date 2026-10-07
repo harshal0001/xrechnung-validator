@@ -649,7 +649,7 @@
       "review_notes": [
         "DRAFT, unreviewed. This is the finding every visitor sees first: both failing demo invoices and many reference messages trip it. It is flagged `information`.",
         "German wording: `what` is the rule text [L1] with 'sollte … entweder … oder … enthalten' turned into 'enthält … weder … noch'; the three element names stay as the text writes them. The first two `why` sentences are KoSIT's descriptions of BT-72, BG-14 and BG-26 [SEM].",
-        "[UStG] The last `why` sentence follows the pattern approved in BR-03 ('… ist eine gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 3 UStG)'). 'Zeitpunkt der Lieferung oder sonstigen Leistung' is the statute's wording for Nr. 6 as I have it — the reviewer must check it against gesetze-im-internet.de before approving; I have not fetched the page.",
+        "[UStG] The last `why` sentence follows the pattern approved in BR-03 ('… ist eine gesetzliche Pflichtangabe (§ 14 Abs. 4 Nr. 3 UStG)'). Verified 2026-10-07 against gesetze-im-internet.de/ustg_1980/__14.html: Abs. 4 Nr. 6 reads 'den Zeitpunkt der Lieferung oder sonstigen Leistung; in den Fällen des Absatzes 5 Satz 1 den Zeitpunkt der Vereinnahmung des Entgelts …'. The `why` quotes the first clause.",
         "[L1] Compiled test: BT-72 present, or BG-14 present, or every line has BG-26. 'in jeder Rechnungsposition' is therefore literal: one line without a period fails the third branch.",
         "'TMP' marks a rule KoSIT carries temporarily. Expect its id or text to change in a later rule set; the digest will un-review this entry when it does."
       ],
