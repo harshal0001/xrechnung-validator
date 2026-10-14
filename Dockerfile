@@ -29,7 +29,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- service ---------------------------------------------------------------
-FROM python:3.12-slim AS base
+FROM python:3.14-slim AS base
 
 # libxml2/libxslt for lxml, qpdf for pikepdf, and a JRE-free Saxon — SaxonC-HE
 # bundles its own native library, so there is deliberately no Java here.
