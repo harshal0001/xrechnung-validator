@@ -5,9 +5,6 @@ project-1-xrechnung.md
 SPIKE.md
 notes/
 
-# Local editor / tooling state
-.claude/
-
 # Ruleset artifacts are fetched, hashed and recorded — never committed.
 # manifest.json IS committed: it is the provenance record behind ruleset_sha256.
 # Note the pattern: `rulesets/*/` would stop git descending into the directory,
@@ -50,10 +47,6 @@ frontend/*.tsbuildinfo
 # by review_sheet.py --only in one command. The full sheet is committed; forty
 # batch sheets beside it would be noise.
 docs/review/*.batch-*.md
-
-# Agent handoff notes. Kept local: it names the private planning doc and
-# carries internal links that do not belong in a repo destined to be public.
-CLAUDE.md
 
 # Playwright output
 frontend/test-results/
